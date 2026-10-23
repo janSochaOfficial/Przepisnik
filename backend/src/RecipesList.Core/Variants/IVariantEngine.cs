@@ -61,7 +61,11 @@ public sealed record ResolvedRecipeModel(
     IReadOnlyList<ResolvedStep> InstructionSteps,
     IReadOnlyList<Guid> UtensilIds,
     int? PrepMinutes,
-    int? CookMinutes);
+    int? CookMinutes)
+{
+    /// <summary>Whether the effective times earn the system tag <c>szybkie</c> (D-09).</summary>
+    public bool IsQuick => QuickTagRule.Applies(PrepMinutes, CookMinutes);
+}
 
 /// <summary>A column of the matrix: the base (<see cref="VariantId"/> null, API id <c>"base"</c>) or a variant.</summary>
 public sealed record MatrixVariantModel(Guid? VariantId, IReadOnlyList<ProductSwap> ProductSwaps);
@@ -73,17 +77,14 @@ public sealed record ProductSwap(Guid FromProductId, Guid ToProductId);
 public sealed record SlotOptionModel(string Key, ResolvedIngredient? Ingredient, IReadOnlyList<Guid?> VariantIds);
 
 /// <summary>A slot: a base ingredient (<c>i:&lt;id&gt;</c>) or a product added by variants (<c>p:&lt;productId&gt;</c>).</summary>
-public sealed record SlotModel(string Key, Guid ProductId, IReadOnlyList<SlotOptionModel> Options);
+public sealed record SlotModel(string Key, Guid ProductId, IReadOnlyList<SlotOptionModel> Options)
+{
+    /// <summary>
+    /// For an added slot: the key of the base slot its row follows in the first variant that adds it (the nearest
+    /// base row before it), or null when no base row precedes it. Always null for base slots.
+    /// </summary>
+    public string? AfterSlotKey { get; init; }
+}
 
 /// <summary>The matrix for one recipe and the variants visible to the caller.</summary>
 public sealed record VariantMatrixModel(Guid RecipeId, IReadOnlyList<MatrixVariantModel> Variants, IReadOnlyList<SlotModel> Slots);
-
-/// <summary>Placeholder until B4 implements the engine.</summary>
-public sealed class NotImplementedVariantEngine : IVariantEngine
-{
-    public VariantDiff Diff(Recipe baseRecipe, RecipeDraft edited) => throw new NotImplementedException();
-
-    public ResolvedRecipeModel Resolve(Recipe baseRecipe, Variant? variant) => throw new NotImplementedException();
-
-    public VariantMatrixModel BuildMatrix(Recipe baseRecipe, IReadOnlyList<Variant> variants) => throw new NotImplementedException();
-}

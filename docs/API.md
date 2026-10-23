@@ -248,6 +248,9 @@ type MatrixVariant = {
 type Slot = {
   key: string;                    // base: "i:<ingredientId>"  |  added: "p:<productId>"
   label: string;                  // product name of the base row / added product
+  afterSlotKey?: string;          // added slots: the base slot key the row follows in the first variant that adds it
+                                  // (nearest base row before it), null at the start; null for base slots.
+                                  // Optional in openapi.yaml (older fixtures stay valid); the server always sends it.
   options: SlotOption[];
 };
 type SlotOption = {

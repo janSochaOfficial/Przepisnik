@@ -1,0 +1,102 @@
+# Variants, matrix and selection memory (API.md §5). Sign in first with dev-login (Development only); the
+# cookie is kept between requests. Replace the ids with ones from your database (recipes_b4 for task B4).
+@baseUrl = http://localhost:5104/api/v1
+@recipeId = 00000000-0000-0000-0000-000000000000
+@variantId = 00000000-0000-0000-0000-000000000000
+@chickenRowId = 00000000-0000-0000-0000-000000000000
+@creamRowId = 00000000-0000-0000-0000-000000000000
+@chickenId = 00000000-0000-0000-0000-000000000000
+@heavyCreamId = 00000000-0000-0000-0000-000000000000
+
+### Sign in (dev-login)
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "bartek@test.local", "nickname": "bartek" }
+
+### Variants of a recipe visible to me
+GET {{baseUrl}}/recipes/{{recipeId}}/variants
+
+### My variants (newest first, includes ones whose base I can no longer see)
+GET {{baseUrl}}/variants?author=me&page=1&pageSize=20
+
+### Missing author=me → 400 validation.failed
+GET {{baseUrl}}/variants
+
+### Create a variant from the edited copy (the server computes the diff)
+POST {{baseUrl}}/recipes/{{recipeId}}/variants
+Content-Type: application/json
+X-Requested-With: fetch
+
+{
+  "name": "Na śmietance",
+  "description": null,
+  "visibility": "public",
+  "recipe": {
+    "prepMinutes": 10,
+    "cookMinutes": 20,
+    "utensilIds": [],
+    "ingredients": [
+      { "id": "{{chickenRowId}}", "productId": "{{chickenId}}", "quantity": { "value": 600, "unit": "g", "size": null }, "note": null, "optional": false },
+      { "id": "{{creamRowId}}", "productId": "{{heavyCreamId}}", "quantity": { "value": 200, "unit": "ml", "size": null }, "note": null, "optional": false }
+    ],
+    "prepSteps": [],
+    "instructionSteps": [ { "id": null, "blocks": [ { "type": "text", "text": "Usmaż kurczaka i zalej śmietanką." } ] } ]
+  }
+}
+
+### Get a variant (404 variant.not_found when hidden)
+GET {{baseUrl}}/variants/{{variantId}}
+
+### The variant applied to its base
+GET {{baseUrl}}/variants/{{variantId}}/resolved
+
+### Edit a variant (version from the last read; 403 variant.not_author for others, 409 on a stale version)
+PUT {{baseUrl}}/variants/{{variantId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{
+  "name": "Na śmietance",
+  "description": "Gęstszy sos",
+  "visibility": "private",
+  "version": 0,
+  "recipe": {
+    "prepMinutes": 10,
+    "cookMinutes": 25,
+    "utensilIds": [],
+    "ingredients": [
+      { "id": "{{chickenRowId}}", "productId": "{{chickenId}}", "quantity": { "value": 600, "unit": "g", "size": null }, "note": null, "optional": false }
+    ],
+    "prepSteps": [],
+    "instructionSteps": [ { "id": null, "blocks": [ { "type": "text", "text": "Usmaż kurczaka." } ] } ]
+  }
+}
+
+### The matrix for auto-match
+GET {{baseUrl}}/recipes/{{recipeId}}/variant-matrix
+
+### My remembered picks (204 when none)
+GET {{baseUrl}}/recipes/{{recipeId}}/my-selection
+
+### Remember picks and scaling (recomputes product preferences)
+PUT {{baseUrl}}/recipes/{{recipeId}}/my-selection
+Content-Type: application/json
+X-Requested-With: fetch
+
+{
+  "picks": { "i:{{creamRowId}}": { "optionKey": "{{heavyCreamId}}:200", "source": "user" } },
+  "scaling": { "anchorSlotKey": "i:{{chickenRowId}}", "anchorBaseAmount": 300 }
+}
+
+### Malformed slot key → 400 selection.unknown_slot
+PUT {{baseUrl}}/recipes/{{recipeId}}/my-selection
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "picks": { "cream": { "optionKey": "none", "source": "user" } }, "scaling": null }
+
+### Delete a variant (drops remembered picks of its options)
+DELETE {{baseUrl}}/variants/{{variantId}}
+X-Requested-With: fetch
