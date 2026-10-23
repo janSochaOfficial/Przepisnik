@@ -1,0 +1,29 @@
+
+I want to create a app for keeping recepies and current frigde invetory. The app should be fully in polish language, while the code and documentation remains in english. 
+The functionalities i want:
+- creating/saving the recipies: divided into sections ingredient list, prep, instructions. For prep and instructions there should be an option to add photos in the middle of the text. Addtitionally each recipie should have tags. eg. dinner, quick(<30min), etc. and a utencils required list. 
+-  recipie variants: you should be able to add variant to a recipie, meaing changing inridients, proporsions or instructions to the recipie. The variants shoul be saved as changes to the original recipie, as opossed to thier own recipies.
+- proportion scaling: you should be able to enter for example amount of meat you have and the proportions for other ingidinets. For grams just scale proprtionally for things like vegetable use system of small (,75x), medium (1x) and large(1.3x). For liquids use up to fourths of a glass, smaller portions in tablespoons, teaspoons and drops. For spices use tablespoon, teaspon and pinches. Use online conversion (a glass is 250ml). Use metric system for weights and bigger volumes.
+- variation auto-match: you should be able to click on a ingridient/ ingridient amount and select one from avaliable variations. In the front-end there should be a remebering system for auto and user selected values, to thigten the options as you customize more. At the end of the list of avaliable variations there should be a button to create a new variation, which takes currentlly selected one.
+- frigde: tab for a fridge should contain a list of items along with usage %. For example 330 ml cream, 70% left -> ~ 200 ml still remain. There should be a base of pruduts wchich expads with the lifetime of the app.
+- deducing ingridients from a fridge: At the end of the recipie there should be an option to deduce products from the fridge, which will then show a popup with options to deduce all or deduce selected with switches next to each ingidient.
+- users: basic nickname, authentication via google acount. 
+- shared fridges: ability to add user to a fridge, creating multiple fridges.
+- tabs for my variations, my recipies.
+- exporting/inporting recipie via JSON
+
+Technical baseline:
+- the app should be web-based
+- the front-end of the app should be written in sveltekit + typescript. 
+- the back-end should be written in C# .Net with entity framework, postgess database.
+- both the front-end and the back-end should have unit tests, also create integration test for both layers.
+
+Any questions or incosistecies should be resolved before any code is written. 
+
+All of the project goals and technical standard should be documented in 2 .MD files. This will be your task. 
+
+After creating those files create a plan for implementation with standardized API and create task for subagents to implement the plan concurentlly.
+
+The most important thig right now is resole any unclarities and to form a coherent project plan.
+
+Before implementing any code look for skils that might be usefull for this project and add them to this folder.
