@@ -981,7 +981,11 @@ export interface components {
 			status?: number;
 			detail?: string;
 			instance?: string;
-			/** @description Stable error code, e.g. `recipe.not_found`. */
+			/**
+			 * @description Stable error code, e.g. `recipe.not_found` (API.md §9). Generic codes for responses that no feature produced:
+			 *     `auth.required` (401), `request.not_found` (404), `request.forbidden` (403), `request.invalid` (other 4xx)
+			 *     and `server.error` (5xx, including the 501 stubs).
+			 */
 			code: string;
 			/** @description Validation errors, `<camelCase.path>` → codes. */
 			errors?: {
@@ -1661,7 +1665,7 @@ export interface components {
 		};
 	};
 	responses: {
-		/** @description Validation or business-rule failure (`validation.failed`, `request.missing_csrf_header`, …). */
+		/** @description Validation or business-rule failure (`validation.failed`, `request.missing_csrf_header`, …), or `request.invalid` for a malformed request (bad JSON, wrong content type). */
 		BadRequest: {
 			headers: {
 				[name: string]: unknown;
@@ -1679,7 +1683,7 @@ export interface components {
 				'application/problem+json': components['schemas']['ProblemDetails'];
 			};
 		};
-		/** @description Not allowed (e.g. `user.onboarding_required`, `admin.required`, `recipe.not_author`). */
+		/** @description Not allowed (e.g. `user.onboarding_required`, `admin.required`, `recipe.not_author`; generic `request.forbidden`). */
 		Forbidden: {
 			headers: {
 				[name: string]: unknown;
@@ -1688,7 +1692,7 @@ export interface components {
 				'application/problem+json': components['schemas']['ProblemDetails'];
 			};
 		};
-		/** @description Not found, or not visible to the caller. */
+		/** @description Not found, or not visible to the caller (a feature code such as `recipe.not_found`; `request.not_found` for an unknown route). */
 		NotFound: {
 			headers: {
 				[name: string]: unknown;
