@@ -15,7 +15,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| T00 | 0 | blocked | task/T00-foundation | paused 2026-10-23 (token budget) at d4b7063, tree clean, worktree .claude/worktrees/agent-a21934c230a63d13f. Left: scripts/verify.sh, README.md, manual dev-login + two-stack check, rebase, full verify, Report. See "Progress notes" in the task file; decisions pending (EF Core ref in Core, MTP test runner, contract error codes, POSTGRES_PORT=5433) |
+| T00 | 0 | running | task/T00-foundation | resumed 2026-10-24 in worktree .claude/worktrees/agent-a21934c230a63d13f from d4b7063 (left: verify.sh, README, manual checks, rebase, Report) |
 | B1 | 1 | todo | | |
 | B2 | 2 | todo | | |
 | B3 | 3 | todo | | |
