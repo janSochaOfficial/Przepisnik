@@ -1394,6 +1394,8 @@ export interface components {
 			key: string;
 			/** @description Product name of the base row or the added product. */
 			label: string;
+			/** @description Position hint for an added slot (`p:`): the key of the base slot its row follows in the first variant that adds it (the nearest base row before it), or null when no base row precedes it. Always null for base slots. Optional in the schema so that older clients and fixtures stay valid; the server always sends it. */
+			afterSlotKey?: string | null;
 			options: components['schemas']['SlotOption'][];
 		};
 		/** @description Same product and base amounts within 1 % share one option, keyed by the first-seen amount. Every variant appears in exactly one option per slot. */
