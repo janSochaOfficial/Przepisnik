@@ -31,7 +31,7 @@
 <Tabs.Root bind:value {onValueChange} class={className}>
 	<Tabs.List
 		aria-label={label}
-		class="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 [scrollbar-width:none]"
+		class="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 [scrollbar-width:none] md:mx-0 md:px-0"
 	>
 		{#each items as item (item.value)}
 			<Tabs.Trigger
