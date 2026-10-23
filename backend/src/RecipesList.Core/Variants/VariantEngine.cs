@@ -110,10 +110,11 @@ public sealed class VariantEngine(Func<Guid>? newId = null) : IVariantEngine
             .ToList();
         foreach (var productId in addedProducts)
         {
-            slots.Add(BuildSlot(
+            var slot = BuildSlot(
                 MatrixKeys.AddedSlot(productId),
                 productId,
-                columns.Select(c => (c.VariantId, c.Ingredients.FirstOrDefault(i => !baseIds.Contains(i.Id) && i.ProductId == productId)))));
+                columns.Select(c => (c.VariantId, c.Ingredients.FirstOrDefault(i => !baseIds.Contains(i.Id) && i.ProductId == productId))));
+            slots.Add(slot with { AfterSlotKey = AfterSlotKey(columns.Select(c => c.Ingredients), baseIds, productId) });
         }
 
         var matrixVariants = columns
@@ -166,6 +167,40 @@ public sealed class VariantEngine(Func<Guid>? newId = null) : IVariantEngine
             && (IsSameAmount(option.BaseAmount, candidate.BaseAmount)
                 // Keys must stay unique: amounts that round to the same key are one option.
                 || optionKey == MatrixKeys.Option(candidate.ProductId, candidate.BaseAmount));
+    }
+
+    // The position hint of an added slot: the nearest base row before the first-seen added row of the product.
+    private static string? AfterSlotKey(IEnumerable<IReadOnlyList<ResolvedIngredient>> columns, HashSet<Guid> baseIds, Guid productId)
+    {
+        foreach (var rows in columns)
+        {
+            var index = -1;
+            for (var i = 0; i < rows.Count; i++)
+            {
+                if (!baseIds.Contains(rows[i].Id) && rows[i].ProductId == productId)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index < 0)
+            {
+                continue;
+            }
+
+            for (var i = index - 1; i >= 0; i--)
+            {
+                if (baseIds.Contains(rows[i].Id))
+                {
+                    return MatrixKeys.BaseSlot(rows[i].Id);
+                }
+            }
+
+            return null;
+        }
+
+        return null;
     }
 
     private static List<ProductSwap> ProductSwaps(IReadOnlyList<ResolvedIngredient> baseRows, IReadOnlyList<ResolvedIngredient> resolved)
