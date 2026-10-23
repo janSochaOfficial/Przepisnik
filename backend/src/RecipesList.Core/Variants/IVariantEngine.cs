@@ -61,7 +61,11 @@ public sealed record ResolvedRecipeModel(
     IReadOnlyList<ResolvedStep> InstructionSteps,
     IReadOnlyList<Guid> UtensilIds,
     int? PrepMinutes,
-    int? CookMinutes);
+    int? CookMinutes)
+{
+    /// <summary>Whether the effective times earn the system tag <c>szybkie</c> (D-09).</summary>
+    public bool IsQuick => QuickTagRule.Applies(PrepMinutes, CookMinutes);
+}
 
 /// <summary>A column of the matrix: the base (<see cref="VariantId"/> null, API id <c>"base"</c>) or a variant.</summary>
 public sealed record MatrixVariantModel(Guid? VariantId, IReadOnlyList<ProductSwap> ProductSwaps);
@@ -77,13 +81,3 @@ public sealed record SlotModel(string Key, Guid ProductId, IReadOnlyList<SlotOpt
 
 /// <summary>The matrix for one recipe and the variants visible to the caller.</summary>
 public sealed record VariantMatrixModel(Guid RecipeId, IReadOnlyList<MatrixVariantModel> Variants, IReadOnlyList<SlotModel> Slots);
-
-/// <summary>Placeholder until B4 implements the engine.</summary>
-public sealed class NotImplementedVariantEngine : IVariantEngine
-{
-    public VariantDiff Diff(Recipe baseRecipe, RecipeDraft edited) => throw new NotImplementedException();
-
-    public ResolvedRecipeModel Resolve(Recipe baseRecipe, Variant? variant) => throw new NotImplementedException();
-
-    public VariantMatrixModel BuildMatrix(Recipe baseRecipe, IReadOnlyList<Variant> variants) => throw new NotImplementedException();
-}

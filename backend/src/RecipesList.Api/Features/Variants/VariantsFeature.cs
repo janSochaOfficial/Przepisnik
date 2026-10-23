@@ -7,7 +7,7 @@ internal static class VariantsFeature
 {
     public static IServiceCollection AddVariants(this IServiceCollection services)
     {
-        services.AddSingleton<IVariantEngine, NotImplementedVariantEngine>();
+        services.AddSingleton<IVariantEngine>(new VariantEngine());
         return services;
     }
 
