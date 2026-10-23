@@ -2247,6 +2247,12 @@ components:
         label:
           description: Product name of the base row or the added product.
           type: string
+        afterSlotKey:
+          description: >-
+            Position hint for an added slot (`p:`): the key of the base slot its row follows in the first variant
+            that adds it (the nearest base row before it), or null when no base row precedes it. Always null for
+            base slots. Optional in the schema so that older clients and fixtures stay valid; the server always sends it.
+          type: [string, 'null']
         options:
           type: array
           items: { $ref: '#/components/schemas/SlotOption' }
