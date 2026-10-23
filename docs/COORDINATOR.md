@@ -15,7 +15,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| T00 | 0 | blocked | task/T00-foundation | paused 2026-10-23 (token budget): 6 commits on branch, 8 uncommitted files in worktree .claude/worktrees/agent-a21934c230a63d13f; was writing the integration test harness; no Report, verify.sh not run |
+| T00 | 0 | blocked | task/T00-foundation | paused 2026-10-23 (token budget) at d4b7063, tree clean, worktree .claude/worktrees/agent-a21934c230a63d13f. Left: scripts/verify.sh, README.md, manual dev-login + two-stack check, rebase, full verify, Report. See "Progress notes" in the task file; decisions pending (EF Core ref in Core, MTP test runner, contract error codes, POSTGRES_PORT=5433) |
 | B1 | 1 | todo | | |
 | B2 | 2 | todo | | |
 | B3 | 3 | todo | | |
