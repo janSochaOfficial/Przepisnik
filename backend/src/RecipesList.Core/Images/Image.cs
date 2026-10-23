@@ -39,13 +39,3 @@ public interface IImageStorage
     /// <summary>Deletes every rendition of an image.</summary>
     Task DeleteAsync(Guid id, CancellationToken ct);
 }
-
-/// <summary>Placeholder until B3 implements local disk storage.</summary>
-public sealed class NotImplementedImageStorage : IImageStorage
-{
-    public Task<StoredImage> SaveAsync(Stream s, CancellationToken ct) => throw new NotImplementedException();
-
-    public Stream? Open(Guid id, ImageSize size) => throw new NotImplementedException();
-
-    public Task DeleteAsync(Guid id, CancellationToken ct) => throw new NotImplementedException();
-}
