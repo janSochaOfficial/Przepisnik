@@ -1,0 +1,2702 @@
+openapi: 3.1.0
+info:
+  title: RecipesList API
+  version: 1.0.0
+  summary: Normative machine contract of the RecipesList (Przepiśnik) API.
+  description: |
+    Transcription of [docs/API.md](../API.md). Both files change together (TECHNICAL §5).
+
+    Conventions used in this document:
+    - **Responses**: every property is listed under `required`; properties marked `?` in API.md are nullable
+      (`type: [T, 'null']`), so they are always present and may be `null`.
+    - **Requests**: properties marked `?` in API.md are optional *and* nullable; clients send explicit `null`.
+    - Shared shapes that travel in both directions (`Quantity`, `ImageBlock`, `PluralForms`, `MeSettings`,
+      `SelectionWrite`) follow the request rule.
+    - Every mutating request must send `X-Requested-With: fetch` (security scheme `csrfHeader`).
+    - Every error is `application/problem+json` (`ProblemDetails`) with a stable `code` (API.md §9).
+    - Every endpoint other than `/auth/*`, `/me*` and `/users/nickname-available` answers
+      `403 user.onboarding_required` while the caller has no nickname.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: /api/v1
+security:
+  - sessionCookie: []
+tags:
+  - name: auth
+    description: Auth and current user (API.md §1)
+  - name: catalog
+    description: Products, tags and utensils (API.md §2)
+  - name: images
+    description: Images (API.md §3)
+  - name: recipes
+    description: Recipes (API.md §4)
+  - name: variants
+    description: Variants, matrix and selection memory (API.md §5)
+  - name: favorites
+    description: Favourites (API.md §4, §5, §5.3)
+  - name: fridges
+    description: Fridges, invites, members and items (API.md §6)
+  - name: deductions
+    description: Deductions (API.md §7)
+  - name: shopping
+    description: Shopping list (API.md §7)
+  - name: transfer
+    description: Recipe export and import (API.md §8)
+
+paths:
+  # ───────────────────────────── 1. Auth and current user ─────────────────────────────
+  /auth/google:
+    post:
+      tags: [auth]
+      operationId: AuthGoogle
+      summary: Sign in with a Google ID token
+      security:
+        - csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GoogleLoginRequest' }
+      responses:
+        '200':
+          description: Signed in; the session cookie is set.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/dev-login:
+    post:
+      tags: [auth]
+      operationId: AuthDevLogin
+      summary: Sign in without Google (Development and Testing only)
+      description: Answers 404 outside the Development and Testing environments. Sets the nickname if the user has none.
+      security:
+        - csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DevLoginRequest' }
+      responses:
+        '200':
+          description: Signed in; the session cookie is set.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: AuthLogout
+      summary: End the session
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Signed out. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/config:
+    get:
+      tags: [auth]
+      operationId: GetAuthConfig
+      summary: Public sign-in configuration
+      security: []
+      responses:
+        '200':
+          description: Sign-in configuration for the login page.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthConfig' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /me:
+    get:
+      tags: [auth]
+      operationId: GetMe
+      summary: The signed-in user
+      responses:
+        '200':
+          description: The current user. A null nickname means onboarding is required.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /me/nickname:
+    put:
+      tags: [auth]
+      operationId: SetNickname
+      summary: Set or change the nickname
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NicknameWrite' }
+      responses:
+        '200':
+          description: The updated user.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /users/nickname-available:
+    get:
+      tags: [auth]
+      operationId: IsNicknameAvailable
+      summary: Check whether a nickname is free
+      parameters:
+        - name: nickname
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Availability of the nickname.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NicknameAvailability' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /me/settings:
+    put:
+      tags: [auth]
+      operationId: UpdateSettings
+      summary: Update the per-user settings
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeSettings' }
+      responses:
+        '200':
+          description: The updated user.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /me/product-preferences:
+    get:
+      tags: [auth]
+      operationId: GetProductPreferences
+      summary: The user's product swap preferences
+      responses:
+        '200':
+          description: Cross-recipe product preferences (PROJECT §6.6).
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ProductPreference' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ───────────────────────────── 2. Catalog ─────────────────────────────
+  /products:
+    get:
+      tags: [catalog]
+      operationId: SearchProducts
+      summary: Search the product catalog
+      description: Trigram + prefix search on the normalized name.
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - name: category
+          in: query
+          schema: { $ref: '#/components/schemas/ProductCategory' }
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Matching products.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ProductRef' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [catalog]
+      operationId: CreateProduct
+      summary: Add a product to the catalog
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductWrite' }
+      responses:
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductRef' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: '`product.duplicate`; the extension `existingId` holds the id of the existing product.'
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+  /products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [catalog]
+      operationId: GetProduct
+      summary: Get a product
+      responses:
+        '200':
+          description: The product.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductRef' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /admin/products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [catalog]
+      operationId: AdminUpdateProduct
+      summary: Edit a product (admin)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductWrite' }
+      responses:
+        '200':
+          description: The updated product.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductRef' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /admin/products/{id}/merge:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [catalog]
+      operationId: AdminMergeProduct
+      summary: Merge a product into another (admin)
+      description: Re-points every reference to `targetId`, then deletes the source (PROJECT §7.3).
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MergeProductRequest' }
+      responses:
+        '204': { description: Merged. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /tags:
+    get:
+      tags: [catalog]
+      operationId: SearchTags
+      summary: Search tags
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Matching tags.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TagRef' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [catalog]
+      operationId: CreateTag
+      summary: Create a tag, or return the existing one
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NameWrite' }
+      responses:
+        '200':
+          description: An existing tag matched the normalized name.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagRef' }
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagRef' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /utensils:
+    get:
+      tags: [catalog]
+      operationId: SearchUtensils
+      summary: Search utensils
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Matching utensils.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/UtensilRef' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [catalog]
+      operationId: CreateUtensil
+      summary: Create a utensil, or return the existing one
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NameWrite' }
+      responses:
+        '200':
+          description: An existing utensil matched the normalized name.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UtensilRef' }
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UtensilRef' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ───────────────────────────── 3. Images ─────────────────────────────
+  /images:
+    post:
+      tags: [images]
+      operationId: UploadImage
+      summary: Upload a photo
+      description: JPEG, PNG or WebP up to 10 MB; stored as WebP (≤ 1600 px) plus a 400 px thumbnail.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  contentMediaType: application/octet-stream
+      responses:
+        '201':
+          description: Stored.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImageInfo' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /images/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [images]
+      operationId: GetImage
+      summary: Download a photo
+      parameters:
+        - name: size
+          in: query
+          schema:
+            type: string
+            enum: [full, thumb]
+            default: full
+      responses:
+        '200':
+          description: The WebP image, served with `Cache-Control public, max-age=31536000, immutable`.
+          content:
+            image/webp:
+              schema:
+                type: string
+                contentMediaType: image/webp
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────────── 4. Recipes ─────────────────────────────
+  /recipes:
+    get:
+      tags: [recipes]
+      operationId: ListRecipes
+      summary: List recipes visible to the caller
+      description: Archived recipes are excluded.
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - name: tags
+          in: query
+          description: Comma-separated tag ids; a recipe must have all of them.
+          schema: { type: string }
+        - name: author
+          in: query
+          description: '`me` or a user id.'
+          schema: { type: string }
+        - name: visibility
+          in: query
+          schema: { $ref: '#/components/schemas/Visibility' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, title]
+            default: newest
+      responses:
+        '200':
+          description: A page of recipe summaries.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedRecipeSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [recipes]
+      operationId: CreateRecipe
+      summary: Create a recipe
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecipeCreate' }
+      responses:
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /recipes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [recipes]
+      operationId: GetRecipe
+      summary: Get a recipe
+      description: 404 `recipe.not_found` also when the recipe is not visible to the caller.
+      responses:
+        '200':
+          description: The recipe.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [recipes]
+      operationId: UpdateRecipe
+      summary: Edit a recipe directly
+      description: |
+        PROJECT §4.5. A public recipe → 409 `recipe.public_locked`. With variants and `deleteVariants: false` →
+        409 `recipe.has_variants` (extensions `variantCount`, `foreignVariantCount`). With `deleteVariants: true` all
+        variants (and their favourites and remembered picks) are deleted in the same transaction.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecipeUpdate' }
+      responses:
+        '200':
+          description: The updated recipe.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [recipes]
+      operationId: DeleteRecipe
+      summary: Delete or archive a recipe
+      description: Archived instead of deleted when other users have variants (PROJECT §4.4).
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Deleted or archived. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /recipes/{id}/visibility:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [recipes]
+      operationId: SetRecipeVisibility
+      summary: Change a recipe's visibility
+      description: Narrowing while other users have variants → 409 `recipe.visibility_locked` (extension `foreignVariantCount`).
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VisibilityWrite' }
+      responses:
+        '200':
+          description: The updated recipe.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /recipes/{id}/favorite:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [favorites]
+      operationId: FavoriteRecipe
+      summary: Mark a recipe as favourite (idempotent)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Favourited. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [favorites]
+      operationId: UnfavoriteRecipe
+      summary: Remove a recipe from favourites (idempotent)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Not a favourite (any more). }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /recipes/{id}/export:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [transfer]
+      operationId: ExportRecipe
+      summary: Export a recipe with its visible variants
+      responses:
+        '200':
+          description: The export file.
+          headers:
+            Content-Disposition:
+              description: '`attachment; filename="<slug>.json"`'
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeExport' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /recipes/import:
+    post:
+      tags: [transfer]
+      operationId: ImportRecipe
+      summary: Import a recipe export file (≤ 25 MB)
+      description: Creates a private recipe and private variants owned by the caller.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecipeExport' }
+      responses:
+        '201':
+          description: The imported recipe.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # ───────────────────────────── 5. Variants ─────────────────────────────
+  /recipes/{id}/variants:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [variants]
+      operationId: ListRecipeVariants
+      summary: Variants of a recipe visible to the caller
+      responses:
+        '200':
+          description: Variant summaries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/VariantSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [variants]
+      operationId: CreateVariant
+      summary: Create a variant from an edited copy (D-12)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VariantWrite' }
+      responses:
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VariantDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /variants:
+    get:
+      tags: [variants]
+      operationId: ListMyVariants
+      summary: Variants created by the caller
+      description: Includes variants whose base recipe is no longer visible (`baseAvailable false`).
+      parameters:
+        - name: author
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [me]
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of variant summaries.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedVariantSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /variants/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [variants]
+      operationId: GetVariant
+      summary: Get a variant
+      description: 404 `variant.not_found` also when the variant or its recipe is not visible; the author always gets it.
+      responses:
+        '200':
+          description: The variant.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VariantDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [variants]
+      operationId: UpdateVariant
+      summary: Edit a variant
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VariantUpdate' }
+      responses:
+        '200':
+          description: The updated variant.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VariantDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [variants]
+      operationId: DeleteVariant
+      summary: Delete a variant
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Deleted. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /variants/{id}/resolved:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [variants]
+      operationId: GetResolvedVariant
+      summary: A variant applied to its base recipe
+      responses:
+        '200':
+          description: The resolved recipe.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResolvedRecipe' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /variants/{id}/favorite:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [favorites]
+      operationId: FavoriteVariant
+      summary: Mark a variant as favourite (idempotent)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Favourited. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [favorites]
+      operationId: UnfavoriteVariant
+      summary: Remove a variant from favourites (idempotent)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Not a favourite (any more). }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /recipes/{id}/variant-matrix:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [variants]
+      operationId: GetVariantMatrix
+      summary: The slot/option matrix for client-side auto-match (API.md §5.1)
+      responses:
+        '200':
+          description: The matrix of the base and the variants visible to the caller.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VariantMatrix' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /recipes/{id}/my-selection:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [variants]
+      operationId: GetMySelection
+      summary: The caller's remembered picks for a recipe
+      responses:
+        '200':
+          description: The remembered selection.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Selection' }
+        '204': { description: Nothing remembered yet. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [variants]
+      operationId: PutMySelection
+      summary: Save the caller's picks and scaling
+      description: Recomputes the caller's product preferences (API.md §5.2).
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SelectionWrite' }
+      responses:
+        '200':
+          description: The saved selection.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Selection' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /favorites:
+    get:
+      tags: [favorites]
+      operationId: ListFavorites
+      summary: The caller's favourite recipes and variants
+      description: Newest favourite first; only items currently visible to the caller (PROJECT §4.6).
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of favourites.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedFavoriteItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ───────────────────────────── 6. Fridges ─────────────────────────────
+  /fridges:
+    get:
+      tags: [fridges]
+      operationId: ListFridges
+      summary: The caller's fridges
+      responses:
+        '200':
+          description: Fridges the caller owns or belongs to.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/FridgeSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [fridges]
+      operationId: CreateFridge
+      summary: Create a fridge
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NameWrite' }
+      responses:
+        '201':
+          description: Created; the caller is its owner.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FridgeSummary' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /fridges/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [fridges]
+      operationId: GetFridge
+      summary: Get a fridge with its members
+      description: 404 `fridge.not_found` also for non-members.
+      responses:
+        '200':
+          description: The fridge.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FridgeDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [fridges]
+      operationId: RenameFridge
+      summary: Rename a fridge (owner)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NameWrite' }
+      responses:
+        '200':
+          description: The renamed fridge.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FridgeSummary' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [fridges]
+      operationId: DeleteFridge
+      summary: Delete a fridge (owner)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Deleted. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/invites:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [fridges]
+      operationId: CreateInvite
+      summary: Create an invite link (owner)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '201':
+          description: Created; valid for 7 days.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invite' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    get:
+      tags: [fridges]
+      operationId: ListInvites
+      summary: Active invite links (owner)
+      responses:
+        '200':
+          description: Active invites.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Invite' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/invites/{inviteId}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - name: inviteId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Uuid' }
+    delete:
+      tags: [fridges]
+      operationId: RevokeInvite
+      summary: Revoke an invite link (owner)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Revoked. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /invites/{token}:
+    parameters:
+      - $ref: '#/components/parameters/Token'
+    get:
+      tags: [fridges]
+      operationId: PreviewInvite
+      summary: Preview an invite
+      description: 404 `invite.not_found` also when expired or revoked.
+      responses:
+        '200':
+          description: What the invite is for.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvitePreview' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /invites/{token}/accept:
+    parameters:
+      - $ref: '#/components/parameters/Token'
+    post:
+      tags: [fridges]
+      operationId: AcceptInvite
+      summary: Join a fridge through an invite (idempotent for members)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '200':
+          description: The joined fridge.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FridgeSummary' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - name: userId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Uuid' }
+    delete:
+      tags: [fridges]
+      operationId: RemoveMember
+      summary: Remove a member (owner) or leave a fridge (member)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Removed. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/items:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [fridges]
+      operationId: ListFridgeItems
+      summary: Items in a fridge
+      responses:
+        '200':
+          description: The items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/FridgeItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [fridges]
+      operationId: CreateFridgeItem
+      summary: Add an item to a fridge
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FridgeItemWrite' }
+      responses:
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FridgeItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/ItemId'
+    put:
+      tags: [fridges]
+      operationId: UpdateFridgeItem
+      summary: Edit a fridge item
+      description: '`remainingPercent: 0` deletes the item and answers 204.'
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FridgeItemUpdate' }
+      responses:
+        '200':
+          description: The updated item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FridgeItem' }
+        '204': { description: The item reached 0 % and was removed. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [fridges]
+      operationId: DeleteFridgeItem
+      summary: Remove a fridge item
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Removed. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────────── 7. Deductions and shopping list ─────────────────────────────
+  /fridges/{id}/deductions:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [deductions]
+      operationId: CreateDeduction
+      summary: Deduct a cooked recipe from a fridge (PROJECT §9)
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DeductionRequest' }
+      responses:
+        '201':
+          description: Deducted.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DeductionResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/deductions/{deductionId}/undo:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - name: deductionId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Uuid' }
+    post:
+      tags: [deductions]
+      operationId: UndoDeduction
+      summary: Undo a deduction
+      description: 409 `deduction.items_changed` when a touched item changed since; 409 `deduction.already_undone`.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '200':
+          description: Undone (`undone true`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DeductionResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /fridges/{id}/shopping-list:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [shopping]
+      operationId: GetShoppingList
+      summary: The fridge's shopping list
+      description: Unchecked first, then by category, then by name.
+      responses:
+        '200':
+          description: The items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ShoppingListItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/shopping-list/items:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [shopping]
+      operationId: AddShoppingListItems
+      summary: Add or merge shopping-list items
+      description: A product that already has an unchecked item adds the amounts together (null + x = x).
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ShoppingListItemsWrite' }
+      responses:
+        '200':
+          description: The created or merged items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ShoppingListItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/shopping-list/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/ItemId'
+    patch:
+      tags: [shopping]
+      operationId: PatchShoppingListItem
+      summary: Check off or edit an item
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ShoppingListItemPatch' }
+      responses:
+        '200':
+          description: The updated item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShoppingListItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [shopping]
+      operationId: DeleteShoppingListItem
+      summary: Remove an item
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': { description: Removed. }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /fridges/{id}/shopping-list/complete:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [shopping]
+      operationId: CompleteShoppingList
+      summary: Remove bought items, optionally moving them to the fridge
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompleteShoppingListRequest' }
+      responses:
+        '200':
+          description: What was removed and created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CompleteShoppingListResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-rl_session
+      description: Session cookie set by `/auth/google` or `/auth/dev-login` (`rl_session` in Development over http).
+    csrfHeader:
+      type: apiKey
+      in: header
+      name: X-Requested-With
+      description: Must be `fetch` on every mutating request; otherwise 400 `request.missing_csrf_header`.
+
+  headers:
+    Location:
+      description: URL of the created resource.
+      schema: { type: string }
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/Uuid' }
+    ItemId:
+      name: itemId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/Uuid' }
+    Token:
+      name: token
+      in: path
+      required: true
+      schema: { type: string }
+    Q:
+      name: q
+      in: query
+      description: Search text (normalized server-side).
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  responses:
+    BadRequest:
+      description: Validation or business-rule failure (`validation.failed`, `request.missing_csrf_header`, …).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Unauthorized:
+      description: Not signed in (`auth.required`) or an invalid Google token (`auth.invalid_token`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Forbidden:
+      description: Not allowed (e.g. `user.onboarding_required`, `admin.required`, `recipe.not_author`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Not found, or not visible to the caller.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Conflict:
+      description: Conflicts with the current state (duplicates, locks, `concurrency.conflict`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    PayloadTooLarge:
+      description: The upload is too large (`image.too_large`, `import.too_large`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    TooManyRequests:
+      description: Rate limited (`rate_limited`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  schemas:
+    # ───────────── 0. Common types ─────────────
+    Uuid:
+      type: string
+      format: uuid
+    DateTime:
+      type: string
+      format: date-time
+    Version:
+      description: PostgreSQL `xmin` (uint32), used for optimistic concurrency.
+      type: integer
+      minimum: 0
+      maximum: 4294967295
+    MeasureKind:
+      type: string
+      enum: [mass, volume, count]
+    DisplayClass:
+      type: string
+      enum: [weight, liquid, spice, piece]
+    ProductCategory:
+      type: string
+      enum: [vegetables, fruits, meat, fish, dairy, bakery, dryGoods, spices, oilsVinegars, sauces, canned, frozen, drinks, sweets, other]
+    Unit:
+      type: string
+      enum: [g, kg, ml, l, glass, tbsp, tsp, drop, pinch, piece]
+    PieceSize:
+      type: string
+      enum: [small, medium, large]
+    LiquidUnits:
+      type: string
+      enum: [kitchen, metric]
+    StepSection:
+      type: string
+      enum: [prep, instructions]
+    FridgeRole:
+      type: string
+      enum: [owner, member]
+    Visibility:
+      description: PROJECT §4.4; resources the caller cannot see answer 404.
+      type: string
+      enum: [private, fridges, public]
+
+    ProblemDetails:
+      description: RFC 9457 problem with the stable `code` (API.md §9). Extra extensions depend on the code.
+      type: object
+      required: [code]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        code:
+          type: string
+          description: Stable error code, e.g. `recipe.not_found`.
+        errors:
+          description: Validation errors, `<camelCase.path>` → codes.
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+        traceId: { type: string }
+      additionalProperties: true
+
+    PluralForms:
+      type: object
+      required: [one, few, many, fraction]
+      properties:
+        one: { type: string }
+        few: { type: string }
+        many: { type: string }
+        fraction: { type: string }
+      additionalProperties: false
+
+    ProductRef:
+      type: object
+      required: [id, name, category, measureKind, displayClass, hasSizes, allowHalf, gramsPerMl, gramsPerPiece, defaultPackageAmount, pieceForms]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+        category: { $ref: '#/components/schemas/ProductCategory' }
+        measureKind: { $ref: '#/components/schemas/MeasureKind' }
+        displayClass: { $ref: '#/components/schemas/DisplayClass' }
+        hasSizes: { type: boolean }
+        allowHalf: { type: boolean }
+        gramsPerMl: { type: [number, 'null'] }
+        gramsPerPiece: { type: [number, 'null'] }
+        defaultPackageAmount:
+          description: Base units.
+          type: [number, 'null']
+        pieceForms:
+          oneOf:
+            - $ref: '#/components/schemas/PluralForms'
+            - type: 'null'
+      additionalProperties: false
+
+    Quantity:
+      description: As entered by the author; `size` only for unit `piece` and products with sizes.
+      type: object
+      required: [value, unit]
+      properties:
+        value: { type: number, exclusiveMinimum: 0 }
+        unit: { $ref: '#/components/schemas/Unit' }
+        size:
+          oneOf:
+            - $ref: '#/components/schemas/PieceSize'
+            - type: 'null'
+      additionalProperties: false
+
+    ContentBlock:
+      oneOf:
+        - $ref: '#/components/schemas/TextBlock'
+        - $ref: '#/components/schemas/ImageBlock'
+      discriminator:
+        propertyName: type
+        mapping:
+          text: '#/components/schemas/TextBlock'
+          image: '#/components/schemas/ImageBlock'
+    TextBlock:
+      description: Plain text; line breaks are kept.
+      type: object
+      required: [type, text]
+      properties:
+        type: { type: string, const: text }
+        text: { type: string, maxLength: 5000 }
+      additionalProperties: false
+    ImageBlock:
+      type: object
+      required: [type, imageId]
+      properties:
+        type: { type: string, const: image }
+        imageId: { $ref: '#/components/schemas/Uuid' }
+        caption: { type: [string, 'null'], maxLength: 300 }
+      additionalProperties: false
+
+    UserRef:
+      type: object
+      required: [id, nickname]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        nickname: { type: string }
+      additionalProperties: false
+    TagRef:
+      type: object
+      required: [id, name, isSystem]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+        isSystem: { type: boolean }
+      additionalProperties: false
+    UtensilRef:
+      type: object
+      required: [id, name]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+      additionalProperties: false
+    NameWrite:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+      additionalProperties: false
+
+    # ───────────── 1. Auth and current user ─────────────
+    GoogleLoginRequest:
+      type: object
+      required: [idToken]
+      properties:
+        idToken: { type: string }
+      additionalProperties: false
+    DevLoginRequest:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email, maxLength: 320 }
+        nickname: { type: [string, 'null'], maxLength: 30 }
+      additionalProperties: false
+    AuthConfig:
+      type: object
+      required: [googleClientId, devLoginEnabled]
+      properties:
+        googleClientId: { type: [string, 'null'] }
+        devLoginEnabled: { type: boolean }
+      additionalProperties: false
+    MeSettings:
+      type: object
+      required: [liquidUnits]
+      properties:
+        liquidUnits: { $ref: '#/components/schemas/LiquidUnits' }
+        defaultFridgeId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+      additionalProperties: false
+    Me:
+      type: object
+      required: [id, email, nickname, avatarUrl, isAdmin, settings]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        email: { type: string }
+        nickname:
+          description: Null ⇒ onboarding required.
+          type: [string, 'null']
+        avatarUrl: { type: [string, 'null'] }
+        isAdmin: { type: boolean }
+        settings: { $ref: '#/components/schemas/MeSettings' }
+      additionalProperties: false
+    NicknameWrite:
+      type: object
+      required: [nickname]
+      properties:
+        nickname: { type: string, minLength: 3, maxLength: 30 }
+      additionalProperties: false
+    NicknameAvailability:
+      type: object
+      required: [available]
+      properties:
+        available: { type: boolean }
+      additionalProperties: false
+    ProductPreference:
+      type: object
+      required: [fromProductId, toProductId, weight]
+      properties:
+        fromProductId: { $ref: '#/components/schemas/Uuid' }
+        toProductId: { $ref: '#/components/schemas/Uuid' }
+        weight: { type: integer, minimum: 0 }
+      additionalProperties: false
+
+    # ───────────── 2. Catalog ─────────────
+    ProductWrite:
+      description: '`displayClass` must fit `measureKind`; `hasSizes`/`allowHalf` only for `count` (else 400 `product.invalid_combination`).'
+      type: object
+      required: [name, category, measureKind, displayClass, hasSizes, allowHalf]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        category: { $ref: '#/components/schemas/ProductCategory' }
+        measureKind: { $ref: '#/components/schemas/MeasureKind' }
+        displayClass: { $ref: '#/components/schemas/DisplayClass' }
+        hasSizes: { type: boolean }
+        allowHalf: { type: boolean }
+        gramsPerMl: { type: [number, 'null'], exclusiveMinimum: 0 }
+        gramsPerPiece: { type: [number, 'null'], exclusiveMinimum: 0 }
+        defaultPackageAmount: { type: [number, 'null'], exclusiveMinimum: 0 }
+        pieceForms:
+          oneOf:
+            - $ref: '#/components/schemas/PluralForms'
+            - type: 'null'
+      additionalProperties: false
+    MergeProductRequest:
+      type: object
+      required: [targetId]
+      properties:
+        targetId: { $ref: '#/components/schemas/Uuid' }
+      additionalProperties: false
+
+    # ───────────── 3. Images ─────────────
+    ImageInfo:
+      type: object
+      required: [id, url, thumbnailUrl, width, height]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        url:
+          description: '`/api/v1/images/{id}`'
+          type: string
+        thumbnailUrl:
+          description: '`/api/v1/images/{id}?size=thumb`'
+          type: string
+        width: { type: integer }
+        height: { type: integer }
+      additionalProperties: false
+
+    # ───────────── 4. Recipes ─────────────
+    RecipeSummary:
+      type: object
+      required: [id, title, author, coverImage, visibility, isFavorite, tags, prepMinutes, cookMinutes, variantCount, createdAt, updatedAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        title: { type: string }
+        author: { $ref: '#/components/schemas/UserRef' }
+        coverImage:
+          oneOf:
+            - $ref: '#/components/schemas/ImageInfo'
+            - type: 'null'
+        visibility: { $ref: '#/components/schemas/Visibility' }
+        isFavorite: { type: boolean }
+        tags:
+          type: array
+          items: { $ref: '#/components/schemas/TagRef' }
+        prepMinutes: { type: [integer, 'null'] }
+        cookMinutes: { type: [integer, 'null'] }
+        variantCount:
+          description: Variants visible to the caller.
+          type: integer
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+      additionalProperties: false
+    PagedRecipeSummary:
+      type: object
+      required: [items, page, pageSize, totalCount]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/RecipeSummary' }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalCount: { type: integer }
+      additionalProperties: false
+    Ingredient:
+      type: object
+      required: [id, product, quantity, baseAmount, note, optional]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        product: { $ref: '#/components/schemas/ProductRef' }
+        quantity:
+          description: Null ⇒ "do smaku".
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
+        baseAmount:
+          description: Server-computed canonical amount (g | ml | medium pieces); null iff quantity is null.
+          type: [number, 'null']
+        note: { type: [string, 'null'] }
+        optional: { type: boolean }
+      additionalProperties: false
+    Step:
+      type: object
+      required: [id, blocks]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        blocks:
+          type: array
+          items: { $ref: '#/components/schemas/ContentBlock' }
+      additionalProperties: false
+    RecipeDetail:
+      type: object
+      required: [id, version, isArchived, visibility, isFavorite, canEdit, totalVariantCount, foreignVariantCount, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, variantCount, createdAt, updatedAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        version: { $ref: '#/components/schemas/Version' }
+        isArchived: { type: boolean }
+        visibility: { $ref: '#/components/schemas/Visibility' }
+        isFavorite: { type: boolean }
+        canEdit:
+          description: Caller is the author and the recipe is not public.
+          type: boolean
+        totalVariantCount:
+          description: All variants, including hidden ones (author only; others get 0).
+          type: integer
+        foreignVariantCount:
+          description: Variants by other users (author only; others get 0).
+          type: integer
+        title: { type: string }
+        description: { type: [string, 'null'] }
+        coverImage:
+          oneOf:
+            - $ref: '#/components/schemas/ImageInfo'
+            - type: 'null'
+        author: { $ref: '#/components/schemas/UserRef' }
+        prepMinutes: { type: [integer, 'null'] }
+        cookMinutes: { type: [integer, 'null'] }
+        tags:
+          description: Includes the system tag `szybkie` when applicable.
+          type: array
+          items: { $ref: '#/components/schemas/TagRef' }
+        utensils:
+          type: array
+          items: { $ref: '#/components/schemas/UtensilRef' }
+        ingredients:
+          type: array
+          items: { $ref: '#/components/schemas/Ingredient' }
+        prepSteps:
+          type: array
+          items: { $ref: '#/components/schemas/Step' }
+        instructionSteps:
+          type: array
+          items: { $ref: '#/components/schemas/Step' }
+        cookCount: { type: integer }
+        variantCount:
+          description: Variants visible to the caller.
+          type: integer
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+      additionalProperties: false
+    IngredientWrite:
+      type: object
+      required: [productId, optional]
+      properties:
+        id:
+          description: Keep the existing id on edit (needed for variant ops); omit for new rows.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        productId: { $ref: '#/components/schemas/Uuid' }
+        quantity:
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
+        note: { type: [string, 'null'], maxLength: 300 }
+        optional: { type: boolean }
+      additionalProperties: false
+    StepWrite:
+      type: object
+      required: [blocks]
+      properties:
+        id:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        blocks:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/ContentBlock' }
+      additionalProperties: false
+    RecipeWrite:
+      description: 'Id stability: rows sent with an existing id are updated in place, rows without an id are created, missing rows are deleted.'
+      type: object
+      required: [title, tagIds, utensilIds, ingredients, prepSteps, instructionSteps]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 150 }
+        description: { type: [string, 'null'], maxLength: 2000 }
+        coverImageId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        prepMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
+        cookMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
+        tagIds:
+          description: System tags are ignored.
+          type: array
+          items: { $ref: '#/components/schemas/Uuid' }
+        utensilIds:
+          type: array
+          items: { $ref: '#/components/schemas/Uuid' }
+        ingredients:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { $ref: '#/components/schemas/IngredientWrite' }
+        prepSteps:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/StepWrite' }
+        instructionSteps:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items: { $ref: '#/components/schemas/StepWrite' }
+    RecipeCreate:
+      allOf:
+        - $ref: '#/components/schemas/RecipeWrite'
+        - type: object
+          required: [visibility]
+          properties:
+            visibility: { $ref: '#/components/schemas/Visibility' }
+    RecipeUpdate:
+      allOf:
+        - $ref: '#/components/schemas/RecipeWrite'
+        - type: object
+          required: [version, deleteVariants]
+          properties:
+            version: { $ref: '#/components/schemas/Version' }
+            deleteVariants: { type: boolean }
+    VisibilityWrite:
+      type: object
+      required: [visibility]
+      properties:
+        visibility: { $ref: '#/components/schemas/Visibility' }
+      additionalProperties: false
+
+    # ───────────── 5. Variants ─────────────
+    VariantRecipeWrite:
+      description: The edited copy of the base recipe (`Omit<RecipeWrite, 'title' | 'description' | 'coverImageId' | 'tagIds'>`); ids of base rows must be kept.
+      type: object
+      required: [utensilIds, ingredients, prepSteps, instructionSteps]
+      properties:
+        prepMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
+        cookMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
+        utensilIds:
+          type: array
+          items: { $ref: '#/components/schemas/Uuid' }
+        ingredients:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { $ref: '#/components/schemas/IngredientWrite' }
+        prepSteps:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/StepWrite' }
+        instructionSteps:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items: { $ref: '#/components/schemas/StepWrite' }
+      additionalProperties: false
+    VariantWrite:
+      type: object
+      required: [name, visibility, recipe]
+      properties:
+        name:
+          description: Unique per recipe per author.
+          type: string
+          minLength: 1
+          maxLength: 80
+        description: { type: [string, 'null'], maxLength: 2000 }
+        visibility:
+          description: Effective audience = recipe audience ∩ variant audience (PROJECT §6.1).
+          allOf:
+            - $ref: '#/components/schemas/Visibility'
+        recipe: { $ref: '#/components/schemas/VariantRecipeWrite' }
+    VariantUpdate:
+      allOf:
+        - $ref: '#/components/schemas/VariantWrite'
+        - type: object
+          required: [version]
+          properties:
+            version: { $ref: '#/components/schemas/Version' }
+
+    IngredientOp:
+      oneOf:
+        - $ref: '#/components/schemas/ModifyIngredientOp'
+        - $ref: '#/components/schemas/RemoveIngredientOp'
+        - $ref: '#/components/schemas/AddIngredientOp'
+      discriminator:
+        propertyName: op
+        mapping:
+          modify: '#/components/schemas/ModifyIngredientOp'
+          remove: '#/components/schemas/RemoveIngredientOp'
+          add: '#/components/schemas/AddIngredientOp'
+    ModifyIngredientOp:
+      type: object
+      required: [op, targetId, productId, quantity, note, optional]
+      properties:
+        op: { type: string, const: modify }
+        targetId: { $ref: '#/components/schemas/Uuid' }
+        productId: { $ref: '#/components/schemas/Uuid' }
+        quantity:
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
+        note: { type: [string, 'null'] }
+        optional: { type: boolean }
+      additionalProperties: false
+    RemoveIngredientOp:
+      type: object
+      required: [op, targetId]
+      properties:
+        op: { type: string, const: remove }
+        targetId: { $ref: '#/components/schemas/Uuid' }
+      additionalProperties: false
+    AddIngredientOp:
+      type: object
+      required: [op, id, afterId, productId, quantity, note, optional]
+      properties:
+        op: { type: string, const: add }
+        id: { $ref: '#/components/schemas/Uuid' }
+        afterId:
+          description: Null ⇒ insert at the start. May reference a base row or an earlier `add` of the same variant.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        productId: { $ref: '#/components/schemas/Uuid' }
+        quantity:
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
+        note: { type: [string, 'null'] }
+        optional: { type: boolean }
+      additionalProperties: false
+    StepOp:
+      oneOf:
+        - $ref: '#/components/schemas/ReplaceStepOp'
+        - $ref: '#/components/schemas/RemoveStepOp'
+        - $ref: '#/components/schemas/AddStepOp'
+      discriminator:
+        propertyName: op
+        mapping:
+          replace: '#/components/schemas/ReplaceStepOp'
+          remove: '#/components/schemas/RemoveStepOp'
+          add: '#/components/schemas/AddStepOp'
+    ReplaceStepOp:
+      type: object
+      required: [op, section, targetId, blocks]
+      properties:
+        op: { type: string, const: replace }
+        section: { $ref: '#/components/schemas/StepSection' }
+        targetId: { $ref: '#/components/schemas/Uuid' }
+        blocks:
+          type: array
+          items: { $ref: '#/components/schemas/ContentBlock' }
+      additionalProperties: false
+    RemoveStepOp:
+      type: object
+      required: [op, section, targetId]
+      properties:
+        op: { type: string, const: remove }
+        section: { $ref: '#/components/schemas/StepSection' }
+        targetId: { $ref: '#/components/schemas/Uuid' }
+      additionalProperties: false
+    AddStepOp:
+      type: object
+      required: [op, section, id, afterId, blocks]
+      properties:
+        op: { type: string, const: add }
+        section: { $ref: '#/components/schemas/StepSection' }
+        id: { $ref: '#/components/schemas/Uuid' }
+        afterId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        blocks:
+          type: array
+          items: { $ref: '#/components/schemas/ContentBlock' }
+      additionalProperties: false
+
+    VariantSummary:
+      type: object
+      required: [id, recipeId, recipeTitle, name, description, author, visibility, isFavorite, baseAvailable, cookCount, changeCount, createdAt, updatedAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        recipeId: { $ref: '#/components/schemas/Uuid' }
+        recipeTitle: { type: string }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        author: { $ref: '#/components/schemas/UserRef' }
+        visibility: { $ref: '#/components/schemas/Visibility' }
+        isFavorite: { type: boolean }
+        baseAvailable: { type: boolean }
+        cookCount: { type: integer }
+        changeCount: { type: integer }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+    PagedVariantSummary:
+      type: object
+      required: [items, page, pageSize, totalCount]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/VariantSummary' }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalCount: { type: integer }
+      additionalProperties: false
+    VariantDetail:
+      allOf:
+        - $ref: '#/components/schemas/VariantSummary'
+        - type: object
+          required: [version, ingredientOps, stepOps, utensilIdsAdded, utensilIdsRemoved, prepMinutes, cookMinutes]
+          properties:
+            version: { $ref: '#/components/schemas/Version' }
+            ingredientOps:
+              type: array
+              items: { $ref: '#/components/schemas/IngredientOp' }
+            stepOps:
+              type: array
+              items: { $ref: '#/components/schemas/StepOp' }
+            utensilIdsAdded:
+              type: array
+              items: { $ref: '#/components/schemas/Uuid' }
+            utensilIdsRemoved:
+              type: array
+              items: { $ref: '#/components/schemas/Uuid' }
+            prepMinutes:
+              description: Override; null = inherit.
+              type: [integer, 'null']
+            cookMinutes:
+              description: Override; null = inherit.
+              type: [integer, 'null']
+      unevaluatedProperties: false
+    ResolvedRecipe:
+      description: '`Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id.'
+      type: object
+      required: [id, isArchived, visibility, isFavorite, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, createdAt, updatedAt, variantId, variantName]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        isArchived: { type: boolean }
+        visibility: { $ref: '#/components/schemas/Visibility' }
+        isFavorite: { type: boolean }
+        title: { type: string }
+        description: { type: [string, 'null'] }
+        coverImage:
+          oneOf:
+            - $ref: '#/components/schemas/ImageInfo'
+            - type: 'null'
+        author: { $ref: '#/components/schemas/UserRef' }
+        prepMinutes: { type: [integer, 'null'] }
+        cookMinutes: { type: [integer, 'null'] }
+        tags:
+          type: array
+          items: { $ref: '#/components/schemas/TagRef' }
+        utensils:
+          type: array
+          items: { $ref: '#/components/schemas/UtensilRef' }
+        ingredients:
+          type: array
+          items: { $ref: '#/components/schemas/Ingredient' }
+        prepSteps:
+          type: array
+          items: { $ref: '#/components/schemas/Step' }
+        instructionSteps:
+          type: array
+          items: { $ref: '#/components/schemas/Step' }
+        cookCount: { type: integer }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+        variantId:
+          description: Null ⇒ base.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        variantName: { type: [string, 'null'] }
+      additionalProperties: false
+
+    VariantRefId:
+      description: A variant id, or `base` for the base recipe.
+      anyOf:
+        - $ref: '#/components/schemas/Uuid'
+        - type: string
+          const: base
+    VariantMatrix:
+      type: object
+      required: [recipeId, variants, slots]
+      properties:
+        recipeId: { $ref: '#/components/schemas/Uuid' }
+        variants:
+          description: Includes the base as `{ id 'base', … }`; only variants visible to the caller.
+          type: array
+          items: { $ref: '#/components/schemas/MatrixVariant' }
+        slots:
+          description: Base ingredients in base order, then added slots in first-seen order.
+          type: array
+          items: { $ref: '#/components/schemas/Slot' }
+      additionalProperties: false
+    MatrixVariant:
+      type: object
+      required: [id, name, author, cookCount, createdAt, isFavorite, productSwaps]
+      properties:
+        id: { $ref: '#/components/schemas/VariantRefId' }
+        name: { type: string }
+        author: { $ref: '#/components/schemas/UserRef' }
+        cookCount: { type: integer }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        isFavorite:
+          description: The caller's ♥ (for `base` the recipe's ♥).
+          type: boolean
+        productSwaps:
+          type: array
+          items: { $ref: '#/components/schemas/ProductSwap' }
+      additionalProperties: false
+    ProductSwap:
+      type: object
+      required: [fromProductId, toProductId]
+      properties:
+        fromProductId: { $ref: '#/components/schemas/Uuid' }
+        toProductId: { $ref: '#/components/schemas/Uuid' }
+      additionalProperties: false
+    Slot:
+      type: object
+      required: [key, label, options]
+      properties:
+        key:
+          description: 'Base slot `i:<ingredientId>`, added slot `p:<productId>`.'
+          type: string
+        label:
+          description: Product name of the base row or the added product.
+          type: string
+        options:
+          type: array
+          items: { $ref: '#/components/schemas/SlotOption' }
+      additionalProperties: false
+    SlotOption:
+      description: Same product and base amounts within 1 % share one option, keyed by the first-seen amount. Every variant appears in exactly one option per slot.
+      type: object
+      required: [key, ingredient, variantIds]
+      properties:
+        key:
+          description: '`none` or `<productId>:<baseAmount rounded to 3 decimals, or x when null>`; the amount is in invariant format without trailing zeros (`…:27.3`, `…:200`).'
+          type: string
+        ingredient:
+          description: Null for `none`.
+          oneOf:
+            - $ref: '#/components/schemas/Ingredient'
+            - type: 'null'
+        variantIds:
+          type: array
+          items: { $ref: '#/components/schemas/VariantRefId' }
+      additionalProperties: false
+
+    Pick:
+      type: object
+      required: [optionKey, source]
+      properties:
+        optionKey: { type: string }
+        source:
+          type: string
+          enum: [user, auto]
+      additionalProperties: false
+    ScalingState:
+      description: The user's "Mam …" in base units.
+      type: object
+      required: [anchorSlotKey, anchorBaseAmount]
+      properties:
+        anchorSlotKey: { type: string }
+        anchorBaseAmount: { type: number, exclusiveMinimum: 0 }
+      additionalProperties: false
+    SelectionWrite:
+      type: object
+      required: [picks]
+      properties:
+        picks:
+          description: Slot key → pick.
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/Pick' }
+        scaling:
+          oneOf:
+            - $ref: '#/components/schemas/ScalingState'
+            - type: 'null'
+    Selection:
+      allOf:
+        - $ref: '#/components/schemas/SelectionWrite'
+        - type: object
+          required: [recipeId, updatedAt, scaling]
+          properties:
+            recipeId: { $ref: '#/components/schemas/Uuid' }
+            updatedAt: { $ref: '#/components/schemas/DateTime' }
+      unevaluatedProperties: false
+
+    FavoriteItem:
+      oneOf:
+        - $ref: '#/components/schemas/RecipeFavoriteItem'
+        - $ref: '#/components/schemas/VariantFavoriteItem'
+      discriminator:
+        propertyName: kind
+        mapping:
+          recipe: '#/components/schemas/RecipeFavoriteItem'
+          variant: '#/components/schemas/VariantFavoriteItem'
+    RecipeFavoriteItem:
+      type: object
+      required: [kind, favoritedAt, recipe]
+      properties:
+        kind: { type: string, const: recipe }
+        favoritedAt: { $ref: '#/components/schemas/DateTime' }
+        recipe: { $ref: '#/components/schemas/RecipeSummary' }
+      additionalProperties: false
+    VariantFavoriteItem:
+      type: object
+      required: [kind, favoritedAt, variant, recipe]
+      properties:
+        kind: { type: string, const: variant }
+        favoritedAt: { $ref: '#/components/schemas/DateTime' }
+        variant: { $ref: '#/components/schemas/VariantSummary' }
+        recipe: { $ref: '#/components/schemas/RecipeSummary' }
+      additionalProperties: false
+    PagedFavoriteItem:
+      type: object
+      required: [items, page, pageSize, totalCount]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/FavoriteItem' }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalCount: { type: integer }
+      additionalProperties: false
+
+    # ───────────── 6. Fridges ─────────────
+    FridgeSummary:
+      type: object
+      required: [id, name, role, owner, memberCount, itemCount]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+        role: { $ref: '#/components/schemas/FridgeRole' }
+        owner: { $ref: '#/components/schemas/UserRef' }
+        memberCount: { type: integer }
+        itemCount: { type: integer }
+    FridgeMember:
+      type: object
+      required: [id, nickname, role]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        nickname: { type: string }
+        role: { $ref: '#/components/schemas/FridgeRole' }
+      additionalProperties: false
+    FridgeDetail:
+      allOf:
+        - $ref: '#/components/schemas/FridgeSummary'
+        - type: object
+          required: [members]
+          properties:
+            members:
+              type: array
+              items: { $ref: '#/components/schemas/FridgeMember' }
+      unevaluatedProperties: false
+    Invite:
+      type: object
+      required: [id, token, url, expiresAt, createdAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        token: { type: string }
+        url:
+          description: '`/zaproszenie/<token>`'
+          type: string
+        expiresAt: { $ref: '#/components/schemas/DateTime' }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+      additionalProperties: false
+    InvitePreview:
+      type: object
+      required: [fridgeName, owner, expiresAt, alreadyMember]
+      properties:
+        fridgeName: { type: string }
+        owner: { $ref: '#/components/schemas/UserRef' }
+        expiresAt: { $ref: '#/components/schemas/DateTime' }
+        alreadyMember: { type: boolean }
+      additionalProperties: false
+    FridgeItem:
+      type: object
+      required: [id, version, product, packageAmount, remainingPercent, remainingAmount, note, addedBy, createdAt, updatedAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        version: { $ref: '#/components/schemas/Version' }
+        product: { $ref: '#/components/schemas/ProductRef' }
+        packageAmount:
+          description: Base units, > 0.
+          type: number
+        remainingPercent:
+          description: 0–100, up to 2 decimals.
+          type: number
+        remainingAmount:
+          description: packageAmount * remainingPercent / 100 (server-computed).
+          type: number
+        note: { type: [string, 'null'] }
+        addedBy: { $ref: '#/components/schemas/UserRef' }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+      additionalProperties: false
+    FridgeItemWrite:
+      type: object
+      required: [productId, packageAmount, remainingPercent]
+      properties:
+        productId: { $ref: '#/components/schemas/Uuid' }
+        packageAmount: { type: number, exclusiveMinimum: 0 }
+        remainingPercent: { type: number, minimum: 0, maximum: 100 }
+        note: { type: [string, 'null'], maxLength: 300 }
+    FridgeItemUpdate:
+      allOf:
+        - $ref: '#/components/schemas/FridgeItemWrite'
+        - type: object
+          required: [version]
+          properties:
+            version: { $ref: '#/components/schemas/Version' }
+
+    # ───────────── 7. Deductions and shopping list ─────────────
+    DeductionRequest:
+      type: object
+      required: [lines]
+      properties:
+        recipeId:
+          description: For cook counts.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        variantId:
+          description: Requires `recipeId`.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        lines:
+          description: Base units, > 0; the same product may not repeat.
+          type: array
+          items: { $ref: '#/components/schemas/DeductionRequestLine' }
+      additionalProperties: false
+    DeductionRequestLine:
+      type: object
+      required: [productId, amount]
+      properties:
+        productId: { $ref: '#/components/schemas/Uuid' }
+        amount: { type: number, exclusiveMinimum: 0 }
+      additionalProperties: false
+    DeductionResult:
+      type: object
+      required: [id, undone, createdAt, lines]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        undone: { type: boolean }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/DeductionResultLine' }
+      additionalProperties: false
+    DeductionResultLine:
+      type: object
+      required: [productId, requested, deducted, shortfall, items]
+      properties:
+        productId: { $ref: '#/components/schemas/Uuid' }
+        requested: { type: number }
+        deducted: { type: number }
+        shortfall: { type: number }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/DeductionItemResult' }
+      additionalProperties: false
+    DeductionItemResult:
+      type: object
+      required: [itemId, previousPercent, newPercent, removed]
+      properties:
+        itemId: { $ref: '#/components/schemas/Uuid' }
+        previousPercent: { type: number }
+        newPercent: { type: number }
+        removed: { type: boolean }
+      additionalProperties: false
+    ShoppingListItem:
+      type: object
+      required: [id, version, product, text, amount, checked, addedBy, createdAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        version: { $ref: '#/components/schemas/Version' }
+        product:
+          description: Exactly one of `product` and `text` is set.
+          oneOf:
+            - $ref: '#/components/schemas/ProductRef'
+            - type: 'null'
+        text: { type: [string, 'null'] }
+        amount:
+          description: Base units, only with a product.
+          type: [number, 'null']
+        checked: { type: boolean }
+        addedBy: { $ref: '#/components/schemas/UserRef' }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+      additionalProperties: false
+    ShoppingListItemWrite:
+      type: object
+      properties:
+        productId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        text: { type: [string, 'null'], maxLength: 200 }
+        amount: { type: [number, 'null'], exclusiveMinimum: 0 }
+      additionalProperties: false
+    ShoppingListItemsWrite:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { $ref: '#/components/schemas/ShoppingListItemWrite' }
+      additionalProperties: false
+    ShoppingListItemPatch:
+      type: object
+      required: [version]
+      properties:
+        version: { $ref: '#/components/schemas/Version' }
+        checked: { type: [boolean, 'null'] }
+        amount: { type: [number, 'null'], exclusiveMinimum: 0 }
+        text: { type: [string, 'null'], maxLength: 200 }
+      additionalProperties: false
+    CompleteShoppingListRequest:
+      type: object
+      required: [moveToFridge]
+      properties:
+        moveToFridge: { type: boolean }
+      additionalProperties: false
+    CompleteShoppingListResult:
+      type: object
+      required: [removed, createdFridgeItems]
+      properties:
+        removed: { type: integer }
+        createdFridgeItems:
+          type: array
+          items: { $ref: '#/components/schemas/FridgeItem' }
+      additionalProperties: false
+
+    # ───────────── 8. Recipe export format ─────────────
+    RecipeExport:
+      description: Self-contained recipe file (API.md §8). Keys are opaque strings unique within the file.
+      type: object
+      required: [format, formatVersion, exportedAt, products, images, recipe, variants]
+      properties:
+        format: { type: string, const: recipes-list/recipe }
+        formatVersion: { type: integer, const: 1 }
+        exportedAt: { $ref: '#/components/schemas/DateTime' }
+        products:
+          description: Every product referenced anywhere in the file.
+          type: array
+          items: { $ref: '#/components/schemas/ExportProduct' }
+        images:
+          description: localImageKey → image.
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/ExportImage' }
+        recipe: { $ref: '#/components/schemas/ExportRecipe' }
+        variants:
+          type: array
+          items: { $ref: '#/components/schemas/ExportVariant' }
+      additionalProperties: false
+    ExportImage:
+      type: object
+      required: [contentType, dataBase64]
+      properties:
+        contentType: { type: string, const: image/webp }
+        dataBase64: { type: string, contentEncoding: base64 }
+      additionalProperties: false
+    ExportProduct:
+      type: object
+      required: [key, name, category, measureKind, displayClass, hasSizes, allowHalf]
+      properties:
+        key: { type: string }
+        name: { type: string, minLength: 2, maxLength: 80 }
+        category: { $ref: '#/components/schemas/ProductCategory' }
+        measureKind: { $ref: '#/components/schemas/MeasureKind' }
+        displayClass: { $ref: '#/components/schemas/DisplayClass' }
+        hasSizes: { type: boolean }
+        allowHalf: { type: boolean }
+        gramsPerMl: { type: [number, 'null'] }
+        gramsPerPiece: { type: [number, 'null'] }
+        defaultPackageAmount: { type: [number, 'null'] }
+        pieceForms:
+          oneOf:
+            - $ref: '#/components/schemas/PluralForms'
+            - type: 'null'
+      additionalProperties: false
+    ExportBlock:
+      oneOf:
+        - $ref: '#/components/schemas/ExportTextBlock'
+        - $ref: '#/components/schemas/ExportImageBlock'
+      discriminator:
+        propertyName: type
+        mapping:
+          text: '#/components/schemas/ExportTextBlock'
+          image: '#/components/schemas/ExportImageBlock'
+    ExportTextBlock:
+      type: object
+      required: [type, text]
+      properties:
+        type: { type: string, const: text }
+        text: { type: string, maxLength: 5000 }
+      additionalProperties: false
+    ExportImageBlock:
+      type: object
+      required: [type, imageKey]
+      properties:
+        type: { type: string, const: image }
+        imageKey: { type: string }
+        caption: { type: [string, 'null'], maxLength: 300 }
+      additionalProperties: false
+    ExportIngredient:
+      type: object
+      required: [key, productKey, optional]
+      properties:
+        key: { type: string }
+        productKey: { type: string }
+        quantity:
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
+        note: { type: [string, 'null'] }
+        optional: { type: boolean }
+      additionalProperties: false
+    ExportStep:
+      type: object
+      required: [key, blocks]
+      properties:
+        key: { type: string }
+        blocks:
+          type: array
+          items: { $ref: '#/components/schemas/ExportBlock' }
+      additionalProperties: false
+    ExportRecipe:
+      type: object
+      required: [key, title, authorNickname, tags, utensils, ingredients, prepSteps, instructionSteps]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        description: { type: [string, 'null'] }
+        coverImageKey: { type: [string, 'null'] }
+        authorNickname: { type: string }
+        prepMinutes: { type: [integer, 'null'] }
+        cookMinutes: { type: [integer, 'null'] }
+        tags:
+          description: Tag names.
+          type: array
+          items: { type: string }
+        utensils:
+          description: Utensil names.
+          type: array
+          items: { type: string }
+        ingredients:
+          type: array
+          items: { $ref: '#/components/schemas/ExportIngredient' }
+        prepSteps:
+          type: array
+          items: { $ref: '#/components/schemas/ExportStep' }
+        instructionSteps:
+          type: array
+          items: { $ref: '#/components/schemas/ExportStep' }
+      additionalProperties: false
+    ExportVariant:
+      type: object
+      required: [name, authorNickname, utensilsAdded, utensilsRemoved, ingredientOps, stepOps]
+      properties:
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        authorNickname: { type: string }
+        prepMinutes: { type: [integer, 'null'] }
+        cookMinutes: { type: [integer, 'null'] }
+        utensilsAdded:
+          type: array
+          items: { type: string }
+        utensilsRemoved:
+          type: array
+          items: { type: string }
+        ingredientOps:
+          description: Same shapes as `IngredientOp`, with ids → keys and `productId` → `productKey`.
+          type: array
+          items: {}
+        stepOps:
+          description: Same shapes as `StepOp`, with ids → keys and `imageId` → `imageKey`.
+          type: array
+          items: {}
+      additionalProperties: false

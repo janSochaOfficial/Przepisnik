@@ -47,12 +47,14 @@ internal static class AuthFeature
         api.MapGet("/auth/config", GetConfig)
             .WithName("GetAuthConfig")
             .WithSummary("Public sign-in configuration")
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .RequireRateLimiting(RateLimitPolicies.Auth);
 
         api.MapPost("/auth/logout", LogoutAsync)
             .WithName("AuthLogout")
             .WithSummary("End the session")
-            .AllowWithoutNickname();
+            .AllowWithoutNickname()
+            .RequireRateLimiting(RateLimitPolicies.Auth);
 
         api.MapGet("/me", GetMeAsync)
             .WithName("GetMe")

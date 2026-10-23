@@ -51,7 +51,7 @@ type UtensilRef = { id: Uuid; name: string };
 | Method | Path | Body | Response | Errors |
 |---|---|---|---|---|
 | POST | `/auth/google` **public** | `{ idToken: string }` | `200 Me` + session cookie | 401 `auth.invalid_token` |
-| POST | `/auth/dev-login` **public, Development/Testing only** | `{ email: string; nickname?: string }` | `200 Me` + cookie | 404 outside dev/test |
+| POST | `/auth/dev-login` **public, Development/Testing only** | `{ email: string; nickname?: string }` | `200 Me` + cookie (sets the nickname if the user has none) | 404 outside dev/test, 400 `nickname.invalid`, 409 `nickname.taken` |
 | POST | `/auth/logout` | — | `204` | |
 | GET | `/me` | — | `200 Me` | 401 |
 | PUT | `/me/nickname` | `{ nickname: string }` | `200 Me` | 409 `nickname.taken`, 400 `nickname.invalid` |
@@ -252,6 +252,7 @@ type Slot = {
 };
 type SlotOption = {
   key: string;                    // "none" | "<productId>:<baseAmount rounded to 3 decimals or 'x' if null>"
+                                  // amount in invariant format without trailing zeros: "…:27.3", "…:200"
   ingredient?: Ingredient;        // null for "none"
   variantIds: (Uuid | 'base')[];  // every variant whose resolved recipe has this value in this slot
 };
@@ -379,7 +380,7 @@ Keys are opaque strings that are unique within the file (the exporter uses `i1, 
 
 ## 9. Error codes
 
-`auth.invalid_token` · `user.onboarding_required` · `nickname.taken` · `nickname.invalid` · `admin.required` ·
+`auth.invalid_token` · `auth.required` · `user.onboarding_required` · `nickname.taken` · `nickname.invalid` · `admin.required` ·
 `product.not_found` · `product.duplicate` · `product.invalid_combination` · `product.merge_incompatible` · `tag.reserved` ·
 `image.invalid_type` · `image.too_large` · `image.not_found` · `image.not_owned` ·
 `recipe.not_found` · `recipe.not_author` · `recipe.public_locked` · `recipe.has_variants` · `recipe.visibility_locked` · `quantity.unit_incompatible` · `quantity.invalid` ·
@@ -388,6 +389,8 @@ Keys are opaque strings that are unique within the file (the exporter uses `i1, 
 `fridge_item.not_found` · `deduction.empty` · `deduction.not_found` · `deduction.items_changed` · `deduction.already_undone` ·
 `shopping_item.not_found` · `shopping_item.invalid` ·
 `import.invalid_format` · `import.unsupported_version` · `import.too_large` ·
-`concurrency.conflict` · `validation.failed` · `request.missing_csrf_header` · `rate_limited` · `server.error`
+`concurrency.conflict` · `validation.failed` · `request.missing_csrf_header` · `request.not_found` · `request.forbidden` · `request.invalid` · `rate_limited` · `server.error`
+
+Generic codes for responses that no feature produced: `auth.required` (401, not signed in), `request.not_found` (404, unknown route), `request.forbidden` (403), `request.invalid` (other 4xx such as malformed JSON or a wrong content type), `server.error` (5xx, including the 501 stubs before a feature is implemented).
 
 Every code needs an entry in `frontend/src/lib/i18n/pl/errors.ts`. A unit test checks that every code in this list has one.
