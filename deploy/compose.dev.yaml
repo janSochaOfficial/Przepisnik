@@ -1,0 +1,27 @@
+# Local development database only (TECHNICAL §8). The full stack (compose.yaml) is added by T90.
+#   docker compose -f deploy/compose.dev.yaml up -d
+# Task agents use their own database on this server: recipes_<taskid> (plan §4.3).
+name: recipes-list-dev
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: recipes
+      POSTGRES_PASSWORD: recipes
+      POSTGRES_DB: recipes
+    ports:
+      # POSTGRES_PORT overrides the host port when 5432 is taken (then point ConnectionStrings__Default at it).
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # postgres:18 keeps its data in a major-version subdirectory of /var/lib/postgresql.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recipes -d recipes"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

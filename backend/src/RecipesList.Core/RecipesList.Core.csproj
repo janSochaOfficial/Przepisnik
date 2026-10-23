@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>RecipesList.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--
+      Only the provider-agnostic EF Core package: IAppDbContext exposes DbSet<T> (plan §5.1) and services use the
+      async LINQ operators. Core references no Relational/Npgsql package and no ASP.NET Core (TECHNICAL §3.1).
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="RecipesList.UnitTests" />
+  </ItemGroup>
+</Project>

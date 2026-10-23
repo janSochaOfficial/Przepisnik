@@ -1,0 +1,40 @@
+# Local environment (ports per worktree, secrets)
+.env
+.env.local
+.env.*.local
+!deploy/.env.example
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+coverage*.xml
+
+# Node / SvelteKit
+node_modules/
+frontend/build/
+frontend/.svelte-kit/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/
+build/
+
+# Runtime data
+data/
+*.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Claude Code worktrees of the coordinator
+.claude/worktrees/

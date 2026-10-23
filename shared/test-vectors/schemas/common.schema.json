@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recipes-list.local/test-vectors/common.schema.json",
+  "title": "Shared definitions of the test-vector schemas",
+  "$defs": {
+    "caseId": {
+      "description": "Unique across all files of the kind, prefixed with the task id (e.g. F1-onion-2.8).",
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*-[A-Za-z0-9._-]+$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "measureKind": { "enum": ["mass", "volume", "count"] },
+    "displayClass": { "enum": ["weight", "liquid", "spice", "piece"] },
+    "unit": { "enum": ["g", "kg", "ml", "l", "glass", "tbsp", "tsp", "drop", "pinch", "piece"] },
+    "pieceSize": { "enum": ["small", "medium", "large"] },
+    "pluralForms": {
+      "type": "object",
+      "required": ["one", "few", "many", "fraction"],
+      "properties": {
+        "one": { "type": "string" },
+        "few": { "type": "string" },
+        "many": { "type": "string" },
+        "fraction": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "quantity": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "$ref": "#/$defs/unit" },
+        "size": { "oneOf": [{ "$ref": "#/$defs/pieceSize" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

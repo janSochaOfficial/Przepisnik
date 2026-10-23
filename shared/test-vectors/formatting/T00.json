@@ -1,0 +1,1349 @@
+{
+  "cases": [
+    {
+      "id": "T00-weight-7.4g",
+      "description": "weight < 10 g: step 1 g; 7 g is 5.4 % off",
+      "base": 7.4,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "7 g",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-weight-7g",
+      "description": "weight exact",
+      "base": 7,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "7 g",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-weight-47g",
+      "description": "weight < 100 g: step 5 g",
+      "base": 47,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "45 g",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-weight-52g",
+      "description": "weight < 100 g: step 5 g",
+      "base": 52,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "50 g",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-weight-333g",
+      "description": "weight < 1000 g: step 10 g",
+      "base": 333,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "330 g",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-weight-1234g",
+      "description": "weight >= 1000 g: kg with a 0.05 kg step",
+      "base": 1234,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1,25 kg",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-weight-1500g",
+      "description": "kg with a decimal comma",
+      "base": 1500,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1,5 kg",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-weight-2000g",
+      "description": "whole kilograms",
+      "base": 2000,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 kg",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-190ml-kitchen",
+      "description": "kitchen: glasses to the nearest quarter (PROJECT §5.4 example)",
+      "base": 190,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "¾ szklanki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-250ml-kitchen",
+      "description": "one glass",
+      "base": 250,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 szklanka",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-375ml-kitchen",
+      "description": "one and a half glasses (PROJECT §5.4 example)",
+      "base": 375,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 ½ szklanki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-500ml-kitchen",
+      "description": "two glasses",
+      "base": 500,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 szklanki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-1000ml-kitchen",
+      "description": "upper bound of the glass range (PROJECT §5.4 example)",
+      "base": 1000,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "4 szklanki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-62.5ml-kitchen",
+      "description": "lower bound of the glass range",
+      "base": 62.5,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "¼ szklanki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-140ml-kitchen",
+      "description": "half a glass is 10.7 % off",
+      "base": 140,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "½ szklanki",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-liquid-190ml-metric",
+      "description": "metric: ml rounded to 10 ml",
+      "base": 190,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "metric",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "190 ml",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-333ml-metric",
+      "description": "metric: ml rounded to 10 ml",
+      "base": 333,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "metric",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "330 ml",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-250ml-metric",
+      "description": "metric glass (PROJECT §5.4 example)",
+      "base": 250,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "metric",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "250 ml",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-1240ml-kitchen",
+      "description": "above 1000 ml: litres with a 0.1 l step, in both settings",
+      "base": 1240,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1,2 l",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-1240ml-metric",
+      "description": "above 1000 ml in the metric setting",
+      "base": 1240,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "metric",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1,2 l",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-2000ml",
+      "description": "whole litres",
+      "base": 2000,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 l",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-37.5ml-spoons",
+      "description": "spoons: greedy tablespoons, rest in teaspoons (PROJECT §5.4 example)",
+      "base": 37.5,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 łyżki + 1 ½ łyżeczki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-3.75ml-spoons",
+      "description": "three quarters of a teaspoon (PROJECT §5.4 example)",
+      "base": 3.75,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "¾ łyżeczki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-15ml-spoons",
+      "description": "one tablespoon",
+      "base": 15,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 łyżka",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-5ml-spoons",
+      "description": "one teaspoon",
+      "base": 5,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 łyżeczka",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-10ml-spoons",
+      "description": "two teaspoons",
+      "base": 10,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 łyżeczki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-45ml-spoons",
+      "description": "three tablespoons",
+      "base": 45,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "3 łyżki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-50ml-spoons",
+      "description": "tablespoons plus a whole teaspoon",
+      "base": 50,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "3 łyżki + 1 łyżeczka",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-1.3ml-spoons",
+      "description": "rounded to the nearest quarter teaspoon",
+      "base": 1.3,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "¼ łyżeczki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-37.5ml-metric",
+      "description": "spoons are used below 62.5 ml in the metric setting too",
+      "base": 37.5,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "metric",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 łyżki + 1 ½ łyżeczki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-0.4ml-drops",
+      "description": "below 0.625 ml: drops (PROJECT §5.4 example)",
+      "base": 0.4,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "8 kropli",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-0.05ml-drops",
+      "description": "one drop",
+      "base": 0.05,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 kropla",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-0.1ml-drops",
+      "description": "two drops (few form)",
+      "base": 0.1,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 krople",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-liquid-0.6ml-drops",
+      "description": "twelve drops (12-14 take the many form)",
+      "base": 0.6,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "12 kropli",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-spice-0.3ml",
+      "description": "spice below 0.625 ml: pinches (PROJECT §5.4 example)",
+      "base": 0.3,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 szczypta",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-spice-0.6ml",
+      "description": "two pinches (PROJECT §5.4 example)",
+      "base": 0.6,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 szczypty",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-spice-0.1ml",
+      "description": "at least one pinch; 0.3 ml shown for 0.1 ml is approximate",
+      "base": 0.1,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 szczypta",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-spice-15ml",
+      "description": "one tablespoon of a spice",
+      "base": 15,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 łyżka",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-spice-330ml",
+      "description": "spices never use glasses: 22 tablespoons (few form)",
+      "base": 330,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "22 łyżki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-spice-180ml",
+      "description": "twelve tablespoons (many form)",
+      "base": 180,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "12 łyżek",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-spice-100ml-metric",
+      "description": "spices ignore the metric setting",
+      "base": 100,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "metric",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "6 łyżek + 2 łyżeczki",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-piece-2.8",
+      "description": "fewest pieces within 10 %: 2 large (PROJECT §5.4 example)",
+      "base": 2.8,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 duże",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-piece-1.4",
+      "description": "one large (PROJECT §5.4 example)",
+      "base": 1.4,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 duża",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-piece-3.5",
+      "description": "2 large + 1 medium beats 2 large + 1 small on error (PROJECT §5.4 example)",
+      "base": 3.5,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 duże + 1 średnia",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-piece-1",
+      "description": "one medium",
+      "base": 1,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 średnia",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-piece-0.75",
+      "description": "one small",
+      "base": 0.75,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 mała",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-piece-2",
+      "description": "two medium beat large + small on error",
+      "base": 2,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 średnie",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-piece-6.5",
+      "description": "five large (many form)",
+      "base": 6.5,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "5 dużych",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-piece-0.2",
+      "description": "below 0.3: a quarter of a medium",
+      "base": 0.2,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "¼ średniej",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-piece-0.5",
+      "description": "below 0.625: half of a medium",
+      "base": 0.5,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "½ średniej",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-egg-2.4",
+      "description": "pieces without sizes round to whole numbers",
+      "base": 2.4,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": {
+          "one": "jajko",
+          "few": "jajka",
+          "many": "jajek",
+          "fraction": "jajka"
+        }
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "2 jajka",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-egg-5",
+      "description": "custom piece forms, many",
+      "base": 5,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": {
+          "one": "jajko",
+          "few": "jajka",
+          "many": "jajek",
+          "fraction": "jajka"
+        }
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "5 jajek",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-egg-1",
+      "description": "custom piece forms, one",
+      "base": 1,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": {
+          "one": "jajko",
+          "few": "jajka",
+          "many": "jajek",
+          "fraction": "jajka"
+        }
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 jajko",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-egg-0.3",
+      "description": "at least one piece",
+      "base": 0.3,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": {
+          "one": "jajko",
+          "few": "jajka",
+          "many": "jajek",
+          "fraction": "jajka"
+        }
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 jajko",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-can-3",
+      "description": "default piece name",
+      "base": 3,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "3 szt.",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-lemon-1.4",
+      "description": "allowHalf rounds to the nearest half",
+      "base": 1.4,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": true,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "1 ½ szt.",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-lemon-0.5",
+      "description": "half a lemon",
+      "base": 0.5,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": true,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "recipe"
+      },
+      "expected": {
+        "text": "½ szt.",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-liquid-231ml",
+      "description": "inventory: liquids are always metric, step 10 ml up to 1000 ml",
+      "base": 231,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "230 ml",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-liquid-7.3ml",
+      "description": "inventory: step 1 ml below 10 ml",
+      "base": 7.3,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "7 ml",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-liquid-47ml",
+      "description": "inventory: step 5 ml below 100 ml",
+      "base": 47,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "45 ml",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-liquid-1500ml",
+      "description": "inventory: litres above 1000 ml",
+      "base": 1500,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "liquid",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "1,5 l",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-spice-12ml",
+      "description": "inventory: spices are metric too",
+      "base": 12,
+      "product": {
+        "measureKind": "volume",
+        "displayClass": "spice",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "10 ml",
+        "approximate": true
+      }
+    },
+    {
+      "id": "T00-inventory-weight-200g",
+      "description": "inventory: weight uses the weight rules",
+      "base": 200,
+      "product": {
+        "measureKind": "mass",
+        "displayClass": "weight",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "200 g",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-egg-6",
+      "description": "inventory: whole pieces",
+      "base": 6,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": false,
+        "pieceForms": {
+          "one": "jajko",
+          "few": "jajka",
+          "many": "jajek",
+          "fraction": "jajka"
+        }
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "6 jajek",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-onion-3",
+      "description": "inventory: no size combinations, default piece name",
+      "base": 3,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": true,
+        "allowHalf": false,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "3 szt.",
+        "approximate": false
+      }
+    },
+    {
+      "id": "T00-inventory-lemon-0.5",
+      "description": "inventory: halves for allowHalf",
+      "base": 0.5,
+      "product": {
+        "measureKind": "count",
+        "displayClass": "piece",
+        "hasSizes": false,
+        "allowHalf": true,
+        "pieceForms": null
+      },
+      "options": {
+        "liquidUnits": "kitchen",
+        "context": "inventory"
+      },
+      "expected": {
+        "text": "½ szt.",
+        "approximate": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recipes-list.local/test-vectors/formatting.schema.json",
+  "title": "formatting/<TaskID>.json: base amount + product + options → Polish display string",
+  "description": "Asserted by the frontend formatBaseAmount (PROJECT §5.4–5.5). expected.text never contains the '~' marker; expected.approximate is true when the shown value differs from the exact one by more than 5 %. Fractions use the glyphs ¼ ½ ¾ separated from the integer part by a space ('1 ½ szklanki'); decimals use a comma ('1,25 kg'); combined amounts are joined with ' + '.",
+  "type": "object",
+  "required": ["cases"],
+  "properties": {
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "base", "product", "options", "expected"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/caseId" },
+          "description": { "type": "string" },
+          "base": { "type": "number", "exclusiveMinimum": 0 },
+          "product": {
+            "type": "object",
+            "required": ["measureKind", "displayClass", "hasSizes", "allowHalf", "pieceForms"],
+            "properties": {
+              "measureKind": { "$ref": "common.schema.json#/$defs/measureKind" },
+              "displayClass": { "$ref": "common.schema.json#/$defs/displayClass" },
+              "hasSizes": { "type": "boolean" },
+              "allowHalf": { "type": "boolean" },
+              "pieceForms": { "oneOf": [{ "$ref": "common.schema.json#/$defs/pluralForms" }, { "type": "null" }] }
+            },
+            "additionalProperties": false
+          },
+          "options": {
+            "type": "object",
+            "required": ["liquidUnits", "context"],
+            "properties": {
+              "liquidUnits": { "enum": ["kitchen", "metric"] },
+              "context": { "enum": ["recipe", "inventory"] }
+            },
+            "additionalProperties": false
+          },
+          "expected": {
+            "type": "object",
+            "required": ["text", "approximate"],
+            "properties": {
+              "text": { "type": "string", "minLength": 1, "not": { "pattern": "~" } },
+              "approximate": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

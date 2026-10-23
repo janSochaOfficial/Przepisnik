@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recipes-list.local/test-vectors/quantities.schema.json",
+  "title": "quantities/<TaskID>.json: an entered quantity + product → base amount",
+  "description": "Asserted by the backend QuantityConverter and the frontend toBaseAmount (PROJECT §5.1–5.2). The expected base amount is in g, ml or medium pieces (by measureKind), rounded to 4 decimals; null means the unit cannot be converted for this product. Implementations compare with a tolerance of 0.0001.",
+  "type": "object",
+  "required": ["cases"],
+  "properties": {
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "quantity", "product", "expected"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/caseId" },
+          "description": { "type": "string" },
+          "quantity": { "$ref": "common.schema.json#/$defs/quantity" },
+          "product": {
+            "type": "object",
+            "required": ["measureKind", "hasSizes", "gramsPerMl", "gramsPerPiece"],
+            "properties": {
+              "measureKind": { "$ref": "common.schema.json#/$defs/measureKind" },
+              "hasSizes": { "type": "boolean" },
+              "gramsPerMl": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+              "gramsPerPiece": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+            },
+            "additionalProperties": false
+          },
+          "expected": { "type": ["number", "null"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

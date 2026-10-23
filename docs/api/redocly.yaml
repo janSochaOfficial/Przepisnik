@@ -1,0 +1,14 @@
+# Lint configuration for openapi.yaml (run by `npm run lint:api` and scripts/verify.sh).
+extends:
+  - recommended
+rules:
+  # The API is same-origin only; a relative server URL is intended.
+  no-server-example.com: error
+  operation-operationId: error
+  operation-summary: error
+  # Warnings of the recommended set count as failures for this contract.
+  operation-4xx-response: error
+  no-unused-components: error
+  security-defined: error
+  tag-description: error
+  info-license: error

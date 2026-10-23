@@ -1,0 +1,1898 @@
+{
+  "cases": [
+    {
+      "id": "T00-variant-modify-amount",
+      "description": "A variant changes the amount of one base ingredient; the slot gets a second option.",
+      "base": {
+        "recipeId": "00000000-0000-7000-8000-000000002001",
+        "title": "Kurczak w śmietanie",
+        "author": {
+          "id": "00000000-0000-7000-8000-000000001001",
+          "nickname": "ania"
+        },
+        "cookCount": 3,
+        "createdAt": "2026-10-01T10:00:00Z",
+        "prepMinutes": 10,
+        "cookMinutes": 20,
+        "utensilIds": [
+          "00000000-0000-7000-8000-00000000e001"
+        ],
+        "ingredients": [
+          {
+            "id": "00000000-0000-7000-8000-00000000b001",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a004",
+              "name": "pierś z kurczaka",
+              "category": "meat",
+              "measureKind": "mass",
+              "displayClass": "weight",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": null,
+              "gramsPerPiece": 200,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 600,
+              "unit": "g",
+              "size": null
+            },
+            "baseAmount": 600,
+            "note": null,
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b002",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a002",
+              "name": "śmietana 18%",
+              "category": "dairy",
+              "measureKind": "volume",
+              "displayClass": "liquid",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": 1.0,
+              "gramsPerPiece": null,
+              "defaultPackageAmount": 200,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 200,
+              "unit": "ml",
+              "size": null
+            },
+            "baseAmount": 200,
+            "note": null,
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b003",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a006",
+              "name": "sól",
+              "category": "spices",
+              "measureKind": "volume",
+              "displayClass": "spice",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": 1.2,
+              "gramsPerPiece": null,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": null,
+            "baseAmount": null,
+            "note": null,
+            "optional": false
+          }
+        ],
+        "prepSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c001",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Pokrój kurczaka w kostkę."
+              }
+            ]
+          }
+        ],
+        "instructionSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c002",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Usmaż kurczaka na złoto."
+              }
+            ]
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000c003",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Dodaj śmietanę i duś 10 minut."
+              }
+            ]
+          }
+        ]
+      },
+      "variants": [
+        {
+          "id": "00000000-0000-7000-8000-00000000d001",
+          "name": "Więcej śmietany",
+          "author": {
+            "id": "00000000-0000-7000-8000-000000001002",
+            "nickname": "bartek"
+          },
+          "cookCount": 1,
+          "createdAt": "2026-10-02T10:00:00Z",
+          "ingredientOps": [
+            {
+              "op": "modify",
+              "targetId": "00000000-0000-7000-8000-00000000b002",
+              "productId": "00000000-0000-7000-8000-00000000a002",
+              "quantity": {
+                "value": 300,
+                "unit": "ml",
+                "size": null
+              },
+              "baseAmount": 300,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "stepOps": [],
+          "utensilIdsAdded": [],
+          "utensilIdsRemoved": [],
+          "prepMinutes": null,
+          "cookMinutes": null
+        }
+      ],
+      "expectedResolved": {
+        "00000000-0000-7000-8000-00000000d001": {
+          "ingredients": [
+            {
+              "id": "00000000-0000-7000-8000-00000000b001",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a004",
+                "name": "pierś z kurczaka",
+                "category": "meat",
+                "measureKind": "mass",
+                "displayClass": "weight",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": null,
+                "gramsPerPiece": 200,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 600,
+                "unit": "g",
+                "size": null
+              },
+              "baseAmount": 600,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b002",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a002",
+                "name": "śmietana 18%",
+                "category": "dairy",
+                "measureKind": "volume",
+                "displayClass": "liquid",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": 1.0,
+                "gramsPerPiece": null,
+                "defaultPackageAmount": 200,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 300,
+                "unit": "ml",
+                "size": null
+              },
+              "baseAmount": 300,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b003",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a006",
+                "name": "sól",
+                "category": "spices",
+                "measureKind": "volume",
+                "displayClass": "spice",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": 1.2,
+                "gramsPerPiece": null,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": null,
+              "baseAmount": null,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "prepSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c001",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Pokrój kurczaka w kostkę."
+                }
+              ]
+            }
+          ],
+          "instructionSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c002",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Usmaż kurczaka na złoto."
+                }
+              ]
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000c003",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Dodaj śmietanę i duś 10 minut."
+                }
+              ]
+            }
+          ],
+          "utensilIds": [
+            "00000000-0000-7000-8000-00000000e001"
+          ],
+          "prepMinutes": 10,
+          "cookMinutes": 20
+        }
+      },
+      "expectedMatrix": {
+        "recipeId": "00000000-0000-7000-8000-000000002001",
+        "variants": [
+          {
+            "id": "base",
+            "name": "Kurczak w śmietanie",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-10-01T10:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000d001",
+            "name": "Więcej śmietany",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001002",
+              "nickname": "bartek"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-10-02T10:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b001",
+            "label": "pierś z kurczaka",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a004:600",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b001",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a004",
+                    "name": "pierś z kurczaka",
+                    "category": "meat",
+                    "measureKind": "mass",
+                    "displayClass": "weight",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 200,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d001"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b002",
+            "label": "śmietana 18%",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a002:200",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b002",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a002",
+                    "name": "śmietana 18%",
+                    "category": "dairy",
+                    "measureKind": "volume",
+                    "displayClass": "liquid",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.0,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": 200,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "ml",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "00000000-0000-7000-8000-00000000a002:300",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b002",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a002",
+                    "name": "śmietana 18%",
+                    "category": "dairy",
+                    "measureKind": "volume",
+                    "displayClass": "liquid",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.0,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": 200,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "ml",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "00000000-0000-7000-8000-00000000d001"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b003",
+            "label": "sól",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a006:x",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b003",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a006",
+                    "name": "sól",
+                    "category": "spices",
+                    "measureKind": "volume",
+                    "displayClass": "spice",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.2,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d001"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T00-variant-swap-product",
+      "description": "A variant replaces the product of a base ingredient; the matrix records the product swap.",
+      "base": {
+        "recipeId": "00000000-0000-7000-8000-000000002001",
+        "title": "Kurczak w śmietanie",
+        "author": {
+          "id": "00000000-0000-7000-8000-000000001001",
+          "nickname": "ania"
+        },
+        "cookCount": 3,
+        "createdAt": "2026-10-01T10:00:00Z",
+        "prepMinutes": 10,
+        "cookMinutes": 20,
+        "utensilIds": [
+          "00000000-0000-7000-8000-00000000e001"
+        ],
+        "ingredients": [
+          {
+            "id": "00000000-0000-7000-8000-00000000b001",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a004",
+              "name": "pierś z kurczaka",
+              "category": "meat",
+              "measureKind": "mass",
+              "displayClass": "weight",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": null,
+              "gramsPerPiece": 200,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 600,
+              "unit": "g",
+              "size": null
+            },
+            "baseAmount": 600,
+            "note": null,
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b002",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a002",
+              "name": "śmietana 18%",
+              "category": "dairy",
+              "measureKind": "volume",
+              "displayClass": "liquid",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": 1.0,
+              "gramsPerPiece": null,
+              "defaultPackageAmount": 200,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 200,
+              "unit": "ml",
+              "size": null
+            },
+            "baseAmount": 200,
+            "note": null,
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b003",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a006",
+              "name": "sól",
+              "category": "spices",
+              "measureKind": "volume",
+              "displayClass": "spice",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": 1.2,
+              "gramsPerPiece": null,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": null,
+            "baseAmount": null,
+            "note": null,
+            "optional": false
+          }
+        ],
+        "prepSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c001",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Pokrój kurczaka w kostkę."
+              }
+            ]
+          }
+        ],
+        "instructionSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c002",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Usmaż kurczaka na złoto."
+              }
+            ]
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000c003",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Dodaj śmietanę i duś 10 minut."
+              }
+            ]
+          }
+        ]
+      },
+      "variants": [
+        {
+          "id": "00000000-0000-7000-8000-00000000d002",
+          "name": "Ze śmietanką 30%",
+          "author": {
+            "id": "00000000-0000-7000-8000-000000001001",
+            "nickname": "ania"
+          },
+          "cookCount": 0,
+          "createdAt": "2026-10-04T12:00:00Z",
+          "ingredientOps": [
+            {
+              "op": "modify",
+              "targetId": "00000000-0000-7000-8000-00000000b002",
+              "productId": "00000000-0000-7000-8000-00000000a003",
+              "quantity": {
+                "value": 200,
+                "unit": "ml",
+                "size": null
+              },
+              "baseAmount": 200,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "stepOps": [],
+          "utensilIdsAdded": [],
+          "utensilIdsRemoved": [],
+          "prepMinutes": null,
+          "cookMinutes": null
+        }
+      ],
+      "expectedResolved": {
+        "00000000-0000-7000-8000-00000000d002": {
+          "ingredients": [
+            {
+              "id": "00000000-0000-7000-8000-00000000b001",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a004",
+                "name": "pierś z kurczaka",
+                "category": "meat",
+                "measureKind": "mass",
+                "displayClass": "weight",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": null,
+                "gramsPerPiece": 200,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 600,
+                "unit": "g",
+                "size": null
+              },
+              "baseAmount": 600,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b002",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a003",
+                "name": "śmietanka 30%",
+                "category": "dairy",
+                "measureKind": "volume",
+                "displayClass": "liquid",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": 1.0,
+                "gramsPerPiece": null,
+                "defaultPackageAmount": 330,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 200,
+                "unit": "ml",
+                "size": null
+              },
+              "baseAmount": 200,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b003",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a006",
+                "name": "sól",
+                "category": "spices",
+                "measureKind": "volume",
+                "displayClass": "spice",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": 1.2,
+                "gramsPerPiece": null,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": null,
+              "baseAmount": null,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "prepSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c001",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Pokrój kurczaka w kostkę."
+                }
+              ]
+            }
+          ],
+          "instructionSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c002",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Usmaż kurczaka na złoto."
+                }
+              ]
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000c003",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Dodaj śmietanę i duś 10 minut."
+                }
+              ]
+            }
+          ],
+          "utensilIds": [
+            "00000000-0000-7000-8000-00000000e001"
+          ],
+          "prepMinutes": 10,
+          "cookMinutes": 20
+        }
+      },
+      "expectedMatrix": {
+        "recipeId": "00000000-0000-7000-8000-000000002001",
+        "variants": [
+          {
+            "id": "base",
+            "name": "Kurczak w śmietanie",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-10-01T10:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000d002",
+            "name": "Ze śmietanką 30%",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-10-04T12:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "00000000-0000-7000-8000-00000000a002",
+                "toProductId": "00000000-0000-7000-8000-00000000a003"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b001",
+            "label": "pierś z kurczaka",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a004:600",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b001",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a004",
+                    "name": "pierś z kurczaka",
+                    "category": "meat",
+                    "measureKind": "mass",
+                    "displayClass": "weight",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 200,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d002"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b002",
+            "label": "śmietana 18%",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a002:200",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b002",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a002",
+                    "name": "śmietana 18%",
+                    "category": "dairy",
+                    "measureKind": "volume",
+                    "displayClass": "liquid",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.0,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": 200,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "ml",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "00000000-0000-7000-8000-00000000a003:200",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b002",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a003",
+                    "name": "śmietanka 30%",
+                    "category": "dairy",
+                    "measureKind": "volume",
+                    "displayClass": "liquid",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.0,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": 330,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "ml",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "00000000-0000-7000-8000-00000000d002"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b003",
+            "label": "sól",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a006:x",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b003",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a006",
+                    "name": "sól",
+                    "category": "spices",
+                    "measureKind": "volume",
+                    "displayClass": "spice",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.2,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d002"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T00-variant-remove",
+      "description": "A variant removes a base ingredient; that slot gets a \"none\" option.",
+      "base": {
+        "recipeId": "00000000-0000-7000-8000-000000002002",
+        "title": "Kurczak z cebulą",
+        "author": {
+          "id": "00000000-0000-7000-8000-000000001001",
+          "nickname": "ania"
+        },
+        "cookCount": 0,
+        "createdAt": "2026-10-03T08:30:00Z",
+        "prepMinutes": 5,
+        "cookMinutes": 15,
+        "utensilIds": [
+          "00000000-0000-7000-8000-00000000e001"
+        ],
+        "ingredients": [
+          {
+            "id": "00000000-0000-7000-8000-00000000b011",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a001",
+              "name": "cebula",
+              "category": "vegetables",
+              "measureKind": "count",
+              "displayClass": "piece",
+              "hasSizes": true,
+              "allowHalf": true,
+              "gramsPerMl": null,
+              "gramsPerPiece": 110,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 1,
+              "unit": "piece",
+              "size": "medium"
+            },
+            "baseAmount": 1,
+            "note": "pokrojona w kostkę",
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b012",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a004",
+              "name": "pierś z kurczaka",
+              "category": "meat",
+              "measureKind": "mass",
+              "displayClass": "weight",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": null,
+              "gramsPerPiece": 200,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 500,
+              "unit": "g",
+              "size": null
+            },
+            "baseAmount": 500,
+            "note": null,
+            "optional": false
+          }
+        ],
+        "prepSteps": [],
+        "instructionSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c011",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Zeszklij cebulę, dodaj kurczaka i smaż 15 minut."
+              }
+            ]
+          }
+        ]
+      },
+      "variants": [
+        {
+          "id": "00000000-0000-7000-8000-00000000d004",
+          "name": "Bez cebuli",
+          "author": {
+            "id": "00000000-0000-7000-8000-000000001002",
+            "nickname": "bartek"
+          },
+          "cookCount": 0,
+          "createdAt": "2026-10-05T09:00:00Z",
+          "ingredientOps": [
+            {
+              "op": "remove",
+              "targetId": "00000000-0000-7000-8000-00000000b011"
+            }
+          ],
+          "stepOps": [],
+          "utensilIdsAdded": [],
+          "utensilIdsRemoved": [],
+          "prepMinutes": null,
+          "cookMinutes": null
+        }
+      ],
+      "expectedResolved": {
+        "00000000-0000-7000-8000-00000000d004": {
+          "ingredients": [
+            {
+              "id": "00000000-0000-7000-8000-00000000b012",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a004",
+                "name": "pierś z kurczaka",
+                "category": "meat",
+                "measureKind": "mass",
+                "displayClass": "weight",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": null,
+                "gramsPerPiece": 200,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 500,
+                "unit": "g",
+                "size": null
+              },
+              "baseAmount": 500,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "prepSteps": [],
+          "instructionSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c011",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Zeszklij cebulę, dodaj kurczaka i smaż 15 minut."
+                }
+              ]
+            }
+          ],
+          "utensilIds": [
+            "00000000-0000-7000-8000-00000000e001"
+          ],
+          "prepMinutes": 5,
+          "cookMinutes": 15
+        }
+      },
+      "expectedMatrix": {
+        "recipeId": "00000000-0000-7000-8000-000000002002",
+        "variants": [
+          {
+            "id": "base",
+            "name": "Kurczak z cebulą",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-10-03T08:30:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000d004",
+            "name": "Bez cebuli",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001002",
+              "nickname": "bartek"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-10-05T09:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b011",
+            "label": "cebula",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a001:1",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b011",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a001",
+                    "name": "cebula",
+                    "category": "vegetables",
+                    "measureKind": "count",
+                    "displayClass": "piece",
+                    "hasSizes": true,
+                    "allowHalf": true,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 110,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 1,
+                    "unit": "piece",
+                    "size": "medium"
+                  },
+                  "baseAmount": 1,
+                  "note": "pokrojona w kostkę",
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "00000000-0000-7000-8000-00000000d004"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b012",
+            "label": "pierś z kurczaka",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a004:500",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b012",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a004",
+                    "name": "pierś z kurczaka",
+                    "category": "meat",
+                    "measureKind": "mass",
+                    "displayClass": "weight",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 200,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 500,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 500,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d004"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T00-variant-add-after",
+      "description": "A variant adds an ingredient after a base row; added slots follow the base slots and are keyed by product.",
+      "base": {
+        "recipeId": "00000000-0000-7000-8000-000000002002",
+        "title": "Kurczak z cebulą",
+        "author": {
+          "id": "00000000-0000-7000-8000-000000001001",
+          "nickname": "ania"
+        },
+        "cookCount": 0,
+        "createdAt": "2026-10-03T08:30:00Z",
+        "prepMinutes": 5,
+        "cookMinutes": 15,
+        "utensilIds": [
+          "00000000-0000-7000-8000-00000000e001"
+        ],
+        "ingredients": [
+          {
+            "id": "00000000-0000-7000-8000-00000000b011",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a001",
+              "name": "cebula",
+              "category": "vegetables",
+              "measureKind": "count",
+              "displayClass": "piece",
+              "hasSizes": true,
+              "allowHalf": true,
+              "gramsPerMl": null,
+              "gramsPerPiece": 110,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 1,
+              "unit": "piece",
+              "size": "medium"
+            },
+            "baseAmount": 1,
+            "note": "pokrojona w kostkę",
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b012",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a004",
+              "name": "pierś z kurczaka",
+              "category": "meat",
+              "measureKind": "mass",
+              "displayClass": "weight",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": null,
+              "gramsPerPiece": 200,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 500,
+              "unit": "g",
+              "size": null
+            },
+            "baseAmount": 500,
+            "note": null,
+            "optional": false
+          }
+        ],
+        "prepSteps": [],
+        "instructionSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c011",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Zeszklij cebulę, dodaj kurczaka i smaż 15 minut."
+              }
+            ]
+          }
+        ]
+      },
+      "variants": [
+        {
+          "id": "00000000-0000-7000-8000-00000000d005",
+          "name": "Z papryką",
+          "author": {
+            "id": "00000000-0000-7000-8000-000000001001",
+            "nickname": "ania"
+          },
+          "cookCount": 0,
+          "createdAt": "2026-10-06T18:00:00Z",
+          "ingredientOps": [
+            {
+              "op": "add",
+              "id": "00000000-0000-7000-8000-00000000b901",
+              "afterId": "00000000-0000-7000-8000-00000000b011",
+              "productId": "00000000-0000-7000-8000-00000000a005",
+              "quantity": {
+                "value": 2,
+                "unit": "piece",
+                "size": "large"
+              },
+              "baseAmount": 2.6,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "stepOps": [],
+          "utensilIdsAdded": [],
+          "utensilIdsRemoved": [],
+          "prepMinutes": null,
+          "cookMinutes": null
+        }
+      ],
+      "expectedResolved": {
+        "00000000-0000-7000-8000-00000000d005": {
+          "ingredients": [
+            {
+              "id": "00000000-0000-7000-8000-00000000b011",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a001",
+                "name": "cebula",
+                "category": "vegetables",
+                "measureKind": "count",
+                "displayClass": "piece",
+                "hasSizes": true,
+                "allowHalf": true,
+                "gramsPerMl": null,
+                "gramsPerPiece": 110,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 1,
+                "unit": "piece",
+                "size": "medium"
+              },
+              "baseAmount": 1,
+              "note": "pokrojona w kostkę",
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b901",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a005",
+                "name": "papryka czerwona",
+                "category": "vegetables",
+                "measureKind": "count",
+                "displayClass": "piece",
+                "hasSizes": true,
+                "allowHalf": true,
+                "gramsPerMl": null,
+                "gramsPerPiece": 150,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 2,
+                "unit": "piece",
+                "size": "large"
+              },
+              "baseAmount": 2.6,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b012",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a004",
+                "name": "pierś z kurczaka",
+                "category": "meat",
+                "measureKind": "mass",
+                "displayClass": "weight",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": null,
+                "gramsPerPiece": 200,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 500,
+                "unit": "g",
+                "size": null
+              },
+              "baseAmount": 500,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "prepSteps": [],
+          "instructionSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c011",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Zeszklij cebulę, dodaj kurczaka i smaż 15 minut."
+                }
+              ]
+            }
+          ],
+          "utensilIds": [
+            "00000000-0000-7000-8000-00000000e001"
+          ],
+          "prepMinutes": 5,
+          "cookMinutes": 15
+        }
+      },
+      "expectedMatrix": {
+        "recipeId": "00000000-0000-7000-8000-000000002002",
+        "variants": [
+          {
+            "id": "base",
+            "name": "Kurczak z cebulą",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-10-03T08:30:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000d005",
+            "name": "Z papryką",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-10-06T18:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b011",
+            "label": "cebula",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a001:1",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b011",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a001",
+                    "name": "cebula",
+                    "category": "vegetables",
+                    "measureKind": "count",
+                    "displayClass": "piece",
+                    "hasSizes": true,
+                    "allowHalf": true,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 110,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 1,
+                    "unit": "piece",
+                    "size": "medium"
+                  },
+                  "baseAmount": 1,
+                  "note": "pokrojona w kostkę",
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d005"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b012",
+            "label": "pierś z kurczaka",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a004:500",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b012",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a004",
+                    "name": "pierś z kurczaka",
+                    "category": "meat",
+                    "measureKind": "mass",
+                    "displayClass": "weight",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 200,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 500,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 500,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d005"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:00000000-0000-7000-8000-00000000a005",
+            "label": "papryka czerwona",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "00000000-0000-7000-8000-00000000a005:2.6",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b901",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a005",
+                    "name": "papryka czerwona",
+                    "category": "vegetables",
+                    "measureKind": "count",
+                    "displayClass": "piece",
+                    "hasSizes": true,
+                    "allowHalf": true,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 150,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 2,
+                    "unit": "piece",
+                    "size": "large"
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "00000000-0000-7000-8000-00000000d005"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T00-variant-step-replace-utensils",
+      "description": "A variant replaces a step (text + image), swaps a utensil and overrides the cook time; ingredients are unchanged.",
+      "base": {
+        "recipeId": "00000000-0000-7000-8000-000000002001",
+        "title": "Kurczak w śmietanie",
+        "author": {
+          "id": "00000000-0000-7000-8000-000000001001",
+          "nickname": "ania"
+        },
+        "cookCount": 3,
+        "createdAt": "2026-10-01T10:00:00Z",
+        "prepMinutes": 10,
+        "cookMinutes": 20,
+        "utensilIds": [
+          "00000000-0000-7000-8000-00000000e001"
+        ],
+        "ingredients": [
+          {
+            "id": "00000000-0000-7000-8000-00000000b001",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a004",
+              "name": "pierś z kurczaka",
+              "category": "meat",
+              "measureKind": "mass",
+              "displayClass": "weight",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": null,
+              "gramsPerPiece": 200,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 600,
+              "unit": "g",
+              "size": null
+            },
+            "baseAmount": 600,
+            "note": null,
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b002",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a002",
+              "name": "śmietana 18%",
+              "category": "dairy",
+              "measureKind": "volume",
+              "displayClass": "liquid",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": 1.0,
+              "gramsPerPiece": null,
+              "defaultPackageAmount": 200,
+              "pieceForms": null
+            },
+            "quantity": {
+              "value": 200,
+              "unit": "ml",
+              "size": null
+            },
+            "baseAmount": 200,
+            "note": null,
+            "optional": false
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000b003",
+            "product": {
+              "id": "00000000-0000-7000-8000-00000000a006",
+              "name": "sól",
+              "category": "spices",
+              "measureKind": "volume",
+              "displayClass": "spice",
+              "hasSizes": false,
+              "allowHalf": false,
+              "gramsPerMl": 1.2,
+              "gramsPerPiece": null,
+              "defaultPackageAmount": null,
+              "pieceForms": null
+            },
+            "quantity": null,
+            "baseAmount": null,
+            "note": null,
+            "optional": false
+          }
+        ],
+        "prepSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c001",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Pokrój kurczaka w kostkę."
+              }
+            ]
+          }
+        ],
+        "instructionSteps": [
+          {
+            "id": "00000000-0000-7000-8000-00000000c002",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Usmaż kurczaka na złoto."
+              }
+            ]
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000c003",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "Dodaj śmietanę i duś 10 minut."
+              }
+            ]
+          }
+        ]
+      },
+      "variants": [
+        {
+          "id": "00000000-0000-7000-8000-00000000d006",
+          "name": "Z piekarnika",
+          "author": {
+            "id": "00000000-0000-7000-8000-000000001002",
+            "nickname": "bartek"
+          },
+          "cookCount": 2,
+          "createdAt": "2026-10-07T07:45:00Z",
+          "ingredientOps": [],
+          "stepOps": [
+            {
+              "op": "replace",
+              "section": "instructions",
+              "targetId": "00000000-0000-7000-8000-00000000c003",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Przełóż do naczynia żaroodpornego, zalej śmietaną i piecz 20 minut w 180°C."
+                },
+                {
+                  "type": "image",
+                  "imageId": "00000000-0000-7000-8000-00000000f001",
+                  "caption": "Przed pieczeniem"
+                }
+              ]
+            }
+          ],
+          "utensilIdsAdded": [
+            "00000000-0000-7000-8000-00000000e002"
+          ],
+          "utensilIdsRemoved": [
+            "00000000-0000-7000-8000-00000000e001"
+          ],
+          "prepMinutes": null,
+          "cookMinutes": 30
+        }
+      ],
+      "expectedResolved": {
+        "00000000-0000-7000-8000-00000000d006": {
+          "ingredients": [
+            {
+              "id": "00000000-0000-7000-8000-00000000b001",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a004",
+                "name": "pierś z kurczaka",
+                "category": "meat",
+                "measureKind": "mass",
+                "displayClass": "weight",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": null,
+                "gramsPerPiece": 200,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 600,
+                "unit": "g",
+                "size": null
+              },
+              "baseAmount": 600,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b002",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a002",
+                "name": "śmietana 18%",
+                "category": "dairy",
+                "measureKind": "volume",
+                "displayClass": "liquid",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": 1.0,
+                "gramsPerPiece": null,
+                "defaultPackageAmount": 200,
+                "pieceForms": null
+              },
+              "quantity": {
+                "value": 200,
+                "unit": "ml",
+                "size": null
+              },
+              "baseAmount": 200,
+              "note": null,
+              "optional": false
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000b003",
+              "product": {
+                "id": "00000000-0000-7000-8000-00000000a006",
+                "name": "sól",
+                "category": "spices",
+                "measureKind": "volume",
+                "displayClass": "spice",
+                "hasSizes": false,
+                "allowHalf": false,
+                "gramsPerMl": 1.2,
+                "gramsPerPiece": null,
+                "defaultPackageAmount": null,
+                "pieceForms": null
+              },
+              "quantity": null,
+              "baseAmount": null,
+              "note": null,
+              "optional": false
+            }
+          ],
+          "prepSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c001",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Pokrój kurczaka w kostkę."
+                }
+              ]
+            }
+          ],
+          "instructionSteps": [
+            {
+              "id": "00000000-0000-7000-8000-00000000c002",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Usmaż kurczaka na złoto."
+                }
+              ]
+            },
+            {
+              "id": "00000000-0000-7000-8000-00000000c003",
+              "blocks": [
+                {
+                  "type": "text",
+                  "text": "Przełóż do naczynia żaroodpornego, zalej śmietaną i piecz 20 minut w 180°C."
+                },
+                {
+                  "type": "image",
+                  "imageId": "00000000-0000-7000-8000-00000000f001",
+                  "caption": "Przed pieczeniem"
+                }
+              ]
+            }
+          ],
+          "utensilIds": [
+            "00000000-0000-7000-8000-00000000e002"
+          ],
+          "prepMinutes": 10,
+          "cookMinutes": 30
+        }
+      },
+      "expectedMatrix": {
+        "recipeId": "00000000-0000-7000-8000-000000002001",
+        "variants": [
+          {
+            "id": "base",
+            "name": "Kurczak w śmietanie",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001001",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-10-01T10:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "00000000-0000-7000-8000-00000000d006",
+            "name": "Z piekarnika",
+            "author": {
+              "id": "00000000-0000-7000-8000-000000001002",
+              "nickname": "bartek"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-10-07T07:45:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b001",
+            "label": "pierś z kurczaka",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a004:600",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b001",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a004",
+                    "name": "pierś z kurczaka",
+                    "category": "meat",
+                    "measureKind": "mass",
+                    "displayClass": "weight",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": null,
+                    "gramsPerPiece": 200,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d006"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b002",
+            "label": "śmietana 18%",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a002:200",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b002",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a002",
+                    "name": "śmietana 18%",
+                    "category": "dairy",
+                    "measureKind": "volume",
+                    "displayClass": "liquid",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.0,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": 200,
+                    "pieceForms": null
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "ml",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d006"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:00000000-0000-7000-8000-00000000b003",
+            "label": "sól",
+            "options": [
+              {
+                "key": "00000000-0000-7000-8000-00000000a006:x",
+                "ingredient": {
+                  "id": "00000000-0000-7000-8000-00000000b003",
+                  "product": {
+                    "id": "00000000-0000-7000-8000-00000000a006",
+                    "name": "sól",
+                    "category": "spices",
+                    "measureKind": "volume",
+                    "displayClass": "spice",
+                    "hasSizes": false,
+                    "allowHalf": false,
+                    "gramsPerMl": 1.2,
+                    "gramsPerPiece": null,
+                    "defaultPackageAmount": null,
+                    "pieceForms": null
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "00000000-0000-7000-8000-00000000d006"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
