@@ -15,7 +15,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| T00 | 0 | running | task/T00-foundation | |
+| T00 | 0 | blocked | task/T00-foundation | paused 2026-10-23 (token budget): 6 commits on branch, 8 uncommitted files in worktree .claude/worktrees/agent-a21934c230a63d13f; was writing the integration test harness; no Report, verify.sh not run |
 | B1 | 1 | todo | | |
 | B2 | 2 | todo | | |
 | B3 | 3 | todo | | |
