@@ -39,6 +39,8 @@ type MatchCase = {
 const variantCases = loadCases<VariantCase>('variants');
 const matchCases = loadCases<MatchCase>('matching');
 
+const optionsOf = (r: MatchResult, slot: string) => r.options[slot] ?? [];
+
 function deepFreeze<T>(value: T): T {
 	if (value && typeof value === 'object' && !Object.isFrozen(value)) {
 		Object.freeze(value);
@@ -74,19 +76,21 @@ describe('test vectors (matching/*.json)', () => {
 			for (const [slot, pick] of Object.entries(e.picks ?? {}))
 				expect(result.picks[slot], `pick ${slot}`).toEqual(pick);
 			for (const slot of e.absentPickSlots ?? []) expect(result.picks).not.toHaveProperty(slot);
-			if (e.ingredientIds)
-				expect(result.ingredients.map((i) => i.id)).toEqual(e.ingredientIds);
+			if (e.ingredientIds) expect(result.ingredients.map((i) => i.id)).toEqual(e.ingredientIds);
 			for (const [slot, keys] of Object.entries(e.optionOrder ?? {}))
-				expect(result.options[slot].map((o) => o.option.key), `order ${slot}`).toEqual(keys);
+				expect(
+					optionsOf(result, slot).map((o) => o.option.key),
+					`order ${slot}`
+				).toEqual(keys);
 			for (const [slot, flags] of Object.entries(e.optionCompatible ?? {}))
-				expect(result.options[slot].map((o) => o.compatible)).toEqual(flags);
+				expect(optionsOf(result, slot).map((o) => o.compatible)).toEqual(flags);
 			for (const [slot, counts] of Object.entries(e.optionSupport ?? {}))
-				expect(result.options[slot].map((o) => o.supportCount)).toEqual(counts);
+				expect(optionsOf(result, slot).map((o) => o.supportCount)).toEqual(counts);
 			for (const [slot, pick] of Object.entries(e.selected ?? {})) {
-				const selected = result.options[slot].filter((o) => o.selected);
+				const selected = optionsOf(result, slot).filter((o) => o.selected);
 				expect(selected).toHaveLength(1);
-				expect(selected[0].option.key).toBe(pick.optionKey);
-				expect(selected[0].source).toBe(pick.source);
+				expect(selected[0]?.option.key).toBe(pick.optionKey);
+				expect(selected[0]?.source).toBe(pick.source);
 			}
 		});
 	});
@@ -102,11 +106,11 @@ describe('invariants over every variants/*.json matrix', () => {
 		expect(Object.keys(result.picks)).toEqual(matrix.slots.map((s) => s.key));
 		expect(matrix.variants.map((v) => v.id)).toContain(result.bestVariantId);
 		for (const slot of matrix.slots) {
-			expect(result.options[slot.key]).toHaveLength(slot.options.length);
-			expect(result.options[slot.key].filter((o) => o.selected)).toHaveLength(1);
+			expect(optionsOf(result, slot.key)).toHaveLength(slot.options.length);
+			expect(optionsOf(result, slot.key).filter((o) => o.selected)).toHaveLength(1);
 			// Auto picks are exactly the best variant's option in every slot.
 			const own = slot.options.find((o) => o.variantIds.includes(result.bestVariantId));
-			expect(result.picks[slot.key].optionKey).toBe(own?.key);
+			expect(result.picks[slot.key]?.optionKey).toBe(own?.key);
 		}
 		// Pinning each variant's own options reproduces that variant.
 		for (const variant of matrix.variants) {
@@ -215,7 +219,7 @@ describe('pin and clearUserPicks', () => {
 			a: { optionKey: 'a2', source: 'user' },
 			b: { optionKey: 'b1', source: 'user' }
 		});
-		expect(picks.a.source).toBe('auto');
+		expect(picks.a?.source).toBe('auto');
 	});
 
 	it('pin adds a new slot', () => {
@@ -314,8 +318,8 @@ describe('performance', () => {
 		});
 		const matrix = deepFreeze({ recipeId: 'r', variants, slots }) as unknown as VariantMatrix;
 		const picks = deepFreeze({
-			'i:3': { optionKey: slots[3].options[0].key, source: 'user' },
-			'i:7': { optionKey: slots[7].options[0].key, source: 'auto' }
+			'i:3': { optionKey: slots[3]?.options[0]?.key, source: 'user' },
+			'i:7': { optionKey: slots[7]?.options[0]?.key, source: 'auto' }
 		} as Record<string, Pick>);
 
 		matchVariants({ matrix, picks, preferences: [] }); // warm up

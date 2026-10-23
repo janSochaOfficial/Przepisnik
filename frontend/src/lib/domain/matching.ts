@@ -133,13 +133,20 @@ export function matchVariants(input: MatchInput): MatchResult {
 	const picks: Record<string, Pick> = {};
 	const options: Record<string, RankedOption[]> = {};
 	for (const slot of matrix.slots) {
-		const pinned = validPicks[slot.key]?.source === 'user' ? validPicks[slot.key] : undefined;
-		const optionKey =
-			pinned?.optionKey ??
-			index.get(slot.key)?.get(bestVariantId) ??
-			validPicks[slot.key]?.optionKey ??
-			slot.options[0].key;
-		picks[slot.key] = pinned ?? { optionKey, source: 'auto' };
+		const remembered = validPicks[slot.key];
+		const pick: Pick =
+			remembered?.source === 'user'
+				? remembered
+				: {
+						optionKey:
+							index.get(slot.key)?.get(bestVariantId) ??
+							remembered?.optionKey ??
+							slot.options[0]?.key ??
+							NONE_KEY,
+						source: 'auto'
+					};
+		const optionKey = pick.optionKey;
+		picks[slot.key] = pick;
 
 		const ranked = slot.options.map((option, position) => ({
 			position,
@@ -148,7 +155,7 @@ export function matchVariants(input: MatchInput): MatchResult {
 				compatible: option.variantIds.some((id) => compatibleIds.has(id)),
 				supportCount: option.variantIds.length,
 				selected: option.key === optionKey,
-				...(option.key === optionKey ? { source: picks[slot.key].source } : {})
+				...(option.key === optionKey ? { source: pick.source } : {})
 			} satisfies RankedOption
 		}));
 		ranked.sort(
@@ -168,7 +175,7 @@ export function matchVariants(input: MatchInput): MatchResult {
 	];
 	const ingredients: Ingredient[] = [];
 	for (const slot of ordered) {
-		const chosen = slot.options.find((o) => o.key === picks[slot.key].optionKey);
+		const chosen = slot.options.find((o) => o.key === picks[slot.key]?.optionKey);
 		if (chosen && chosen.key !== NONE_KEY && chosen.ingredient) ingredients.push(chosen.ingredient);
 	}
 
