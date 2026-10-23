@@ -15,7 +15,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| T00 | 0 | todo | | |
+| T00 | 0 | running | task/T00-foundation | |
 | B1 | 1 | todo | | |
 | B2 | 2 | todo | | |
 | B3 | 3 | todo | | |
