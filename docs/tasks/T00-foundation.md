@@ -78,3 +78,25 @@ Create the skeleton that every other task builds on. Afterwards both apps build 
 
 ## Out of scope
 Feature logic beyond dev-login, `QuantityConverter` and `NameNormalizer`; visual design (F0).
+
+## Progress notes (work in progress, NOT the final Report)
+
+Paused on user request on branch `task/T00-foundation` (worktree `.claude/worktrees/agent-a21934c230a63d13f`). All work is committed; the tree is clean.
+
+### Done and green
+- Repo basics (`.gitignore`, `.editorconfig`, `.nvmrc`), `deploy/compose.dev.yaml` (host port via `POSTGRES_PORT`, default 5432 — a system PostgreSQL 14 already listens on 5432 on this machine, so local runs used `POSTGRES_PORT=5433`), `deploy/.env.example`.
+- Backend: solution, all entities, configurations, migration `0001_Initial` (applies cleanly), `NameNormalizer`, `QuantityConverter`, `VisibilityRules`, domain exceptions, `IImageStorage`/`IVariantEngine` + NotImplemented placeholders, Program.cs (ProblemDetails + exception handler, CSRF middleware, cookie auth, onboarding gate, rate limits, health, OpenAPI, `Database:MigrateOnStartup`, `API_PORT`/.env.local), one `*Feature.cs` per feature with 501 stubs; working dev-login, `/auth/config`, `/auth/logout`, minimal `GET /me`.
+- Backend tests: `dotnet test` (Microsoft.Testing.Platform, set in `backend/global.json`) → 97 passed; `dotnet test --filter-not-trait "Category=Migrations"` → 95. `dotnet format --verify-no-changes` and `dotnet build` (0 warnings) clean.
+- Contract: `docs/api/openapi.yaml` + `docs/api/redocly.yaml`; `npm run lint:api` clean; `schema.d.ts` generated and committed.
+- Shared: vectors (quantities 34, formatting 66, variants 5, empty matching), schemas in `shared/test-vectors/schemas/`, seed files + schemas; `npm run validate:shared` OK.
+- Frontend: SvelteKit 2.70 / Svelte 5 / TS 5.9 / Vite 8, all §4.5 deps pinned; `npm run check`, `npm run lint`, `npm test` (28), `npm run test:integration` (6, mobile + desktop) green; `node scripts/svelte-autofix.mjs` clean on every .svelte file.
+
+### Remaining
+1. `scripts/verify.sh` (plan §4.6): `--agent` / full / `--e2e` placeholder, `set -euo pipefail`, step names, paths relative to the script; steps: dotnet format verify, dotnet build, dotnet test (agent: `--filter-not-trait "Category=Migrations"`), `npm run lint:api` + `npm run gen:api` + `git diff --exit-code frontend/src/lib/api/schema.d.ts`, `npm run check/lint/test`, `npm run test:integration`, `npm run validate:shared`. Run `npm ci` only when node_modules is missing/stale. Must not depend on the machine-specific cache variables.
+2. Root `README.md` (quick start; optional `NUGET_PACKAGES` / `PLAYWRIGHT_BROWSERS_PATH` / `npm_config_cache` exports; `POSTGRES_PORT` note; `npx playwright install chromium`).
+3. Manual acceptance checks: dev-login end to end through the Vite dev server against a running API; two stacks with different ports at the same time.
+4. `git rebase main`, full `scripts/verify.sh` green, then append the final `## Report` (Summary, Deviations, Model changes, Contract changes, Dependencies added, Requests for other tasks, Follow-ups) and commit. Do not edit `docs/COORDINATOR.md`.
+
+### Points for the Report (decided so far)
+- Deviations: Core references the base `Microsoft.EntityFrameworkCore` package (plan §5.1 `IAppDbContext` exposes `DbSet<T>`; TECHNICAL §3.1 says no EF in Core). C# enum is `VisibilityLevel` (namespace clash with `Core.Visibility`). Archived recipes in `VisibleRecipes`: author, or a variant author who could otherwise see it. Stored variant ops carry a server-computed `baseAmount`. Dev cookie is `rl_session` (no `__Host-` prefix over http in Development). `dotnet test` uses Microsoft.Testing.Platform (xunit.v3 4.x requires it); `xunit.runner.visualstudio`/`Microsoft.NET.Test.Sdk` not used. SvelteKit 2 / TypeScript 5.9 pinned instead of the newer Kit 3 / TS 7 (spec says Kit 2; tooling compatibility). Formatting vectors: `text` excludes `~`. Quantity converter: size ignored when the product has no sizes; base amounts rounded to 4 decimals. `/auth/config` and `/auth/logout` also use the `auth` rate limit. T00 implemented minimal `GET /me`/logout/config (B1 owns and may replace).
+- Contract changes: new codes `auth.required`, `request.not_found`, `request.forbidden`, `request.invalid` (+ client-only `network.error` in errors.ts); dev-login errors 400/409; option-key amount format clarified (invariant, no trailing zeros).
