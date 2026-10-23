@@ -79,24 +79,55 @@ Create the skeleton that every other task builds on. Afterwards both apps build 
 ## Out of scope
 Feature logic beyond dev-login, `QuantityConverter` and `NameNormalizer`; visual design (F0).
 
-## Progress notes (work in progress, NOT the final Report)
+## Report
 
-Paused on user request on branch `task/T00-foundation` (worktree `.claude/worktrees/agent-a21934c230a63d13f`). All work is committed; the tree is clean.
+### Summary
+Everything listed under Deliverables is done, on branch `task/T00-foundation`, rebased onto `main`.
+- **Repository:** `.gitignore`, `.editorconfig`, `.nvmrc` (24), and a root `README.md` (quick start, ports, the quality gate, optional cache variables). The layout follows TECHNICAL §2.
+- **Contract:** `docs/api/openapi.yaml` (OpenAPI 3.1, every path in API.md) plus `docs/api/redocly.yaml`. `npm run lint:api` is clean, and `frontend/src/lib/api/schema.d.ts` is generated and committed.
+- **Backend:** `RecipesList.slnx` (3 src + 2 test projects), central package management, and warnings as errors. It has every entity with one EF configuration per entity, snake_case naming, `pg_trgm` + `unaccent`, and migration `0001_Initial` (it applies cleanly and `MigrationsAreInSync` is green). Implemented: `NameNormalizer`, `QuantityConverter`, `VisibilityRules` (single-query visibility with an `EXISTS` over `fridge_members`, index `fridge_members(user_id, fridge_id)`, and the 3 × 3 matrix tests). `IImageStorage` and `IVariantEngine` have NotImplemented placeholders. `Program.cs` has ProblemDetails with the exception handler, the CSRF middleware, cookie auth, the onboarding gate, rate limits, health/ready, OpenAPI, `Database:MigrateOnStartup`, and `API_PORT` / `.env.local`. There is one `*Feature.cs` per feature with 501 stubs, plus a working dev-login, `/auth/config`, `/auth/logout` and a minimal `GET /me`.
+- **Backend tests:** 58 unit tests and 39 integration tests (Testcontainers Postgres 18, `EnsureCreated` + Respawn, `ApiClient.LoginAsync`, `ContractAssert` against `openapi.yaml`).
+- **Shared:** test vectors (quantities 34, formatting 66, variants 5, and an empty `matching/`) with one schema per kind, and directory loaders in C# and TS that fail on duplicate ids. The seed files (`szybkie` tag only) have schemas. `npm run validate:shared` checks all of them.
+- **Frontend:** SvelteKit 2 + Svelte 5 + TS strict, adapter-static SPA, Tailwind 4, and every dependency from §4.5, pinned. It has the typed client with error mapping, `i18n/pl/` (with a test that `errors.ts` covers every API.md §9 code) and a guard against Polish literals outside `i18n/pl/`. Every route is a placeholder; the root layout has nav and an auth guard; the domain stubs match plan §5.2. Also in place: `mockApi` + per-feature fixtures, and the smoke test (mobile + desktop). Ports come from the environment or `.env.local`.
+- **Tooling:** `deploy/compose.dev.yaml` (postgres:18) and `deploy/.env.example`. `scripts/verify.sh` follows plan §4.6: `--agent`, full by default, and an `--e2e` placeholder. It uses `set -euo pipefail`, prints a named step before each step, names the failing step, uses paths relative to the script, and runs `npm ci` only when `node_modules` is missing or older than the lockfile.
+- **Acceptance, verified after rebasing onto `main`:**
+  - Full `scripts/verify.sh` is green, run from outside the repo (all 97 backend tests, 28 Vitest, 6 Playwright), including the `npm ci` path.
+  - Manual check: two stacks ran at the same time, API 5100 + web 5200 and API 5190 + web 5290, each with its own database (`recipes_t00`, `recipes_t00b`). Both migrated on startup.
+  - Through each Vite proxy: `/api/v1/auth/config` answered `devLoginEnabled: true`, `/me` answered 401 `auth.required`, and dev-login without the header answered 400 `request.missing_csrf_header`. Dev-login with the header answered 200 and `/me` then answered 200.
+  - In a real browser (Playwright), `/przepisy` redirected to `/logowanie`, the dev-login form logged in and landed back on `/przepisy`, and `/me` returned the new nickname, on both stacks. The only console error was the expected 401 before login.
+  - All servers were stopped afterwards and `recipes_t00b` was dropped. The dev Postgres container was already running and was left running.
 
-### Done and green
-- Repo basics (`.gitignore`, `.editorconfig`, `.nvmrc`), `deploy/compose.dev.yaml` (host port via `POSTGRES_PORT`, default 5432 — a system PostgreSQL 14 already listens on 5432 on this machine, so local runs used `POSTGRES_PORT=5433`), `deploy/.env.example`.
-- Backend: solution, all entities, configurations, migration `0001_Initial` (applies cleanly), `NameNormalizer`, `QuantityConverter`, `VisibilityRules`, domain exceptions, `IImageStorage`/`IVariantEngine` + NotImplemented placeholders, Program.cs (ProblemDetails + exception handler, CSRF middleware, cookie auth, onboarding gate, rate limits, health, OpenAPI, `Database:MigrateOnStartup`, `API_PORT`/.env.local), one `*Feature.cs` per feature with 501 stubs; working dev-login, `/auth/config`, `/auth/logout`, minimal `GET /me`.
-- Backend tests: `dotnet test` (Microsoft.Testing.Platform, set in `backend/global.json`) → 97 passed; `dotnet test --filter-not-trait "Category=Migrations"` → 95. `dotnet format --verify-no-changes` and `dotnet build` (0 warnings) clean.
-- Contract: `docs/api/openapi.yaml` + `docs/api/redocly.yaml`; `npm run lint:api` clean; `schema.d.ts` generated and committed.
-- Shared: vectors (quantities 34, formatting 66, variants 5, empty matching), schemas in `shared/test-vectors/schemas/`, seed files + schemas; `npm run validate:shared` OK.
-- Frontend: SvelteKit 2.70 / Svelte 5 / TS 5.9 / Vite 8, all §4.5 deps pinned; `npm run check`, `npm run lint`, `npm test` (28), `npm run test:integration` (6, mobile + desktop) green; `node scripts/svelte-autofix.mjs` clean on every .svelte file.
+### Deviations
+- **Accepted by coordinator:** Core references the base `Microsoft.EntityFrameworkCore` package (no provider and no Design package). The fixed `IAppDbContext` (plan §5.1) exposes `DbSet<T>`, while TECHNICAL §3.1 says there is no EF in Core.
+- **Accepted by coordinator:** the error codes `auth.required`, `request.not_found`, `request.forbidden` and `request.invalid` are added. They are in API.md §9 and are now also named in `openapi.yaml` (the `ProblemDetails.code` description and the shared 400/403/404 responses). `network.error` is client-only (`errors.ts`) and is not in the contract.
+- **Accepted by coordinator:** `deploy/compose.dev.yaml` takes the host port from `POSTGRES_PORT` (default 5432). This is documented in the README and in `deploy/.env.example`.
+- **Test runner is VSTest, not Microsoft.Testing.Platform.** The coordinator accepted MTP on the condition that plain `dotnet test backend` works from the repo root. That cannot hold with MTP on the .NET 10 SDK. The MTP mode of `dotnet test` rejects a positional directory ("should be via '--project' or '--solution'"), and it is opted into through the nearest `global.json`, which a run from the root does not find. I took the conservative option that keeps the documented commands working: the test projects use `xunit.runner.visualstudio` + `Microsoft.NET.Test.Sdk` with `IsTestingPlatformApplication=false`, and the `test.runner` entry is removed from `backend/global.json`. The commands `dotnet test backend` (root), `cd backend && dotnet test`, and `dotnet test --filter "Category!=Migrations"` (agent mode) all work. The MTP flag `--filter-not-trait` therefore does not exist. Agents use the VSTest filter, as `scripts/verify.sh --agent` does.
+- **`scripts/verify.sh --e2e`** stops right away with "added by T90" instead of running the full gate first. The E2E suite does not exist yet.
+- The C# enum is named `VisibilityLevel`, because `Visibility` clashes with the `Core.Visibility` namespace.
+- **Archived recipes in `VisibleRecipes`:** visible to the author, and to a variant author who could otherwise see the recipe.
+- Stored variant ops carry a server-computed `baseAmount`.
+- The dev session cookie is `rl_session`. The `__Host-` prefix cannot be used over http in Development.
+- SvelteKit 2 and TypeScript 5.9 are pinned instead of the newer Kit 3 / TS 7: the spec says Kit 2, and the tooling must be compatible.
+- **Formatting vectors:** `text` excludes `~`.
+- **Quantity converter:** the size is ignored when the product has no sizes, and base amounts are rounded to 4 decimals.
+- `/auth/config` and `/auth/logout` also use the `auth` rate-limit policy.
+- T00 implemented minimal `GET /me`, `/auth/logout` and `/auth/config`. B1 owns them and may replace them.
 
-### Remaining
-1. `scripts/verify.sh` (plan §4.6): `--agent` / full / `--e2e` placeholder, `set -euo pipefail`, step names, paths relative to the script; steps: dotnet format verify, dotnet build, dotnet test (agent: `--filter-not-trait "Category=Migrations"`), `npm run lint:api` + `npm run gen:api` + `git diff --exit-code frontend/src/lib/api/schema.d.ts`, `npm run check/lint/test`, `npm run test:integration`, `npm run validate:shared`. Run `npm ci` only when node_modules is missing/stale. Must not depend on the machine-specific cache variables.
-2. Root `README.md` (quick start; optional `NUGET_PACKAGES` / `PLAYWRIGHT_BROWSERS_PATH` / `npm_config_cache` exports; `POSTGRES_PORT` note; `npx playwright install chromium`).
-3. Manual acceptance checks: dev-login end to end through the Vite dev server against a running API; two stacks with different ports at the same time.
-4. `git rebase main`, full `scripts/verify.sh` green, then append the final `## Report` (Summary, Deviations, Model changes, Contract changes, Dependencies added, Requests for other tasks, Follow-ups) and commit. Do not edit `docs/COORDINATOR.md`.
+### Model changes
+None beyond the initial model. `0001_Initial` contains the full model from this task file.
 
-### Points for the Report (decided so far)
-- Deviations: Core references the base `Microsoft.EntityFrameworkCore` package (plan §5.1 `IAppDbContext` exposes `DbSet<T>`; TECHNICAL §3.1 says no EF in Core). C# enum is `VisibilityLevel` (namespace clash with `Core.Visibility`). Archived recipes in `VisibleRecipes`: author, or a variant author who could otherwise see it. Stored variant ops carry a server-computed `baseAmount`. Dev cookie is `rl_session` (no `__Host-` prefix over http in Development). `dotnet test` uses Microsoft.Testing.Platform (xunit.v3 4.x requires it); `xunit.runner.visualstudio`/`Microsoft.NET.Test.Sdk` not used. SvelteKit 2 / TypeScript 5.9 pinned instead of the newer Kit 3 / TS 7 (spec says Kit 2; tooling compatibility). Formatting vectors: `text` excludes `~`. Quantity converter: size ignored when the product has no sizes; base amounts rounded to 4 decimals. `/auth/config` and `/auth/logout` also use the `auth` rate limit. T00 implemented minimal `GET /me`/logout/config (B1 owns and may replace).
-- Contract changes: new codes `auth.required`, `request.not_found`, `request.forbidden`, `request.invalid` (+ client-only `network.error` in errors.ts); dev-login errors 400/409; option-key amount format clarified (invariant, no trailing zeros).
+### Contract changes
+- The generic error codes listed above are in both API.md §9 and `openapi.yaml`.
+- `POST /auth/dev-login` errors: 400 `nickname.invalid`, 409 `nickname.taken`.
+- The option-key amount format is clarified: invariant culture, with no trailing zeros.
+
+### Dependencies added
+Everything in plan §4.5, installed up front. In addition, beyond the list: `Microsoft.NET.Test.Sdk` 18.11.0 and `xunit.runner.visualstudio` 4.0.1 (the VSTest runner, see Deviations), and the base `Microsoft.EntityFrameworkCore` in Core.
+
+### Requests for other tasks
+- **B1:** may replace the minimal `GET /me`, `/auth/logout` and `/auth/config` implemented here, keeping the contract.
+- **T90:** wire the `--e2e` mode of `scripts/verify.sh` to the compose stack and `tests/e2e`.
+
+### Follow-ups
+- **Coordinator:** set T00 to `merged` in `docs/COORDINATOR.md` after merging. This task did not edit that file.
+- Two `dotnet run` processes from the **same** checkout race on the build output (static web assets cache). For a second stack in one checkout, use `dotnet run --no-build`. Separate worktrees are not affected.
