@@ -15,23 +15,23 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| T00 | 0 | running | task/T00-foundation | resumed 2026-10-24 in worktree .claude/worktrees/agent-a21934c230a63d13f from d4b7063 (left: verify.sh, README, manual checks, rebase, Report) |
-| B1 | 1 | todo | | |
+| T00 | 0 | merged | task/T00-foundation | merged 2026-10-24, full verify green (97 backend, 28 vitest, 6 playwright). Tests run on VSTest (MTP cannot run `dotnet test backend`); agent filter `--filter "Category!=Migrations"` |
+| B1 | 1 | todo | | may replace T00's minimal `GET /me`, `/auth/logout`, `/auth/config` (keep the contract) |
 | B2 | 2 | todo | | |
-| B3 | 3 | todo | | |
-| B4 | 4 | todo | | |
+| B3 | 3 | running | task/B3-recipes-images | sonnet/medium |
+| B4 | 4 | running | task/B4-variants | opus/medium |
 | B5 | 5 | todo | | |
 | S1 | 8 | todo | | |
-| F0 | 10 | todo | | |
-| F1 | 11 | todo | | |
-| F2 | 12 | todo | | |
+| F0 | 10 | running | task/F0-design-system | opus/medium |
+| F1 | 11 | running | task/F1-quantities-lib | sonnet/medium |
+| F2 | 12 | running | task/F2-matching-lib | sonnet/medium |
 | B6 | 6 | todo | | needs B3, B4 |
 | B7 | 7 | todo | | needs B3, B4 |
 | F3 | 13 | todo | | needs F0 |
 | F4 | 14 | todo | | needs F0, F1 |
 | F5 | 15 | todo | | needs F0, F1, F2 |
 | F6 | 16 | todo | | needs F0, F1 |
-| T90 | 0 | todo | | needs all |
+| T90 | 0 | todo | | needs all. Wire `verify.sh --e2e` (T00 left a placeholder); document `dotnet run --no-build` for a second API from the same checkout |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
