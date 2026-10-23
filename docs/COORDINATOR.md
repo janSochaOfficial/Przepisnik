@@ -18,7 +18,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 | T00 | 0 | merged | task/T00-foundation | merged 2026-10-24, full verify green (97 backend, 28 vitest, 6 playwright). Tests run on VSTest (MTP cannot run `dotnet test backend`); agent filter `--filter "Category!=Migrations"` |
 | B1 | 1 | todo | | may replace T00's minimal `GET /me`, `/auth/logout`, `/auth/config` (keep the contract) |
 | B2 | 2 | todo | | |
-| B3 | 3 | merged | task/B3-recipes-images | merged 2026-10-24 (+ coordinator: 400 for invalid image `size` documented). OPEN (asked user): editing an archived recipe with `deleteVariants: true` clears `IsArchived`. Follow-ups: B4 `DropStalePicksAsync` could take a set of ids (B3 uses TransactionScope + two saves); recipe/variant DTO duplication (`RecipeProductRefDto`/`VariantProductRef`, `UserRefDto`/`VariantUserRef`) |
+| B3 | 3 | merged | task/B3-recipes-images | merged 2026-10-24 (+ coordinator: 400 for invalid image `size` documented). User decided D-27: archived recipes are read-only (PUT and PUT /visibility → 409 `recipe.archived`, `canEdit` false); fixed on main. Follow-ups: B4 `DropStalePicksAsync` could take a set of ids (B3 uses TransactionScope + two saves); recipe/variant DTO duplication (`RecipeProductRefDto`/`VariantProductRef`, `UserRefDto`/`VariantUserRef`) |
 | B4 | 4 | merged | task/B4-variants | merged 2026-10-24. Contract: optional `Slot.afterSlotKey` (vector schema updated on main). Follow-up: concurrent duplicate variant name gives 500 not 409 |
 | B5 | 5 | todo | | |
 | S1 | 8 | todo | | |
@@ -28,7 +28,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 | B6 | 6 | todo | | needs B3, B4 (merged). Import can reuse `RecipeService.CreateAsync` |
 | B7 | 7 | todo | | needs B3, B4 (merged). Reuse `VariantQueries.ToSummaryRows` and `VariantSummaryResponse.From` for variant entries in `/favorites`. Repoint the two `AuthFoundationTests` that use `GET /favorites` as a 501 stub once favourites are real |
 | F3 | 13 | todo | | needs F0 (merged). Rebuild `/logowanie` and `/witaj` with F0 components, then drop legacy colour names (`text`, `accent`, `border`) from app.css; toasts on those pages sit above a missing tab bar |
-| F4 | 14 | todo | | needs F0, F1 (merged) |
+| F4 | 14 | todo | | needs F0, F1 (merged). Archived recipes are read-only (D-27): hide edit for `canEdit: false`, map 409 `recipe.archived` |
 | F5 | 15 | todo | | needs F0, F1, F2 (merged). Decide how to show a custom mix: every `RankedOption.compatible` is false there; `supportCount` counts all variants. Added slots follow base rows unless B4 ships `afterSlotKey` |
 | F6 | 16 | todo | | needs F0, F1 (merged). Use F1 `context: 'inventory'` for fridge, shopping list and deduction dialog; show `~` when `approximate` |
 | T90 | 0 | todo | | needs all. F3–F6 start every screen with `<Page>` (DESIGN.md §10–12); `PagePlaceholder` has no `Page` wrapper (replace or wrap). No dropdown-menu primitive yet. Wire `verify.sh --e2e` (T00 left a placeholder); document `dotnet run --no-build` for a second API from the same checkout |
