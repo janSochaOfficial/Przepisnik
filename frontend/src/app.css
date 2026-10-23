@@ -1,39 +1,211 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/literata/index.css';
+@import '@fontsource-variable/atkinson-hyperlegible-next/index.css';
 
 /*
- * Placeholder tokens. F0 owns this file and replaces them with the design system (frontend/DESIGN.md).
- * Tailwind theme values reference the CSS custom properties (TECHNICAL §4.3).
+ * Design tokens of Przepiśnik ("Bolesławiec" direction). frontend/DESIGN.md explains every value;
+ * change a token there first, then here. Components use the Tailwind names (bg-paper, text-ink,
+ * rounded-control …), never raw hex values.
  */
 :root {
+	color-scheme: light;
+
+	/* Palette (light): stoneware, ink, cobalt, dill, beet. */
+	--rl-paper: #eef1f0;
 	--rl-surface: #ffffff;
-	--rl-text: #1f2328;
-	--rl-muted: #59636e;
-	--rl-accent: #2f5d50;
-	--rl-border: #d1d9e0;
-	color-scheme: light dark;
+	--rl-sunken: #e3e8e7;
+	--rl-ink: #1b2333;
+	--rl-muted: #4f5a6b;
+	--rl-line: #c3cbd2;
+	--rl-line-strong: #737e8d;
+	--rl-cobalt: #1f4fa8;
+	--rl-cobalt-strong: #173d85;
+	--rl-on-cobalt: #ffffff;
+	--rl-cobalt-wash: #dfe7f6;
+	--rl-dill: #2e6a3a;
+	--rl-dill-wash: #ddeedf;
+	--rl-beet: #a3214a;
+	--rl-beet-strong: #85193b;
+	--rl-on-beet: #ffffff;
+	--rl-beet-wash: #f7e1e8;
+	--rl-scrim: rgb(15 20 32 / 0.45);
+
+	--rl-shadow-raised: 0 1px 2px rgb(27 35 51 / 0.08), 0 2px 6px rgb(27 35 51 / 0.06);
+	--rl-shadow-overlay: 0 8px 28px rgb(27 35 51 / 0.18), 0 2px 6px rgb(27 35 51 / 0.1);
+
+	/* Shell metrics, also used by pages that place sticky bars (DESIGN.md "Layout"). */
+	--rl-header-h: 3.5rem;
+	--rl-tabbar-h: 4rem;
+	--rl-rail-w: 15rem;
+	--rl-safe-top: env(safe-area-inset-top, 0px);
+	--rl-safe-bottom: env(safe-area-inset-bottom, 0px);
+	--rl-safe-left: env(safe-area-inset-left, 0px);
+	--rl-safe-right: env(safe-area-inset-right, 0px);
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--rl-surface: #15191d;
-		--rl-text: #e6edf3;
-		--rl-muted: #9198a1;
-		--rl-accent: #7fbfa9;
-		--rl-border: #3d444d;
+		color-scheme: dark;
+
+		--rl-paper: #0f1420;
+		--rl-surface: #18202f;
+		--rl-sunken: #0a0e17;
+		--rl-ink: #e5e9f0;
+		--rl-muted: #a5afbf;
+		--rl-line: #2e3a50;
+		--rl-line-strong: #6b7891;
+		--rl-cobalt: #8daef2;
+		--rl-cobalt-strong: #b3caf7;
+		--rl-on-cobalt: #0d1730;
+		--rl-cobalt-wash: #1d2a47;
+		--rl-dill: #8ccb93;
+		--rl-dill-wash: #173023;
+		--rl-beet: #f28ba9;
+		--rl-beet-strong: #f7b0c5;
+		--rl-on-beet: #2a0814;
+		--rl-beet-wash: #3a1624;
+		--rl-scrim: rgb(0 0 0 / 0.6);
+
+		--rl-shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
+		--rl-shadow-overlay: 0 10px 32px rgb(0 0 0 / 0.55);
 	}
 }
 
 @theme inline {
+	--color-paper: var(--rl-paper);
 	--color-surface: var(--rl-surface);
-	--color-text: var(--rl-text);
+	--color-sunken: var(--rl-sunken);
+	--color-ink: var(--rl-ink);
 	--color-muted: var(--rl-muted);
-	--color-accent: var(--rl-accent);
-	--color-border: var(--rl-border);
+	--color-line: var(--rl-line);
+	--color-line-strong: var(--rl-line-strong);
+	--color-cobalt: var(--rl-cobalt);
+	--color-cobalt-strong: var(--rl-cobalt-strong);
+	--color-on-cobalt: var(--rl-on-cobalt);
+	--color-cobalt-wash: var(--rl-cobalt-wash);
+	--color-dill: var(--rl-dill);
+	--color-dill-wash: var(--rl-dill-wash);
+	--color-beet: var(--rl-beet);
+	--color-beet-strong: var(--rl-beet-strong);
+	--color-on-beet: var(--rl-on-beet);
+	--color-beet-wash: var(--rl-beet-wash);
+	--color-scrim: var(--rl-scrim);
+
+	/* Deprecated aliases for the T00 placeholder pages; new code must not use them. */
+	--color-text: var(--rl-ink);
+	--color-accent: var(--rl-cobalt);
+	--color-border: var(--rl-line);
+
+	--shadow-raised: var(--rl-shadow-raised);
+	--shadow-overlay: var(--rl-shadow-overlay);
 }
 
-html,
-body {
-	background: var(--rl-surface);
-	color: var(--rl-text);
-	font-family: system-ui, sans-serif;
+@theme {
+	--font-sans: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+	--font-serif: 'Literata Variable', Georgia, serif;
+
+	/* Type scale: 17 px base, ratio ~1.2 (DESIGN.md "Type"). Replaces Tailwind's default sizes. */
+	--text-*: initial;
+	--text-xs: 0.8125rem;
+	--text-xs--line-height: 1.4;
+	--text-sm: 0.9375rem;
+	--text-sm--line-height: 1.45;
+	--text-base: 1.0625rem;
+	--text-base--line-height: 1.5;
+	--text-lg: 1.25rem;
+	--text-lg--line-height: 1.35;
+	--text-xl: 1.5rem;
+	--text-xl--line-height: 1.25;
+	--text-2xl: 1.8125rem;
+	--text-2xl--line-height: 1.2;
+	--text-3xl: 2.1875rem;
+	--text-3xl--line-height: 1.15;
+
+	/* Radius by hierarchy: chips are pills, controls are soft, cards and sheets are rounder. */
+	--radius-control: 0.625rem;
+	--radius-card: 1rem;
+	--radius-sheet: 1.25rem;
+
+	--breakpoint-md: 48rem;
+	--breakpoint-lg: 64rem;
+
+	--animate-rl-pulse: rl-pulse 1.6s ease-in-out infinite;
+	--animate-rl-spin: spin 0.8s linear infinite;
+	--animate-rl-sheet-in: rl-sheet-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	--animate-rl-toast-in: rl-toast-in 180ms ease-out;
+
+	@keyframes rl-sheet-in {
+		from {
+			transform: translateY(100%);
+		}
+	}
+
+	@keyframes rl-toast-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.5rem);
+		}
+	}
+
+	@keyframes rl-pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.45;
+		}
+	}
+}
+
+@layer base {
+	html {
+		background: var(--rl-paper);
+		color: var(--rl-ink);
+		font-family: var(--font-sans);
+		font-size: 100%;
+		line-height: 1.5;
+		-webkit-text-size-adjust: 100%;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	body {
+		background: var(--rl-paper);
+		font-size: var(--text-base);
+		min-height: 100dvh;
+	}
+
+	h1,
+	h2,
+	h3 {
+		font-family: var(--font-serif);
+		font-weight: 600;
+		text-wrap: balance;
+	}
+
+	/* One visible focus style for everything (DESIGN.md "Focus"). */
+	:focus-visible {
+		outline: 3px solid var(--rl-cobalt);
+		outline-offset: 2px;
+	}
+
+	::selection {
+		background: var(--rl-cobalt-wash);
+		color: var(--rl-ink);
+	}
+}
+
+@utility tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }

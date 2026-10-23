@@ -29,6 +29,7 @@ export default defineConfig({
 		url: baseURL,
 		reuseExistingServer: false,
 		timeout: 180_000,
-		env: { PREVIEW_PORT: String(previewPort) }
+		// VITE_UI_SHOWCASE builds the dev-only /ui showcase (F0) so its a11y test can run.
+		env: { PREVIEW_PORT: String(previewPort), VITE_UI_SHOWCASE: '1' }
 	}
 });
