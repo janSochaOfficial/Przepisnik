@@ -73,4 +73,25 @@ describe('toBaseAmount', () => {
 	it('returns null when the unit cannot be converted', () => {
 		expect(toBaseAmount({ value: 1, unit: 'glass' }, mass)).toBeNull();
 	});
+
+	// The vector schema forbids zero density / piece weight, so the guards are tested here.
+	it('treats a zero density as missing', () => {
+		const p = asProduct({
+			measureKind: 'mass',
+			hasSizes: false,
+			gramsPerMl: 0,
+			gramsPerPiece: null
+		});
+		expect(toBaseAmount({ value: 1, unit: 'tbsp' }, p)).toBeNull();
+	});
+
+	it('treats a zero piece weight as missing', () => {
+		const p = asProduct({
+			measureKind: 'count',
+			hasSizes: false,
+			gramsPerMl: null,
+			gramsPerPiece: 0
+		});
+		expect(toBaseAmount({ value: 100, unit: 'g' }, p)).toBeNull();
+	});
 });

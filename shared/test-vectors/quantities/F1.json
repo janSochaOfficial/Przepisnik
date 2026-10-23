@@ -78,36 +78,6 @@
       "expected": 400
     },
     {
-      "id": "F1-tbsp-zero-density",
-      "description": "zero density is missing",
-      "quantity": {
-        "value": 1,
-        "unit": "tbsp"
-      },
-      "product": {
-        "measureKind": "mass",
-        "hasSizes": false,
-        "gramsPerMl": 0,
-        "gramsPerPiece": null
-      },
-      "expected": null
-    },
-    {
-      "id": "F1-g-zero-piece-weight",
-      "description": "zero piece weight is missing",
-      "quantity": {
-        "value": 100,
-        "unit": "g"
-      },
-      "product": {
-        "measureKind": "count",
-        "hasSizes": false,
-        "gramsPerMl": null,
-        "gramsPerPiece": 0
-      },
-      "expected": null
-    },
-    {
       "id": "F1-round-third",
       "description": "rounded to 4 decimals",
       "quantity": {
