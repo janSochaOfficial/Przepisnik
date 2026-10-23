@@ -101,7 +101,7 @@ Validation: `displayClass` must fit `measureKind` (`weight`→`mass`; `liquid`/`
 | Method | Path | Body | Response | Errors |
 |---|---|---|---|---|
 | POST | `/images` | `multipart/form-data` field `file` | `201 ImageInfo` | 400 `image.invalid_type`, 413 `image.too_large` |
-| GET | `/images/{id}` | `?size=full\|thumb` (default `full`) | `200 image/webp` | 404 |
+| GET | `/images/{id}` | `?size=full\|thumb` (default `full`) | `200 image/webp` | 400 (`validation.failed`, invalid `size`), 404 |
 
 ```ts
 type ImageInfo = { id: Uuid; url: string; thumbnailUrl: string; width: number; height: number };
