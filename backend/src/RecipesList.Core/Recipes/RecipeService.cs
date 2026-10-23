@@ -61,6 +61,7 @@ public sealed class RecipeService(
     {
         var me = currentUser.Id;
         var recipe = await LoadForAuthorAsync(id, ct);
+        EnsureNotArchived(recipe);
 
         if (recipe.Visibility == VisibilityLevel.Public)
         {
@@ -114,6 +115,7 @@ public sealed class RecipeService(
         var recipe = await rules.VisibleRecipes(me).SingleOrDefaultAsync(r => r.Id == id, ct)
             ?? throw new NotFoundException(ErrorCodes.RecipeNotFound);
         EnsureAuthor(recipe);
+        EnsureNotArchived(recipe);
 
         if (visibility < recipe.Visibility)
         {
@@ -180,6 +182,15 @@ public sealed class RecipeService(
         }
     }
 
+    // Archived recipes are read-only, even for the author (D-27).
+    private static void EnsureNotArchived(Recipe recipe)
+    {
+        if (recipe.IsArchived)
+        {
+            throw new ConflictException(ErrorCodes.RecipeArchived, "An archived recipe cannot be changed.");
+        }
+    }
+
     // All variants of the recipe and their favourites. Remembered picks are cleaned up by SelectionMemory afterwards.
     private async Task DeleteVariantsAsync(Recipe recipe, CancellationToken ct)
     {
@@ -187,9 +198,6 @@ public sealed class RecipeService(
         var variantIds = variants.Select(v => v.Id).ToList();
         db.VariantFavorites.RemoveRange(await db.VariantFavorites.Where(f => variantIds.Contains(f.VariantId)).ToListAsync(ct));
         db.Variants.RemoveRange(variants);
-
-        // Archived only because of foreign variants (PROJECT §4.4); with none left it is a normal recipe again.
-        recipe.IsArchived = false;
     }
 
     // Copies the input onto the recipe: updates rows whose id is sent back, adds the others, removes the missing ones.

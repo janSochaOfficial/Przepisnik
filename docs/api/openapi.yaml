@@ -555,7 +555,7 @@ paths:
       operationId: UpdateRecipe
       summary: Edit a recipe directly
       description: |
-        PROJECT §4.5. A public recipe → 409 `recipe.public_locked`. With variants and `deleteVariants: false` →
+        PROJECT §4.5. An archived recipe → 409 `recipe.archived` (read-only, D-27). A public recipe → 409 `recipe.public_locked`. With variants and `deleteVariants: false` →
         409 `recipe.has_variants` (extensions `variantCount`, `foreignVariantCount`). With `deleteVariants: true` all
         variants (and their favourites and remembered picks) are deleted in the same transaction.
       security:
@@ -598,7 +598,7 @@ paths:
       tags: [recipes]
       operationId: SetRecipeVisibility
       summary: Change a recipe's visibility
-      description: Narrowing while other users have variants → 409 `recipe.visibility_locked` (extension `foreignVariantCount`).
+      description: An archived recipe → 409 `recipe.archived` (read-only, D-27). Narrowing while other users have variants → 409 `recipe.visibility_locked` (extension `foreignVariantCount`).
       security:
         - sessionCookie: []
           csrfHeader: []
@@ -1825,7 +1825,7 @@ components:
         visibility: { $ref: '#/components/schemas/Visibility' }
         isFavorite: { type: boolean }
         canEdit:
-          description: Caller is the author and the recipe is not public.
+          description: Caller is the author and the recipe is neither public nor archived.
           type: boolean
         totalVariantCount:
           description: All variants, including hidden ones (author only; others get 0).

@@ -353,7 +353,7 @@ export interface paths {
 		get: operations['GetRecipe'];
 		/**
 		 * Edit a recipe directly
-		 * @description PROJECT §4.5. A public recipe → 409 `recipe.public_locked`. With variants and `deleteVariants: false` →
+		 * @description PROJECT §4.5. An archived recipe → 409 `recipe.archived` (read-only, D-27). A public recipe → 409 `recipe.public_locked`. With variants and `deleteVariants: false` →
 		 *     409 `recipe.has_variants` (extensions `variantCount`, `foreignVariantCount`). With `deleteVariants: true` all
 		 *     variants (and their favourites and remembered picks) are deleted in the same transaction.
 		 */
@@ -381,7 +381,7 @@ export interface paths {
 		get?: never;
 		/**
 		 * Change a recipe's visibility
-		 * @description Narrowing while other users have variants → 409 `recipe.visibility_locked` (extension `foreignVariantCount`).
+		 * @description An archived recipe → 409 `recipe.archived` (read-only, D-27). Narrowing while other users have variants → 409 `recipe.visibility_locked` (extension `foreignVariantCount`).
 		 */
 		put: operations['SetRecipeVisibility'];
 		post?: never;
@@ -1158,7 +1158,7 @@ export interface components {
 			isArchived: boolean;
 			visibility: components['schemas']['Visibility'];
 			isFavorite: boolean;
-			/** @description Caller is the author and the recipe is not public. */
+			/** @description Caller is the author and the recipe is neither public nor archived. */
 			canEdit: boolean;
 			/** @description All variants, including hidden ones (author only; others get 0). */
 			totalVariantCount: number;

@@ -116,15 +116,15 @@ An image can only be referenced in recipes and variants by the user who uploaded
 | GET | `/recipes` | `q?`, `tags?` (comma-separated tag ids, AND), `author?` (`me` or user id), `visibility?`, `page`, `pageSize`, `sort` (`newest`\|`title`) | `200 Paged<RecipeSummary>` (only recipes visible to the caller) | |
 | GET | `/recipes/{id}` | — | `200 RecipeDetail` | 404 `recipe.not_found` (also when not visible) |
 | POST | `/recipes` | `RecipeWrite & { visibility: Visibility }` | `201 RecipeDetail` | 400 validation, 400 `quantity.unit_incompatible`, 400 `image.not_owned` |
-| PUT | `/recipes/{id}` | `RecipeWrite & { version: Version; deleteVariants: boolean }` | `200 RecipeDetail` | 403 `recipe.not_author`, 409 `recipe.public_locked`, 409 `recipe.has_variants` (when variants exist and `deleteVariants` is false; extensions `variantCount`, `foreignVariantCount`), 409 `concurrency.conflict` |
-| PUT | `/recipes/{id}/visibility` | `{ visibility: Visibility }` | `200 RecipeDetail` | 403 `recipe.not_author`, 409 `recipe.visibility_locked` (narrowing while other users have variants; extension `foreignVariantCount`) |
+| PUT | `/recipes/{id}` | `RecipeWrite & { version: Version; deleteVariants: boolean }` | `200 RecipeDetail` | 403 `recipe.not_author`, 409 `recipe.archived`, 409 `recipe.public_locked`, 409 `recipe.has_variants` (when variants exist and `deleteVariants` is false; extensions `variantCount`, `foreignVariantCount`), 409 `concurrency.conflict` |
+| PUT | `/recipes/{id}/visibility` | `{ visibility: Visibility }` | `200 RecipeDetail` | 403 `recipe.not_author`, 409 `recipe.archived`, 409 `recipe.visibility_locked` (narrowing while other users have variants; extension `foreignVariantCount`) |
 | PUT | `/recipes/{id}/favorite` | — | `204` (idempotent) | 404 |
 | DELETE | `/recipes/{id}/favorite` | — | `204` (idempotent) | |
 | DELETE | `/recipes/{id}` | — | `204` (deleted or archived, see PROJECT §4.4) | 403 |
 | GET | `/recipes/{id}/export` | — | `200 RecipeExport` (variants limited to those visible to the caller) with `Content-Disposition: attachment; filename="<slug>.json"` | 404 |
 | POST | `/recipes/import` | `RecipeExport` (≤ 25 MB) | `201 RecipeDetail` (recipe and variants are `private`) | 400 `import.invalid_format`, 400 `import.unsupported_version` |
 
-Archived recipes are excluded from `GET /recipes`. `GET /recipes/{id}` still returns them, with `isArchived: true`, to the author and to authors of their variants.
+Archived recipes are excluded from `GET /recipes`. `GET /recipes/{id}` still returns them, with `isArchived: true` and `canEdit: false`, to the author and to authors of their variants. They are read-only: `PUT /recipes/{id}` and `PUT /recipes/{id}/visibility` return 409 `recipe.archived` (D-27).
 **Direct edit rules (PROJECT §4.5):** `PUT /recipes/{id}` on a `public` recipe → 409 `recipe.public_locked`. If variants exist, the client first gets 409 `recipe.has_variants`, shows the confirmation, then retries with `deleteVariants: true`. The server then deletes all variants (and their favourites and remembered picks) in the same transaction as the update.
 
 ```ts
@@ -147,7 +147,7 @@ type Step = { id: Uuid; blocks: ContentBlock[] };
 type RecipeDetail = {
   id: Uuid; version: Version; isArchived: boolean;
   visibility: Visibility; isFavorite: boolean;
-  canEdit: boolean;               // caller is author && visibility !== 'public'
+  canEdit: boolean;               // caller is author && visibility !== 'public' && !isArchived
   totalVariantCount: number;      // all variants, including ones hidden from the caller (author only; others get 0)
   foreignVariantCount: number;    // variants by other users (author only; others get 0)
   title: string; description?: string; coverImage?: ImageInfo;
@@ -386,7 +386,7 @@ Keys are opaque strings that are unique within the file (the exporter uses `i1, 
 `auth.invalid_token` · `auth.required` · `user.onboarding_required` · `nickname.taken` · `nickname.invalid` · `admin.required` ·
 `product.not_found` · `product.duplicate` · `product.invalid_combination` · `product.merge_incompatible` · `tag.reserved` ·
 `image.invalid_type` · `image.too_large` · `image.not_found` · `image.not_owned` ·
-`recipe.not_found` · `recipe.not_author` · `recipe.public_locked` · `recipe.has_variants` · `recipe.visibility_locked` · `quantity.unit_incompatible` · `quantity.invalid` ·
+`recipe.not_found` · `recipe.not_author` · `recipe.public_locked` · `recipe.has_variants` · `recipe.visibility_locked` · `recipe.archived` · `quantity.unit_incompatible` · `quantity.invalid` ·
 `variant.not_found` · `variant.not_author` · `variant.no_changes` · `variant.name_taken` · `selection.unknown_slot` ·
 `fridge.not_found` · `fridge.owner_required` · `fridge.owner_cannot_leave` · `invite.not_found` ·
 `fridge_item.not_found` · `deduction.empty` · `deduction.not_found` · `deduction.items_changed` · `deduction.already_undone` ·

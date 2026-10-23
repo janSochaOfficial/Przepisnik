@@ -64,7 +64,7 @@ internal sealed record RecipeSummaryDto(
 
 /// <summary>
 /// A whole recipe (API.md §4 <c>RecipeDetail</c>). <c>Version</c> is sent back on <c>PUT</c> (optimistic concurrency);
-/// <c>CanEdit</c> means the caller is the author and the recipe is not public; <c>TotalVariantCount</c> and
+/// <c>CanEdit</c> means the caller is the author and the recipe is neither public nor archived; <c>TotalVariantCount</c> and
 /// <c>ForeignVariantCount</c> are 0 unless the caller is the author; <c>VariantCount</c> counts variants visible to the caller.
 /// </summary>
 internal sealed record RecipeDetailDto(

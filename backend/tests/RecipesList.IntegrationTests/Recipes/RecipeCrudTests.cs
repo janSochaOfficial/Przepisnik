@@ -367,6 +367,44 @@ public sealed class RecipeCrudTests(ApiFactory factory) : RecipeTestBase(factory
     }
 
     [Fact]
+    public async Task Update_OfAnArchivedRecipe_Returns409ArchivedAndKeepsItArchived()
+    {
+        using var ola = await LoginAsync("ola");
+        using var kasia = await LoginAsync("kasia");
+        var created = await CreateAsync(ola, Draft());
+        var id = created.GetProperty("id").GetGuid();
+        await AddVariantAsync(id, kasia.UserId, "Kasi", VisibilityLevelPrivate());
+        (await ola.DeleteAsync($"/api/v1/recipes/{id}")).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        var archived = await ContractAssert.IsJsonAsync(await GetRecipeAsync(ola, id), HttpStatusCode.OK, "RecipeDetail");
+        archived.GetProperty("canEdit").GetBoolean().ShouldBeFalse();
+
+        // Archived recipes are read-only, even when the edit would delete the variants that keep them archived.
+        var update = UpdateBody(archived);
+        update["deleteVariants"] = true;
+        var response = await ola.PutJsonAsync($"/api/v1/recipes/{id}", update);
+
+        await ContractAssert.IsProblemAsync(response, HttpStatusCode.Conflict, "recipe.archived");
+        var after = await ContractAssert.IsJsonAsync(await GetRecipeAsync(ola, id), HttpStatusCode.OK, "RecipeDetail");
+        after.GetProperty("isArchived").GetBoolean().ShouldBeTrue();
+        (await Count(db => db.Variants.CountAsync(TestContext.Current.CancellationToken))).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task SetVisibility_OfAnArchivedRecipe_Returns409Archived()
+    {
+        using var ola = await LoginAsync("ola");
+        using var kasia = await LoginAsync("kasia");
+        var created = await CreateAsync(ola, Draft());
+        var id = created.GetProperty("id").GetGuid();
+        await AddVariantAsync(id, kasia.UserId, "Kasi", VisibilityLevelPrivate());
+        (await ola.DeleteAsync($"/api/v1/recipes/{id}")).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+
+        var response = await ola.PutJsonAsync($"/api/v1/recipes/{id}/visibility", new { visibility = "public" });
+
+        await ContractAssert.IsProblemAsync(response, HttpStatusCode.Conflict, "recipe.archived");
+    }
+
+    [Fact]
     public async Task Delete_ByAnotherUser_Returns403()
     {
         using var ola = await LoginAsync("ola");

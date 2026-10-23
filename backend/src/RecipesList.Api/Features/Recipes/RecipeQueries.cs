@@ -145,7 +145,7 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             recipe.IsArchived,
             recipe.Visibility,
             isFavorite,
-            CanEdit: isAuthor && recipe.Visibility != VisibilityLevel.Public,
+            CanEdit: isAuthor && recipe.Visibility != VisibilityLevel.Public && !recipe.IsArchived,
             total,
             foreign,
             recipe.Title,

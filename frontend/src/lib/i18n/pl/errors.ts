@@ -26,6 +26,7 @@ export const errors = {
 	'recipe.has_variants': 'Ten przepis ma warianty. Zapisanie zmian je usunie.',
 	'recipe.visibility_locked':
 		'Nie można zawęzić widoczności — inni użytkownicy mają warianty tego przepisu.',
+	'recipe.archived': 'Ten przepis jest zarchiwizowany i nie można go zmieniać.',
 	'quantity.unit_incompatible': 'Tej jednostki nie można użyć dla tego produktu.',
 	'quantity.invalid': 'Nieprawidłowa ilość.',
 

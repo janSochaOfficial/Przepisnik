@@ -100,7 +100,7 @@ Every recipe has a **visibility** (`widoczność`) setting, chosen in the editor
 - A recipe the viewer cannot see answers "not found", so its existence never leaks.
 - **Making a recipe public** asks for confirmation: "Publicznego przepisu nie można edytować — zmiany będą możliwe tylko przez warianty." (A public recipe can't be edited; changes are only possible through variants.)
 - **Narrowing** visibility (public → fridges/private, fridges → private) is **blocked while other users have variants** of the recipe (D-24). Without foreign variants it is allowed. The author's own variants keep working, but become visible only to people who can still see the recipe.
-- **Deleting** a recipe that has variants by other users does not destroy their work. The recipe is **archived** instead: it is hidden from the catalog and search, but still reachable read-only by the authors of those variants. A recipe without foreign variants is deleted for real.
+- **Deleting** a recipe that has variants by other users does not destroy their work. The recipe is **archived** instead: it is hidden from the catalog and search, but still reachable read-only by its author and the authors of those variants (D-27). A recipe without foreign variants is deleted for real.
 
 ### 4.5 Editing a recipe directly (without a variant)
 Only the author can edit a recipe directly, and only under these rules (D-25):
@@ -349,3 +349,4 @@ Servings-based scaling · expiry dates and "use soon" highlighting · direct Goo
 | D-24 | Narrowing a recipe's visibility is blocked while other users have variants of it | user (un-publishing) + assumption (fridges → private) |
 | D-25 | Public recipes can't be edited directly. Editing a private or fridge-only recipe that has variants deletes all of them after a confirmation prompt | user |
 | D-26 | Favourites (♥) for recipes and variants, shown in Moje przepisy → Ulubione, private to the user, and a ranking signal in auto-match | user + assumption (ranking) |
+| D-27 | An archived recipe is read-only for everyone, its author included: no direct edit (even one that would delete the variants keeping it archived) and no visibility change | user |
