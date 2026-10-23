@@ -18,20 +18,20 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 | T00 | 0 | merged | task/T00-foundation | merged 2026-10-24, full verify green (97 backend, 28 vitest, 6 playwright). Tests run on VSTest (MTP cannot run `dotnet test backend`); agent filter `--filter "Category!=Migrations"` |
 | B1 | 1 | todo | | may replace T00's minimal `GET /me`, `/auth/logout`, `/auth/config` (keep the contract) |
 | B2 | 2 | todo | | |
-| B3 | 3 | blocked | task/B3-recipes-images | paused 2026-10-24 (user cap: 2 agents) early (reading specs, uncommitted WIP) in worktree .claude/worktrees/agent-acadb1df54926fec1; resume that agent when a slot frees |
-| B4 | 4 | running | task/B4-variants | opus/medium |
+| B3 | 3 | running | task/B3-recipes-images | resumed 2026-10-24 (same agent/worktree agent-acadb1df54926fec1). From B4: on edit with `deleteVariants: true` call `SelectionMemory.DropStalePicksAsync`; may reuse `QuickTagRule` for `szybkie`; variant DTOs (`VariantProductRef`, `VariantUserRef`) duplicate B3's on purpose, merge later |
+| B4 | 4 | merged | task/B4-variants | merged 2026-10-24. Contract: optional `Slot.afterSlotKey` (vector schema updated on main). Follow-up: concurrent duplicate variant name gives 500 not 409 |
 | B5 | 5 | todo | | |
 | S1 | 8 | todo | | |
-| F0 | 10 | running | task/F0-design-system | opus/medium |
+| F0 | 10 | merged | task/F0-design-system | merged 2026-10-24. Direction "Bolesławiec", see frontend/DESIGN.md; showcase at /ui (dev or VITE_UI_SHOWCASE=1) |
 | F1 | 11 | merged | task/F1-quantities-lib | merged 2026-10-24. Coordinator: delete T00's duplicate `frontend/src/lib/domain/stubs.test.ts` |
 | F2 | 12 | merged | task/F2-matching-lib | merged 2026-10-24. Requests relayed to B4: optional `Slot.afterSlotKey`; unknown step ids in a draft = new steps |
 | B6 | 6 | todo | | needs B3, B4 |
-| B7 | 7 | todo | | needs B3, B4 |
-| F3 | 13 | todo | | needs F0 |
+| B7 | 7 | todo | | needs B3, B4 (merged). Reuse `VariantQueries.ToSummaryRows` and `VariantSummaryResponse.From` for variant entries in `/favorites` |
+| F3 | 13 | todo | | needs F0 (merged). Rebuild `/logowanie` and `/witaj` with F0 components, then drop legacy colour names (`text`, `accent`, `border`) from app.css; toasts on those pages sit above a missing tab bar |
 | F4 | 14 | todo | | needs F0, F1 (merged) |
 | F5 | 15 | todo | | needs F0, F1, F2 (merged). Decide how to show a custom mix: every `RankedOption.compatible` is false there; `supportCount` counts all variants. Added slots follow base rows unless B4 ships `afterSlotKey` |
 | F6 | 16 | todo | | needs F0, F1 (merged). Use F1 `context: 'inventory'` for fridge, shopping list and deduction dialog; show `~` when `approximate` |
-| T90 | 0 | todo | | needs all. Wire `verify.sh --e2e` (T00 left a placeholder); document `dotnet run --no-build` for a second API from the same checkout |
+| T90 | 0 | todo | | needs all. F3–F6 start every screen with `<Page>` (DESIGN.md §10–12); `PagePlaceholder` has no `Page` wrapper (replace or wrap). No dropdown-menu primitive yet. Wire `verify.sh --e2e` (T00 left a placeholder); document `dotnet run --no-build` for a second API from the same checkout |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
