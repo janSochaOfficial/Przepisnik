@@ -1,0 +1,156 @@
+{
+  "cases": [
+    {
+      "id": "F1-glass-flour-half",
+      "description": "half a glass of flour (mass via density)",
+      "quantity": {
+        "value": 0.5,
+        "unit": "glass"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 0.53,
+        "gramsPerPiece": null
+      },
+      "expected": 66.25
+    },
+    {
+      "id": "F1-pinch-salt",
+      "description": "a pinch of salt by weight",
+      "quantity": {
+        "value": 1,
+        "unit": "pinch"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 1.2,
+        "gramsPerPiece": null
+      },
+      "expected": 0.36
+    },
+    {
+      "id": "F1-kg-onions-count",
+      "description": "kilograms of onions to medium pieces",
+      "quantity": {
+        "value": 0.33,
+        "unit": "kg"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 110
+      },
+      "expected": 3
+    },
+    {
+      "id": "F1-small-onions-to-mass",
+      "description": "sizes apply before converting to mass",
+      "quantity": {
+        "value": 4,
+        "unit": "piece",
+        "size": "small"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 100
+      },
+      "expected": 300
+    },
+    {
+      "id": "F1-large-no-sizes-to-mass",
+      "description": "size ignored for products without sizes",
+      "quantity": {
+        "value": 4,
+        "unit": "piece",
+        "size": "large"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": 100
+      },
+      "expected": 400
+    },
+    {
+      "id": "F1-round-third",
+      "description": "rounded to 4 decimals",
+      "quantity": {
+        "value": 1,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": 3,
+        "gramsPerPiece": null
+      },
+      "expected": 0.3333
+    },
+    {
+      "id": "F1-round-two-thirds",
+      "description": "rounded half away from zero at 4 decimals",
+      "quantity": {
+        "value": 2,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": 3,
+        "gramsPerPiece": null
+      },
+      "expected": 0.6667
+    },
+    {
+      "id": "F1-round-tie",
+      "description": "exact tie rounds away from zero",
+      "quantity": {
+        "value": 0.001,
+        "unit": "drop"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 0.0001
+    },
+    {
+      "id": "F1-l-to-mass",
+      "description": "litres via density",
+      "quantity": {
+        "value": 0.5,
+        "unit": "l"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 0.92,
+        "gramsPerPiece": null
+      },
+      "expected": 460
+    },
+    {
+      "id": "F1-ml-to-count",
+      "description": "volume to count through grams",
+      "quantity": {
+        "value": 110,
+        "unit": "ml"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": false,
+        "gramsPerMl": 0.5,
+        "gramsPerPiece": 55
+      },
+      "expected": 1
+    }
+  ]
+}
