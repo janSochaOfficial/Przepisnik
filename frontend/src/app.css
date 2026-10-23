@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+/*
+ * Placeholder tokens. F0 owns this file and replaces them with the design system (frontend/DESIGN.md).
+ * Tailwind theme values reference the CSS custom properties (TECHNICAL §4.3).
+ */
+:root {
+	--rl-surface: #ffffff;
+	--rl-text: #1f2328;
+	--rl-muted: #59636e;
+	--rl-accent: #2f5d50;
+	--rl-border: #d1d9e0;
+	color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--rl-surface: #15191d;
+		--rl-text: #e6edf3;
+		--rl-muted: #9198a1;
+		--rl-accent: #7fbfa9;
+		--rl-border: #3d444d;
+	}
+}
+
+@theme inline {
+	--color-surface: var(--rl-surface);
+	--color-text: var(--rl-text);
+	--color-muted: var(--rl-muted);
+	--color-accent: var(--rl-accent);
+	--color-border: var(--rl-border);
+}
+
+html,
+body {
+	background: var(--rl-surface);
+	color: var(--rl-text);
+	font-family: system-ui, sans-serif;
+}
