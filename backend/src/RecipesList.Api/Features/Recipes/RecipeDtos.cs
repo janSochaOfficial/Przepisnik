@@ -117,7 +117,7 @@ internal sealed record RecipeWriteRequest(
     uint? Version,
     bool? DeleteVariants)
 {
-    public RecipeInput ToInput() => new(
+    public RecipeWriteInput ToInput() => new(
         Title,
         Description,
         CoverImageId,
@@ -125,9 +125,9 @@ internal sealed record RecipeWriteRequest(
         CookMinutes,
         TagIds,
         UtensilIds,
-        [.. Ingredients.Select(i => new IngredientInput(i.Id, i.ProductId, i.Quantity, i.Note, i.Optional))],
-        [.. PrepSteps.Select(s => new StepInput(s.Id, s.Blocks))],
-        [.. InstructionSteps.Select(s => new StepInput(s.Id, s.Blocks))]);
+        [.. Ingredients.Select(i => new IngredientWriteInput(i.Id, i.ProductId, i.Quantity, i.Note, i.Optional))],
+        [.. PrepSteps.Select(s => new StepWriteInput(s.Id, s.Blocks))],
+        [.. InstructionSteps.Select(s => new StepWriteInput(s.Id, s.Blocks))]);
 }
 
 /// <summary>Body of <c>PUT /recipes/{id}/visibility</c>.</summary>

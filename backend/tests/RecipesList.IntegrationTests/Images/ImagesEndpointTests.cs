@@ -145,11 +145,11 @@ public sealed class ImagesEndpointTests : IClassFixture<ApiFactory>, IAsyncLifet
     }
 
     [Fact]
-    public async Task Upload_AsJson_Returns400InvalidType()
+    public async Task Upload_AsJson_Returns415()
     {
         var response = await _client.PostJsonAsync("/api/v1/images", new { file = "x" });
 
-        await ContractAssert.IsProblemAsync(response, HttpStatusCode.BadRequest, "image.invalid_type");
+        await ContractAssert.IsProblemAsync(response, HttpStatusCode.UnsupportedMediaType, "request.invalid");
     }
 
     private ApiClient NewClient() =>

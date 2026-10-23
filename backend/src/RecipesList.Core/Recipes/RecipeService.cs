@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
+using System.Transactions;
 using RecipesList.Core.Quantities;
+using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
 
 namespace RecipesList.Core.Recipes;
@@ -10,10 +12,10 @@ namespace RecipesList.Core.Recipes;
 public interface IRecipeService
 {
     /// <summary>Creates a recipe owned by the caller and returns its id.</summary>
-    Task<Guid> CreateAsync(RecipeInput input, VisibilityLevel visibility, CancellationToken ct);
+    Task<Guid> CreateAsync(RecipeWriteInput input, VisibilityLevel visibility, CancellationToken ct);
 
     /// <summary>Edits a recipe directly (PROJECT §4.5): keeps ids of rows that are sent back, and may delete variants.</summary>
-    Task UpdateAsync(Guid id, RecipeInput input, uint version, bool deleteVariants, CancellationToken ct);
+    Task UpdateAsync(Guid id, RecipeWriteInput input, uint version, bool deleteVariants, CancellationToken ct);
 
     /// <summary>Changes visibility; narrowing is blocked while other users have variants (PROJECT §4.4).</summary>
     Task SetVisibilityAsync(Guid id, VisibilityLevel visibility, CancellationToken ct);
@@ -28,10 +30,11 @@ public sealed class RecipeService(
     ICurrentUser currentUser,
     VisibilityRules rules,
     IQuantityConverter converter,
+    SelectionMemory selections,
     TimeProvider time) : IRecipeService
 {
     /// <inheritdoc />
-    public async Task<Guid> CreateAsync(RecipeInput input, VisibilityLevel visibility, CancellationToken ct)
+    public async Task<Guid> CreateAsync(RecipeWriteInput input, VisibilityLevel visibility, CancellationToken ct)
     {
         RecipeInputValidator.Validate(input).ThrowIfAny();
 
@@ -54,7 +57,7 @@ public sealed class RecipeService(
     }
 
     /// <inheritdoc />
-    public async Task UpdateAsync(Guid id, RecipeInput input, uint version, bool deleteVariants, CancellationToken ct)
+    public async Task UpdateAsync(Guid id, RecipeWriteInput input, uint version, bool deleteVariants, CancellationToken ct)
     {
         var me = currentUser.Id;
         var recipe = await LoadForAuthorAsync(id, ct);
@@ -86,7 +89,17 @@ public sealed class RecipeService(
                     .With("foreignVariantCount", counts.Foreign);
             }
 
+            // Two saves in one local transaction (same connection): the variants must be gone from the database
+            // before SelectionMemory looks at what is left of the remembered picks.
+            using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
             await DeleteVariantsAsync(recipe, ct);
+            await db.SaveChangesAsync(ct);
+            await ApplyAsync(recipe, input, ct);
+            recipe.UpdatedAt = time.GetUtcNow();
+            await selections.DropStalePicksAsync(recipe, excludeVariantId: null, ct);
+            await db.SaveChangesAsync(ct);
+            scope.Complete();
+            return;
         }
 
         await ApplyAsync(recipe, input, ct);
@@ -167,13 +180,12 @@ public sealed class RecipeService(
         }
     }
 
-    // All variants of the recipe, with their favourites and every user's remembered picks, in the caller's transaction.
+    // All variants of the recipe and their favourites. Remembered picks are cleaned up by SelectionMemory afterwards.
     private async Task DeleteVariantsAsync(Recipe recipe, CancellationToken ct)
     {
         var variants = await db.Variants.Where(v => v.RecipeId == recipe.Id).ToListAsync(ct);
         var variantIds = variants.Select(v => v.Id).ToList();
         db.VariantFavorites.RemoveRange(await db.VariantFavorites.Where(f => variantIds.Contains(f.VariantId)).ToListAsync(ct));
-        db.RecipeSelections.RemoveRange(await db.RecipeSelections.Where(s => s.RecipeId == recipe.Id).ToListAsync(ct));
         db.Variants.RemoveRange(variants);
 
         // Archived only because of foreign variants (PROJECT §4.4); with none left it is a normal recipe again.
@@ -181,7 +193,7 @@ public sealed class RecipeService(
     }
 
     // Copies the input onto the recipe: updates rows whose id is sent back, adds the others, removes the missing ones.
-    private async Task ApplyAsync(Recipe recipe, RecipeInput input, CancellationToken ct)
+    private async Task ApplyAsync(Recipe recipe, RecipeWriteInput input, CancellationToken ct)
     {
         var errors = new ValidationErrors();
         var refs = await LoadReferencesAsync(recipe, input, errors, ct);
@@ -202,7 +214,7 @@ public sealed class RecipeService(
         ApplyUtensils(recipe, refs.UtensilIds);
     }
 
-    private void ApplyIngredients(Recipe recipe, RecipeInput input, Dictionary<Guid, Product> products)
+    private void ApplyIngredients(Recipe recipe, RecipeWriteInput input, Dictionary<Guid, Product> products)
     {
         var existing = recipe.Ingredients.ToDictionary(i => i.Id);
         var kept = new HashSet<Guid>();
@@ -233,15 +245,16 @@ public sealed class RecipeService(
         foreach (var removed in recipe.Ingredients.Where(i => existing.ContainsKey(i.Id) && !kept.Contains(i.Id)).ToList())
         {
             db.RecipeIngredients.Remove(removed);
+            recipe.Ingredients.Remove(removed);
         }
     }
 
-    private void ApplySteps(Recipe recipe, RecipeInput input)
+    private void ApplySteps(Recipe recipe, RecipeWriteInput input)
     {
         var existing = recipe.Steps.ToDictionary(s => s.Id);
         var kept = new HashSet<Guid>();
 
-        void Sync(StepSection section, IReadOnlyList<StepInput> steps)
+        void Sync(StepSection section, IReadOnlyList<StepWriteInput> steps)
         {
             for (var position = 0; position < steps.Count; position++)
             {
@@ -273,10 +286,10 @@ public sealed class RecipeService(
         }
     }
 
-    private async Task ApplyTagsAsync(Recipe recipe, RecipeInput input, HashSet<Guid> userTagIds, CancellationToken ct)
+    private async Task ApplyTagsAsync(Recipe recipe, RecipeWriteInput input, HashSet<Guid> userTagIds, CancellationToken ct)
     {
         var wanted = new HashSet<Guid>(userTagIds);
-        if (QuickTag.Applies(input.PrepMinutes, input.CookMinutes))
+        if (QuickTagRule.Applies(input.PrepMinutes, input.CookMinutes))
         {
             wanted.Add(await EnsureQuickTagAsync(ct));
         }
@@ -323,7 +336,7 @@ public sealed class RecipeService(
     }
 
     // Row ids that are sent back must belong to this recipe and appear once (API.md §4).
-    private static void CheckRowIds(Recipe recipe, RecipeInput input, ValidationErrors errors)
+    private static void CheckRowIds(Recipe recipe, RecipeWriteInput input, ValidationErrors errors)
     {
         var ingredientIds = recipe.Ingredients.Select(i => i.Id).ToHashSet();
         var seen = new HashSet<Guid>();
@@ -340,7 +353,7 @@ public sealed class RecipeService(
         CheckStepIds("prepSteps", input.PrepSteps);
         CheckStepIds("instructionSteps", input.InstructionSteps);
 
-        void CheckStepIds(string path, IReadOnlyList<StepInput> steps)
+        void CheckStepIds(string path, IReadOnlyList<StepWriteInput> steps)
         {
             for (var i = 0; i < steps.Count; i++)
             {
@@ -352,7 +365,7 @@ public sealed class RecipeService(
         }
     }
 
-    private async Task<References> LoadReferencesAsync(Recipe recipe, RecipeInput input, ValidationErrors errors, CancellationToken ct)
+    private async Task<References> LoadReferencesAsync(Recipe recipe, RecipeWriteInput input, ValidationErrors errors, CancellationToken ct)
     {
         var me = currentUser.Id;
 
@@ -403,7 +416,7 @@ public sealed class RecipeService(
     }
 
     // Images may be referenced by their uploader, or when the recipe already references them (API.md §3).
-    private async Task CheckImagesAsync(Recipe recipe, RecipeInput input, ValidationErrors errors, Guid me, CancellationToken ct)
+    private async Task CheckImagesAsync(Recipe recipe, RecipeWriteInput input, ValidationErrors errors, Guid me, CancellationToken ct)
     {
         var references = new List<(string Path, Guid ImageId)>();
         if (input.CoverImageId is { } cover)
@@ -414,7 +427,7 @@ public sealed class RecipeService(
         AddBlockReferences("prepSteps", input.PrepSteps);
         AddBlockReferences("instructionSteps", input.InstructionSteps);
 
-        void AddBlockReferences(string path, IReadOnlyList<StepInput> steps)
+        void AddBlockReferences(string path, IReadOnlyList<StepWriteInput> steps)
         {
             for (var i = 0; i < steps.Count; i++)
             {

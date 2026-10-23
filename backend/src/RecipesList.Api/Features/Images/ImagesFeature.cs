@@ -121,9 +121,17 @@ internal static class ImagesFeature
         return TypedResults.Created(info.Url, info);
     }
 
-    private static FileStreamHttpResult GetAsync(Guid id, HttpContext http, IImageStorage storage, ImageSize? size)
+    private static FileStreamHttpResult GetAsync(Guid id, HttpContext http, IImageStorage storage, string? size)
     {
-        var stream = storage.Open(id, size ?? ImageSize.Full)
+        var rendition = size switch
+        {
+            null or "full" => ImageSize.Full,
+            "thumb" => ImageSize.Thumb,
+            _ => throw new DomainValidationException(
+                ErrorCodes.ValidationFailed,
+                new Dictionary<string, string[]> { ["size"] = ["invalid"] }),
+        };
+        var stream = storage.Open(id, rendition)
             ?? throw new NotFoundException(ErrorCodes.ImageNotFound);
 
         // Image ids are never reused and the content never changes.

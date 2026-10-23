@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using RecipesList.Core.Images;
 using RecipesList.Core.Recipes;
+using RecipesList.Core.Users;
 using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
-using RecipesList.Infrastructure.Persistence;
 using RecipesList.Infrastructure.Storage;
 using RecipesList.IntegrationTests.Infrastructure;
 

@@ -4,7 +4,7 @@ using RecipesList.Core.Quantities;
 namespace RecipesList.Core.Recipes;
 
 /// <summary>
-/// Shape validation of a <see cref="RecipeInput"/> (limits from API.md §4 and PROJECT §4.1). Reference checks that
+/// Shape validation of a <see cref="RecipeWriteInput"/> (limits from API.md §4 and PROJECT §4.1). Reference checks that
 /// need the database (products, tags, images, unit conversion) live in <see cref="RecipeService"/>.
 /// Field errors are keyed by camelCase path (<c>ingredients[3].quantity</c>) with short codes.
 /// </summary>
@@ -20,7 +20,7 @@ public static class RecipeInputValidator
     public const int MaxCaption = 300;
 
     /// <summary>Returns the shape errors; empty when the input is valid.</summary>
-    public static ValidationErrors Validate(RecipeInput input)
+    public static ValidationErrors Validate(RecipeWriteInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
         var errors = new ValidationErrors();
@@ -74,7 +74,7 @@ public static class RecipeInputValidator
         }
     }
 
-    private static void CheckSteps(ValidationErrors errors, string path, IReadOnlyList<StepInput> steps, int minimum)
+    private static void CheckSteps(ValidationErrors errors, string path, IReadOnlyList<StepWriteInput> steps, int minimum)
     {
         if (steps.Count < minimum || steps.Count > MaxSteps)
         {
