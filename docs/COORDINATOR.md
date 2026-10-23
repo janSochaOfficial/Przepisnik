@@ -38,7 +38,7 @@ States: `todo` → `running` → `review` (Report written) → `merged` (or `blo
 ## 2. Loop
 Repeat until every task is `merged`:
 
-1. **Pick ready tasks**: `todo` tasks whose dependencies are all `merged` (plan §3). Start them in parallel, but no more than **5 at once** to keep the machine and the review load manageable. Prefer the critical path (B3, B4, F0, F1, F2).
+1. **Pick ready tasks**: `todo` tasks whose dependencies are all `merged` (plan §3). Start them in parallel, but no more than **2 at once** (user decision, 2026-10-24). Prefer the critical path (B3, B4, F0, F1, F2).
 2. **Spawn** each one with the Agent tool, `isolation: "worktree"`, and the prompt in §3. Set it to `running`.
 3. **When an agent finishes**, read its Report and go through it:
    - *Model changes / Contract changes / Dependencies added*: check that they are justified and within the agent's own scope;
