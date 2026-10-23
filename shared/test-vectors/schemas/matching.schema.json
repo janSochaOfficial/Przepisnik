@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recipes-list.local/test-vectors/matching.schema.json",
+  "title": "matching/<TaskID>.json: matrix + picks + preferences → match result essentials",
+  "description": "Asserted by the frontend matchVariants (PROJECT §6.3, §6.6). 'matrix' is an API VariantMatrix (or a reference to a variants/ case via 'matrixFromCase'); 'expected' holds the essentials of the MatchResult (bestVariantId, isCustomMix, picks, …). F2 owns the details and may tighten this schema.",
+  "type": "object",
+  "required": ["cases"],
+  "properties": {
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "picks", "preferences", "expected"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/caseId" },
+          "description": { "type": "string" },
+          "matrix": { "type": "object" },
+          "matrixFromCase": { "description": "Id of a variants/ case whose expectedMatrix is the input.", "type": "string" },
+          "picks": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["optionKey", "source"],
+              "properties": { "optionKey": { "type": "string" }, "source": { "enum": ["user", "auto"] } },
+              "additionalProperties": false
+            }
+          },
+          "preferences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["fromProductId", "toProductId", "weight"],
+              "properties": {
+                "fromProductId": { "type": "string" },
+                "toProductId": { "type": "string" },
+                "weight": { "type": "integer", "minimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "expected": { "type": "object" }
+        },
+        "oneOf": [{ "required": ["matrix"] }, { "required": ["matrixFromCase"] }]
+      }
+    }
+  },
+  "additionalProperties": false
+}

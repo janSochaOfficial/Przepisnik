@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recipes-list.local/seed/utensils.schema.json",
+  "title": "Seed utensils (PROJECT §4.1, \"Przybory\").",
+  "type": "object",
+  "required": ["utensils"],
+  "properties": {
+    "utensils": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 60 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

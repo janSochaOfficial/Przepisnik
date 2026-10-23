@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recipes-list.local/seed/tags.schema.json",
+  "title": "Seed tags (PROJECT §4.3). Exactly one system tag: szybkie.",
+  "type": "object",
+  "required": ["tags"],
+  "properties": {
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "isSystem"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "isSystem": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      },
+      "contains": {
+        "type": "object",
+        "properties": { "name": { "const": "szybkie" }, "isSystem": { "const": true } },
+        "required": ["name", "isSystem"]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  },
+  "additionalProperties": false
+}

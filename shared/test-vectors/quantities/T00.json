@@ -1,0 +1,519 @@
+{
+  "cases": [
+    {
+      "id": "T00-g-same-kind",
+      "description": "grams of a mass product",
+      "quantity": {
+        "value": 200,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 200
+    },
+    {
+      "id": "T00-kg",
+      "description": "kilograms to grams",
+      "quantity": {
+        "value": 1.5,
+        "unit": "kg"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 1500
+    },
+    {
+      "id": "T00-ml-same-kind",
+      "description": "millilitres of a volume product",
+      "quantity": {
+        "value": 330,
+        "unit": "ml"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 330
+    },
+    {
+      "id": "T00-l",
+      "description": "litres to millilitres",
+      "quantity": {
+        "value": 1.25,
+        "unit": "l"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 1250
+    },
+    {
+      "id": "T00-glass",
+      "description": "a glass is 250 ml",
+      "quantity": {
+        "value": 1,
+        "unit": "glass"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 250
+    },
+    {
+      "id": "T00-glass-half",
+      "description": "half a glass",
+      "quantity": {
+        "value": 0.5,
+        "unit": "glass"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 125
+    },
+    {
+      "id": "T00-tbsp",
+      "description": "a tablespoon is 15 ml",
+      "quantity": {
+        "value": 2,
+        "unit": "tbsp"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 30
+    },
+    {
+      "id": "T00-tsp",
+      "description": "a teaspoon is 5 ml",
+      "quantity": {
+        "value": 1.5,
+        "unit": "tsp"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 7.5
+    },
+    {
+      "id": "T00-drop",
+      "description": "a drop is 0.05 ml",
+      "quantity": {
+        "value": 3,
+        "unit": "drop"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 0.15
+    },
+    {
+      "id": "T00-drop-ten",
+      "description": "ten drops",
+      "quantity": {
+        "value": 10,
+        "unit": "drop"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 0.5
+    },
+    {
+      "id": "T00-pinch",
+      "description": "a pinch is 0.3 ml",
+      "quantity": {
+        "value": 2,
+        "unit": "pinch"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": 0.6
+    },
+    {
+      "id": "T00-piece-medium",
+      "description": "medium pieces count 1x",
+      "quantity": {
+        "value": 2,
+        "unit": "piece",
+        "size": "medium"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 110
+      },
+      "expected": 2
+    },
+    {
+      "id": "T00-piece-small",
+      "description": "small pieces count 0.75x",
+      "quantity": {
+        "value": 2,
+        "unit": "piece",
+        "size": "small"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 110
+      },
+      "expected": 1.5
+    },
+    {
+      "id": "T00-piece-large",
+      "description": "large pieces count 1.3x",
+      "quantity": {
+        "value": 3,
+        "unit": "piece",
+        "size": "large"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 110
+      },
+      "expected": 3.9
+    },
+    {
+      "id": "T00-piece-no-size",
+      "description": "no size on a product with sizes means medium",
+      "quantity": {
+        "value": 2,
+        "unit": "piece"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 110
+      },
+      "expected": 2
+    },
+    {
+      "id": "T00-piece-size-ignored",
+      "description": "a size is ignored for a product without sizes",
+      "quantity": {
+        "value": 2,
+        "unit": "piece",
+        "size": "large"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": 55
+      },
+      "expected": 2
+    },
+    {
+      "id": "T00-tbsp-butter",
+      "description": "volume unit for a mass product uses the density (2 tbsp butter)",
+      "quantity": {
+        "value": 2,
+        "unit": "tbsp"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 0.91,
+        "gramsPerPiece": null
+      },
+      "expected": 27.3
+    },
+    {
+      "id": "T00-glass-flour",
+      "description": "a glass of flour",
+      "quantity": {
+        "value": 1,
+        "unit": "glass"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 0.53,
+        "gramsPerPiece": null
+      },
+      "expected": 132.5
+    },
+    {
+      "id": "T00-pinch-sugar",
+      "description": "a pinch of sugar (mass product)",
+      "quantity": {
+        "value": 1,
+        "unit": "pinch"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 0.85,
+        "gramsPerPiece": null
+      },
+      "expected": 0.255
+    },
+    {
+      "id": "T00-l-sugar",
+      "description": "litres of a mass product",
+      "quantity": {
+        "value": 0.2,
+        "unit": "l"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": 0.85,
+        "gramsPerPiece": null
+      },
+      "expected": 170
+    },
+    {
+      "id": "T00-g-milk",
+      "description": "grams of a volume product divide by the density",
+      "quantity": {
+        "value": 103,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": 1.03,
+        "gramsPerPiece": null
+      },
+      "expected": 100
+    },
+    {
+      "id": "T00-g-oil",
+      "description": "grams of oil (rounded to 4 decimals)",
+      "quantity": {
+        "value": 100,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": 0.92,
+        "gramsPerPiece": null
+      },
+      "expected": 108.6957
+    },
+    {
+      "id": "T00-kg-honey",
+      "description": "kilograms of a volume product",
+      "quantity": {
+        "value": 0.5,
+        "unit": "kg"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": 1.42,
+        "gramsPerPiece": null
+      },
+      "expected": 352.1127
+    },
+    {
+      "id": "T00-piece-to-mass",
+      "description": "pieces of a mass product use the piece weight",
+      "quantity": {
+        "value": 2,
+        "unit": "piece"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": 200
+      },
+      "expected": 400
+    },
+    {
+      "id": "T00-g-to-count",
+      "description": "grams of a count product divide by the piece weight",
+      "quantity": {
+        "value": 220,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 110
+      },
+      "expected": 2
+    },
+    {
+      "id": "T00-kg-to-count",
+      "description": "kilograms of potatoes in medium pieces",
+      "quantity": {
+        "value": 0.5,
+        "unit": "kg"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": true,
+        "gramsPerMl": null,
+        "gramsPerPiece": 150
+      },
+      "expected": 3.3333
+    },
+    {
+      "id": "T00-ml-to-count",
+      "description": "volume to count needs density and piece weight",
+      "quantity": {
+        "value": 110,
+        "unit": "ml"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": false,
+        "gramsPerMl": 1.03,
+        "gramsPerPiece": 55
+      },
+      "expected": 2.06
+    },
+    {
+      "id": "T00-large-to-mass",
+      "description": "sizes are ignored for a mass product (it has no sizes)",
+      "quantity": {
+        "value": 1,
+        "unit": "piece",
+        "size": "large"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": 200
+      },
+      "expected": 200
+    },
+    {
+      "id": "T00-incompatible-tbsp-no-density",
+      "description": "volume unit, mass product without density",
+      "quantity": {
+        "value": 1,
+        "unit": "tbsp"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": null
+    },
+    {
+      "id": "T00-incompatible-g-no-density",
+      "description": "mass unit, volume product without density",
+      "quantity": {
+        "value": 100,
+        "unit": "g"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": null
+    },
+    {
+      "id": "T00-incompatible-piece-no-weight",
+      "description": "pieces of a mass product without piece weight",
+      "quantity": {
+        "value": 1,
+        "unit": "piece"
+      },
+      "product": {
+        "measureKind": "mass",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": null
+      },
+      "expected": null
+    },
+    {
+      "id": "T00-incompatible-ml-no-weight",
+      "description": "volume unit, count product without piece weight",
+      "quantity": {
+        "value": 100,
+        "unit": "ml"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": false,
+        "gramsPerMl": 1.0,
+        "gramsPerPiece": null
+      },
+      "expected": null
+    },
+    {
+      "id": "T00-incompatible-glass-no-density",
+      "description": "volume unit, count product with piece weight but no density",
+      "quantity": {
+        "value": 1,
+        "unit": "glass"
+      },
+      "product": {
+        "measureKind": "count",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": 55
+      },
+      "expected": null
+    },
+    {
+      "id": "T00-incompatible-piece-volume-no-density",
+      "description": "pieces of a volume product without density",
+      "quantity": {
+        "value": 1,
+        "unit": "piece"
+      },
+      "product": {
+        "measureKind": "volume",
+        "hasSizes": false,
+        "gramsPerMl": null,
+        "gramsPerPiece": 50
+      },
+      "expected": null
+    }
+  ]
+}
