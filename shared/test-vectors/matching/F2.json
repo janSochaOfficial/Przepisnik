@@ -1,0 +1,7039 @@
+{
+  "cases": [
+    {
+      "id": "F2-no-picks-base",
+      "description": "No picks: the base wins on cook count (5 vs 2, 1, 2).",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "base",
+          "A",
+          "B",
+          "C"
+        ],
+        "picks": {
+          "i:b1": {
+            "optionKey": "P1:600",
+            "source": "auto"
+          },
+          "i:b2": {
+            "optionKey": "P2:200",
+            "source": "auto"
+          },
+          "i:b3": {
+            "optionKey": "P5:x",
+            "source": "auto"
+          },
+          "p:P4": {
+            "optionKey": "none",
+            "source": "auto"
+          }
+        },
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ib3"
+        ]
+      }
+    },
+    {
+      "id": "F2-pin-narrows-to-A",
+      "description": "Pinning the 300 g cream leaves only variant A.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "A"
+        ],
+        "picks": {
+          "i:b2": {
+            "optionKey": "P2:300",
+            "source": "user"
+          },
+          "p:P4": {
+            "optionKey": "none",
+            "source": "auto"
+          }
+        },
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ib3"
+        ]
+      }
+    },
+    {
+      "id": "F2-pin-narrows-to-B-added-slot",
+      "description": "Pinning the added pepper leaves only B; the added ingredient is listed after the base rows.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "B",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "B"
+        ],
+        "picks": {
+          "p:P4": {
+            "optionKey": "P4:2.6",
+            "source": "user"
+          },
+          "i:b2": {
+            "optionKey": "P2:200",
+            "source": "auto"
+          }
+        },
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ib3",
+          "ia4"
+        ]
+      }
+    },
+    {
+      "id": "F2-pin-narrows-to-C",
+      "description": "Pinning the swapped product leaves only C.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P3:200",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "C",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "C"
+        ],
+        "picks": {
+          "i:b2": {
+            "optionKey": "P3:200",
+            "source": "user"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-pin-shared-option",
+      "description": "A pin shared by base and B keeps both compatible; base wins on cook count.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:200",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "base",
+          "B"
+        ]
+      }
+    },
+    {
+      "id": "F2-custom-mix-two-variants",
+      "description": "Pins taken from A and B: no variant has both, so it is a custom mix; A matches as many pins as B and has the higher cook count.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "user"
+        },
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "isCustomMix": true,
+        "compatibleVariantIds": [],
+        "picks": {
+          "i:b2": {
+            "optionKey": "P2:300",
+            "source": "user"
+          },
+          "p:P4": {
+            "optionKey": "P4:2.6",
+            "source": "user"
+          },
+          "i:b1": {
+            "optionKey": "P1:600",
+            "source": "auto"
+          }
+        },
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ib3",
+          "ia4"
+        ]
+      }
+    },
+    {
+      "id": "F2-custom-mix-pins-from-C-and-B",
+      "description": "Pins from C and B: custom mix, C wins the tie on cook count (2 vs 1).",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P3:200",
+          "source": "user"
+        },
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "C",
+        "isCustomMix": true,
+        "compatibleVariantIds": []
+      }
+    },
+    {
+      "id": "F2-custom-mix-favourite-tiebreak",
+      "description": "Custom mix, equal pin matches: the favourite B beats A.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": true,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "user"
+        },
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "B",
+        "isCustomMix": true,
+        "compatibleVariantIds": []
+      }
+    },
+    {
+      "id": "F2-custom-mix-most-pins-wins",
+      "description": "Three pins, no variant has all: D matches two of them and beats A and B (one each) despite fewer cooks.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "D",
+            "name": "D",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 6,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B"
+                ]
+              },
+              {
+                "key": "P1:700",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 700,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 700,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D",
+                  "B"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "user"
+        },
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "user"
+        },
+        "i:b1": {
+          "optionKey": "P1:700",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "D",
+        "isCustomMix": true,
+        "compatibleVariantIds": []
+      }
+    },
+    {
+      "id": "F2-memory-stabilizes-after-new-variant",
+      "description": "Remembered auto picks (A) keep the choice although the new variant D has a higher cook count.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "D",
+            "name": "D",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 9,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P2:250",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 250,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 250,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "auto"
+        },
+        "p:P4": {
+          "optionKey": "none",
+          "source": "auto"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "base",
+          "A",
+          "D"
+        ],
+        "picks": {
+          "i:b2": {
+            "optionKey": "P2:300",
+            "source": "auto"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-without-memory-new-variant-wins",
+      "description": "The same matrix without memory: D wins on cook count.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "D",
+            "name": "D",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 9,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P2:250",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 250,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 250,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "D"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "D",
+        "picks": {
+          "i:b2": {
+            "optionKey": "P2:250",
+            "source": "auto"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-favourite-beats-cook-count",
+      "description": "The favourite A (2 cooks) beats the base (5 cooks).",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": true,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "base",
+          "A",
+          "B",
+          "C"
+        ]
+      }
+    },
+    {
+      "id": "F2-preference-tiebreak",
+      "description": "Equal cook counts: the preference for P2 to P3 lifts C above the base.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [
+        {
+          "fromProductId": "P2",
+          "toProductId": "P3",
+          "weight": 4
+        }
+      ],
+      "expected": {
+        "bestVariantId": "C",
+        "picks": {
+          "i:b2": {
+            "optionKey": "P3:200",
+            "source": "auto"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-preference-beats-cook-count",
+      "description": "The preference score ranks above the cook count.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [
+        {
+          "fromProductId": "P2",
+          "toProductId": "P3",
+          "weight": 1
+        }
+      ],
+      "expected": {
+        "bestVariantId": "C"
+      }
+    },
+    {
+      "id": "F2-favourite-beats-preference",
+      "description": "A favourite outranks the preference score.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": true,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [
+        {
+          "fromProductId": "P2",
+          "toProductId": "P3",
+          "weight": 9
+        }
+      ],
+      "expected": {
+        "bestVariantId": "A"
+      }
+    },
+    {
+      "id": "F2-preference-sums-weights",
+      "description": "Weights of all swaps of a variant add up; unrelated preferences are ignored.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              },
+              {
+                "fromProductId": "P1",
+                "toProductId": "P8"
+              }
+            ]
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [
+        {
+          "fromProductId": "P2",
+          "toProductId": "P3",
+          "weight": 1
+        },
+        {
+          "fromProductId": "P1",
+          "toProductId": "P8",
+          "weight": 1
+        },
+        {
+          "fromProductId": "X",
+          "toProductId": "Y",
+          "weight": 50
+        }
+      ],
+      "expected": {
+        "bestVariantId": "A"
+      }
+    },
+    {
+      "id": "F2-remembered-beats-favourite",
+      "description": "Remembered picks matching B outrank the favourite A.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": true,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "auto"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "B",
+        "picks": {
+          "p:P4": {
+            "optionKey": "P4:2.6",
+            "source": "auto"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-cook-count-tiebreak",
+      "description": "Without any other signal the highest cook count wins.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 4,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "B"
+      }
+    },
+    {
+      "id": "F2-everything-tied-base-first",
+      "description": "All signals tied: the base comes first.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base"
+      }
+    },
+    {
+      "id": "F2-tie-older-variant-first-among-two",
+      "description": "Cook counts tied between A and C, pin \"none\" on the added slot: the older A wins over C.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "p:P4": {
+          "optionKey": "none",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "compatibleVariantIds": [
+          "base",
+          "A",
+          "C"
+        ]
+      }
+    },
+    {
+      "id": "F2-tie-older-variant-first-reversed",
+      "description": "The same with C created before A: C wins.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-06-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 3,
+            "createdAt": "2026-05-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "C"
+      }
+    },
+    {
+      "id": "F2-none-option-pinned",
+      "description": "Pinning \"none\" on the added slot keeps base, A and C and leaves the ingredient out.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "p:P4": {
+          "optionKey": "none",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "compatibleVariantIds": [
+          "base",
+          "A",
+          "C"
+        ],
+        "picks": {
+          "p:P4": {
+            "optionKey": "none",
+            "source": "user"
+          }
+        },
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ib3"
+        ]
+      }
+    },
+    {
+      "id": "F2-two-added-slots-order",
+      "description": "Only chosen non-none options are listed, added ones after the base rows.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "E",
+            "name": "E",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B",
+                  "E"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B",
+                  "E"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "E"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P6",
+            "label": "groszek",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P6:80",
+                "ingredient": {
+                  "id": "ia6",
+                  "product": {
+                    "id": "P6",
+                    "name": "P6"
+                  },
+                  "quantity": {
+                    "value": 80,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 80,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "E"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "p:P6": {
+          "optionKey": "P6:80",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "E",
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ia6"
+        ]
+      }
+    },
+    {
+      "id": "F2-two-added-slots-both-none",
+      "description": "No pins and the base wins: no added ingredient is listed.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "E",
+            "name": "E",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 0,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B",
+                  "E"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B",
+                  "E"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "E"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P6",
+            "label": "groszek",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P6:80",
+                "ingredient": {
+                  "id": "ia6",
+                  "product": {
+                    "id": "P6",
+                    "name": "P6"
+                  },
+                  "quantity": {
+                    "value": 80,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 80,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "E"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "ingredientIds": [
+          "ib1",
+          "ib2"
+        ]
+      }
+    },
+    {
+      "id": "F2-option-order-pinned",
+      "description": "Compatible options first, then by support count, then matrix order.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "optionOrder": {
+          "i:b2": [
+            "P2:300",
+            "P2:200",
+            "P3:200"
+          ],
+          "p:P4": [
+            "none",
+            "P4:2.6"
+          ]
+        },
+        "optionCompatible": {
+          "i:b2": [
+            true,
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "F2-option-order-unpinned",
+      "description": "Everything compatible: support count decides, ties keep the matrix order.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "optionOrder": {
+          "i:b2": [
+            "P2:200",
+            "P2:300",
+            "P3:200"
+          ],
+          "p:P4": [
+            "none",
+            "P4:2.6"
+          ]
+        },
+        "optionSupport": {
+          "i:b2": [
+            2,
+            1,
+            1
+          ],
+          "p:P4": [
+            3,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "F2-stale-picks-ignored",
+      "description": "Picks for an unknown slot or option (a deleted variant) are dropped.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P9:1",
+          "source": "user"
+        },
+        "i:gone": {
+          "optionKey": "none",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "base",
+          "A",
+          "B",
+          "C"
+        ],
+        "picks": {
+          "i:b2": {
+            "optionKey": "P2:200",
+            "source": "auto"
+          }
+        },
+        "absentPickSlots": [
+          "i:gone"
+        ]
+      }
+    },
+    {
+      "id": "F2-user-pin-with-auto-memory",
+      "description": "A user pin on A; the remembered auto pick on another slot does not override the best variant.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P2:300",
+          "source": "user"
+        },
+        "p:P4": {
+          "optionKey": "P4:2.6",
+          "source": "auto"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "A",
+        "compatibleVariantIds": [
+          "A"
+        ],
+        "picks": {
+          "p:P4": {
+            "optionKey": "none",
+            "source": "auto"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-base-only",
+      "description": "A recipe without visible variants resolves to the base.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base",
+        "isCustomMix": false,
+        "compatibleVariantIds": [
+          "base"
+        ],
+        "ingredientIds": [
+          "ib1",
+          "ib2",
+          "ib3"
+        ]
+      }
+    },
+    {
+      "id": "F2-selected-flag-and-source",
+      "description": "The picked option is marked selected with its source.",
+      "matrix": {
+        "recipeId": "r1",
+        "variants": [
+          {
+            "id": "base",
+            "name": "base",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 5,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "A",
+            "name": "A",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-02-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "B",
+            "name": "B",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 1,
+            "createdAt": "2026-03-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": []
+          },
+          {
+            "id": "C",
+            "name": "C",
+            "author": {
+              "id": "u1",
+              "nickname": "ania"
+            },
+            "cookCount": 2,
+            "createdAt": "2026-04-01T00:00:00Z",
+            "isFavorite": false,
+            "productSwaps": [
+              {
+                "fromProductId": "P2",
+                "toProductId": "P3"
+              }
+            ]
+          }
+        ],
+        "slots": [
+          {
+            "key": "i:b1",
+            "label": "kurczak",
+            "options": [
+              {
+                "key": "P1:600",
+                "ingredient": {
+                  "id": "ib1",
+                  "product": {
+                    "id": "P1",
+                    "name": "P1"
+                  },
+                  "quantity": {
+                    "value": 600,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 600,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b2",
+            "label": "smietana",
+            "options": [
+              {
+                "key": "P2:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "B"
+                ]
+              },
+              {
+                "key": "P2:300",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P2",
+                    "name": "P2"
+                  },
+                  "quantity": {
+                    "value": 300,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 300,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "A"
+                ]
+              },
+              {
+                "key": "P3:200",
+                "ingredient": {
+                  "id": "ib2",
+                  "product": {
+                    "id": "P3",
+                    "name": "P3"
+                  },
+                  "quantity": {
+                    "value": 200,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 200,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "i:b3",
+            "label": "sol",
+            "options": [
+              {
+                "key": "P5:x",
+                "ingredient": {
+                  "id": "ib3",
+                  "product": {
+                    "id": "P5",
+                    "name": "P5"
+                  },
+                  "quantity": null,
+                  "baseAmount": null,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "base",
+                  "A",
+                  "B",
+                  "C"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "p:P4",
+            "label": "papryka",
+            "options": [
+              {
+                "key": "none",
+                "ingredient": null,
+                "variantIds": [
+                  "base",
+                  "A",
+                  "C"
+                ]
+              },
+              {
+                "key": "P4:2.6",
+                "ingredient": {
+                  "id": "ia4",
+                  "product": {
+                    "id": "P4",
+                    "name": "P4"
+                  },
+                  "quantity": {
+                    "value": 2.6,
+                    "unit": "g",
+                    "size": null
+                  },
+                  "baseAmount": 2.6,
+                  "note": null,
+                  "optional": false
+                },
+                "variantIds": [
+                  "B"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "picks": {
+        "i:b2": {
+          "optionKey": "P3:200",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "C",
+        "selected": {
+          "i:b2": {
+            "optionKey": "P3:200",
+            "source": "user"
+          },
+          "i:b1": {
+            "optionKey": "P1:600",
+            "source": "auto"
+          }
+        }
+      }
+    },
+    {
+      "id": "F2-t00-modify-amount-no-picks",
+      "description": "T00 matrix: the base has more cooks than the variant.",
+      "matrixFromCase": "T00-variant-modify-amount",
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base"
+      }
+    },
+    {
+      "id": "F2-t00-modify-amount-pin",
+      "description": "T00 matrix: pinning 300 ml selects the variant.",
+      "matrixFromCase": "T00-variant-modify-amount",
+      "picks": {
+        "i:00000000-0000-7000-8000-00000000b002": {
+          "optionKey": "00000000-0000-7000-8000-00000000a002:300",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "00000000-0000-7000-8000-00000000d001",
+        "compatibleVariantIds": [
+          "00000000-0000-7000-8000-00000000d001"
+        ]
+      }
+    },
+    {
+      "id": "F2-t00-swap-preference",
+      "description": "T00 matrix: a preference for the swap lifts the variant above the base despite fewer cooks.",
+      "matrixFromCase": "T00-variant-swap-product",
+      "picks": {},
+      "preferences": [
+        {
+          "fromProductId": "00000000-0000-7000-8000-00000000a002",
+          "toProductId": "00000000-0000-7000-8000-00000000a003",
+          "weight": 5
+        }
+      ],
+      "expected": {
+        "bestVariantId": "00000000-0000-7000-8000-00000000d002"
+      }
+    },
+    {
+      "id": "F2-t00-remove-pin-none",
+      "description": "T00 matrix: pinning \"none\" on the onion selects the variant that removes it.",
+      "matrixFromCase": "T00-variant-remove",
+      "picks": {
+        "i:00000000-0000-7000-8000-00000000b011": {
+          "optionKey": "none",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "00000000-0000-7000-8000-00000000d004",
+        "ingredientIds": [
+          "00000000-0000-7000-8000-00000000b012"
+        ]
+      }
+    },
+    {
+      "id": "F2-t00-remove-no-picks",
+      "description": "T00 matrix: all tied, the base comes first.",
+      "matrixFromCase": "T00-variant-remove",
+      "picks": {},
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "base"
+      }
+    },
+    {
+      "id": "F2-t00-add-after-pin",
+      "description": "T00 matrix: pinning the added pepper lists it after the base rows.",
+      "matrixFromCase": "T00-variant-add-after",
+      "picks": {
+        "p:00000000-0000-7000-8000-00000000a005": {
+          "optionKey": "00000000-0000-7000-8000-00000000a005:2.6",
+          "source": "user"
+        }
+      },
+      "preferences": [],
+      "expected": {
+        "bestVariantId": "00000000-0000-7000-8000-00000000d005",
+        "ingredientIds": [
+          "00000000-0000-7000-8000-00000000b011",
+          "00000000-0000-7000-8000-00000000b012",
+          "00000000-0000-7000-8000-00000000b901"
+        ]
+      }
+    }
+  ]
+}
