@@ -95,7 +95,7 @@ public sealed class AuthFoundationTests(ApiFactory factory) : IClassFixture<ApiF
         me.GetProperty("nickname").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
 
         await ContractAssert.IsProblemAsync(
-            await client.GetAsync("/api/v1/recipes"), HttpStatusCode.Forbidden, "user.onboarding_required");
+            await client.GetAsync("/api/v1/favorites"), HttpStatusCode.Forbidden, "user.onboarding_required");
         (await client.GetAsync("/api/v1/me")).StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
@@ -119,7 +119,7 @@ public sealed class AuthFoundationTests(ApiFactory factory) : IClassFixture<ApiF
         await client.LoginAsync("henryk");
 
         await ContractAssert.IsProblemAsync(
-            await client.GetAsync("/api/v1/recipes"), HttpStatusCode.NotImplemented, "server.error");
+            await client.GetAsync("/api/v1/favorites"), HttpStatusCode.NotImplemented, "server.error");
     }
 
     [Fact]

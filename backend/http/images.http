@@ -1,0 +1,19 @@
+@host = http://localhost:5080
+
+### Upload a photo (JPEG, PNG or WebP, up to 10 MB); the response has id, url and thumbnailUrl
+POST {{host}}/api/v1/images
+X-Requested-With: fetch
+Content-Type: multipart/form-data; boundary=----rl
+
+------rl
+Content-Disposition: form-data; name="file"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+< ./photo.jpg
+------rl--
+
+### Download the full rendition
+GET {{host}}/api/v1/images/00000000-0000-0000-0000-000000000005
+
+### Download the thumbnail
+GET {{host}}/api/v1/images/00000000-0000-0000-0000-000000000005?size=thumb

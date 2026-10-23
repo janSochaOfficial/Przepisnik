@@ -1,0 +1,64 @@
+@host = http://localhost:5080
+
+### Sign in (Development only); the cookie is kept by the client
+POST {{host}}/api/v1/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "ola@example.com", "nickname": "ola" }
+
+### List recipes (filters: q, tags=<id>,<id>, author=me, visibility, page, pageSize, sort=newest|title)
+GET {{host}}/api/v1/recipes?author=me&sort=title&page=1&pageSize=20
+
+### Create (replace the ids with real product ids from GET /products)
+POST {{host}}/api/v1/recipes
+Content-Type: application/json
+X-Requested-With: fetch
+
+{
+  "title": "Nalesniki",
+  "description": null,
+  "coverImageId": null,
+  "prepMinutes": 10,
+  "cookMinutes": 15,
+  "tagIds": [],
+  "utensilIds": [],
+  "ingredients": [
+    { "productId": "00000000-0000-0000-0000-000000000001", "quantity": { "value": 200, "unit": "g" }, "note": null, "optional": false }
+  ],
+  "prepSteps": [],
+  "instructionSteps": [ { "blocks": [ { "type": "text", "text": "Usmaz." } ] } ],
+  "visibility": "private"
+}
+
+### Get one
+GET {{host}}/api/v1/recipes/00000000-0000-0000-0000-000000000002
+
+### Update (send back the ids of rows you keep; version comes from the last response)
+PUT {{host}}/api/v1/recipes/00000000-0000-0000-0000-000000000002
+Content-Type: application/json
+X-Requested-With: fetch
+
+{
+  "title": "Nalesniki v2",
+  "tagIds": [],
+  "utensilIds": [],
+  "ingredients": [
+    { "id": "00000000-0000-0000-0000-000000000003", "productId": "00000000-0000-0000-0000-000000000001", "quantity": { "value": 250, "unit": "g" }, "optional": false }
+  ],
+  "prepSteps": [],
+  "instructionSteps": [ { "id": "00000000-0000-0000-0000-000000000004", "blocks": [ { "type": "text", "text": "Usmaz." } ] } ],
+  "version": 1,
+  "deleteVariants": false
+}
+
+### Change visibility
+PUT {{host}}/api/v1/recipes/00000000-0000-0000-0000-000000000002/visibility
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "visibility": "fridges" }
+
+### Delete (archives the recipe when other users have variants)
+DELETE {{host}}/api/v1/recipes/00000000-0000-0000-0000-000000000002
+X-Requested-With: fetch
