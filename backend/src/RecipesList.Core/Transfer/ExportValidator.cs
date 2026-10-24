@@ -317,7 +317,7 @@ public static class ExportValidator
         HashSet<string> BaseIngredients,
         Dictionary<string, StepSection> BaseSteps);
 
-    private static void CheckBlocks(RecipeExportDocument document,IReadOnlyList<ExportBlock> blocks, string path, Action<string, string> fail)
+    private static void CheckBlocks(RecipeExportDocument document, IReadOnlyList<ExportBlock> blocks, string path, Action<string, string> fail)
     {
         if (blocks.Count == 0)
         {

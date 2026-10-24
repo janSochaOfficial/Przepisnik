@@ -23,9 +23,15 @@
               "displayClass": { "$ref": "common.schema.json#/$defs/displayClass" },
               "hasSizes": { "type": "boolean" },
               "allowHalf": { "type": "boolean" },
-              "pieceForms": { "oneOf": [{ "$ref": "common.schema.json#/$defs/pluralForms" }, { "type": "null" }] }
+              "pieceForms": { "oneOf": [{ "$ref": "common.schema.json#/$defs/pluralForms" }, { "type": "null" }] },
+              "gramsPerMl": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+              "gramsPerPiece": { "type": ["number", "null"], "exclusiveMinimum": 0 }
             },
             "additionalProperties": false
+          },
+          "customUnit": {
+            "description": "When present, the base amount was entered in this custom unit and is shown in it (D-31): rounded to the nearest ¼, at least ¼, with the usual 5 % approximate rule. forms are required then.",
+            "$ref": "common.schema.json#/$defs/customUnit"
           },
           "options": {
             "type": "object",

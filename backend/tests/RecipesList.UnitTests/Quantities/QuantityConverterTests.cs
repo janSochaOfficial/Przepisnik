@@ -1,6 +1,7 @@
 using System.Text.Json;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Quantities;
+using RecipesList.Core.Units;
 
 namespace RecipesList.UnitTests.Quantities;
 
@@ -21,8 +22,13 @@ public sealed class QuantityConverterTests
         var quantity = ReadQuantity(c.GetProperty("quantity"));
         var product = ReadProduct(c.GetProperty("product"));
         var expected = c.GetProperty("expected");
+        var unit = c.TryGetProperty("customUnit", out var u) ? ReadCustomUnit(u, product) : null;
+        if (unit is not null)
+        {
+            quantity = quantity with { CustomUnitId = unit.Id };
+        }
 
-        var actual = _converter.ToBaseAmount(quantity, product);
+        var actual = _converter.ToBaseAmount(quantity, product, unit);
 
         if (expected.ValueKind == JsonValueKind.Null)
         {
@@ -57,6 +63,22 @@ public sealed class QuantityConverterTests
             : (PieceSize?)null;
         return new Quantity(q.GetProperty("value").GetDecimal(), Enum.Parse<Unit>(q.GetProperty("unit").GetString()!, ignoreCase: true), size);
     }
+
+    // scope: "product" (the case's product), "otherProduct" or "all" (a unit for every product).
+    private static CustomUnit ReadCustomUnit(JsonElement u, Product product) => new()
+    {
+        Name = "test",
+        NormalizedName = "test",
+        Forms = new PluralForms("a", "b", "c", "d"),
+        MeasureKind = Enum.Parse<MeasureKind>(u.GetProperty("measureKind").GetString()!, ignoreCase: true),
+        Amount = u.GetProperty("amount").GetDecimal(),
+        ProductId = u.GetProperty("scope").GetString() switch
+        {
+            "product" => product.Id,
+            "otherProduct" => Guid.CreateVersion7(),
+            _ => null,
+        },
+    };
 
     private static Product ReadProduct(JsonElement p) => new()
     {

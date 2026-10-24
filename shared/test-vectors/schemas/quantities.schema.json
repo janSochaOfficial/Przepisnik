@@ -15,6 +15,10 @@
           "id": { "$ref": "common.schema.json#/$defs/caseId" },
           "description": { "type": "string" },
           "quantity": { "$ref": "common.schema.json#/$defs/quantity" },
+          "customUnit": {
+            "description": "Required when quantity.unit is 'custom': the definition of that unit.",
+            "$ref": "common.schema.json#/$defs/customUnit"
+          },
           "product": {
             "type": "object",
             "required": ["measureKind", "hasSizes", "gramsPerMl", "gramsPerPiece"],

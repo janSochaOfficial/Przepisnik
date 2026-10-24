@@ -14,7 +14,7 @@
     },
     "measureKind": { "enum": ["mass", "volume", "count"] },
     "displayClass": { "enum": ["weight", "liquid", "spice", "piece"] },
-    "unit": { "enum": ["g", "kg", "ml", "l", "glass", "tbsp", "tsp", "drop", "pinch", "piece"] },
+    "unit": { "enum": ["g", "kg", "ml", "l", "glass", "tbsp", "tsp", "drop", "pinch", "piece", "custom"] },
     "pieceSize": { "enum": ["small", "medium", "large"] },
     "pluralForms": {
       "type": "object",
@@ -24,6 +24,18 @@
         "few": { "type": "string" },
         "many": { "type": "string" },
         "fraction": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "customUnit": {
+      "description": "A custom unit (PROJECT §5.6): 1 unit = amount base units of measureKind. scope: 'product' = a unit of the case's product, 'otherProduct' = a unit of a different product, 'all' = a unit for every product. forms are needed by formatting cases only.",
+      "type": "object",
+      "required": ["measureKind", "amount", "scope"],
+      "properties": {
+        "measureKind": { "$ref": "#/$defs/measureKind" },
+        "amount": { "type": "number", "exclusiveMinimum": 0 },
+        "scope": { "enum": ["product", "otherProduct", "all"] },
+        "forms": { "$ref": "#/$defs/pluralForms" }
       },
       "additionalProperties": false
     },

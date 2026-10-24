@@ -112,7 +112,7 @@ public sealed class VariantService(
         var productIds = resolved.Ingredients.Select(i => i.ProductId).Distinct().ToList();
         var products = await db.Products.AsNoTracking().Where(p => productIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, ct);
         var units = await db.LoadCustomUnitsAsync(resolved.Ingredients.Select(i => i.Quantity), ct);
-        var utensilList =await db.Utensils.AsNoTracking().Where(u => resolved.UtensilIds.Contains(u.Id)).ToListAsync(ct);
+        var utensilList = await db.Utensils.AsNoTracking().Where(u => resolved.UtensilIds.Contains(u.Id)).ToListAsync(ct);
         var utensilsById = utensilList.ToDictionary(u => u.Id);
         var isFavorite = await db.RecipeFavorites.AnyAsync(f => f.UserId == userId && f.RecipeId == recipe.Id, ct);
         var cookCount = await db.RecipeCookCounts.Where(c => c.RecipeId == recipe.Id).Select(c => c.Count).FirstOrDefaultAsync(ct);
