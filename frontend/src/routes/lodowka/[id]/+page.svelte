@@ -1,6 +1,15 @@
 <script lang="ts">
-	import PagePlaceholder from '$lib/components/PagePlaceholder.svelte';
-	import { t } from '$lib/i18n';
+	import { page } from '$app/state';
+	import { liquidUnitsOf } from '$lib/components/fridge/amount';
+	import FridgeScreen from '$lib/components/fridge/FridgeScreen.svelte';
+
+	let { data } = $props();
 </script>
 
-<PagePlaceholder title={t.fridge.title} />
+{#key page.params.id}
+	<FridgeScreen
+		fridgeId={page.params.id ?? ''}
+		liquidUnits={liquidUnitsOf(data)}
+		meId={data.me?.id ?? ''}
+	/>
+{/key}
