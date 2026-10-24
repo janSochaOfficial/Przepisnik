@@ -39,3 +39,43 @@ PROJECT §4.2, §7 · API §0 (`ProductRef`), §2 · TECHNICAL §3, §4 · `fron
 - Typing "Cebula" and tabbing away → "cebula" is selected without a prompt.
 - The admin edit of a user-added product makes it verified.
 - `scripts/verify.sh --agent` is green.
+
+## Report
+
+### Summary
+- `Product.IsVerified` added. The seeder sets it to true. `POST /products` sets it from `currentUser.IsAdmin`. `PUT /admin/products/{id}` sets it to true.
+- `GET /products` ordering is implemented in one query: exact normalized match, then prefix, word prefix and trigram, then verified before user-added within each tier, then similarity and name. Without `q` it is verified first, then name.
+- `ProductRef` gained `isVerified` in API.md and openapi.yaml, and `schema.d.ts` was regenerated.
+- `ProductPicker` has a `confirmNew` prop, on in the recipe editor's `IngredientRow`. On blur or Enter with unmatched text it does one of two things:
+  - If the text normalizes to a returned product's name, it selects that product.
+  - Otherwise it shows the `ConfirmDialog`. "Dodaj do bazy" opens `NewProductDialog` with the name filled in. "Nie dodawaj" clears the field and refocuses it.
+- User-added products show "dodany przez użytkownika" next to the category in the picker.
+- `Combobox` got additive `onCommit` and `clear()` / `focus()`.
+- Tests: backend search, create and admin-verify tests plus the seeder assertion; frontend unit tests for the Combobox commit hook, `ProductPicker` and `product-name`; Playwright `product-prompt.spec.ts` covering both answers and the exact-match case.
+
+### Deviations
+- The variant editor has no `ProductPicker` in the codebase, so `confirmNew` is wired only in the recipe editor's `IngredientRow` (one added line, outside P1's ownership). Fridge and shopping dialogs keep `confirmNew` off (default false).
+- `isVerified` was added to the product DTO records owned by other features: `RecipeProductRefDto` (Recipes), `VariantProductRef` (Variants) and `FridgeProductRefDto` (Fridges). The contract says `ProductRef` always carries it, and those records serialize `ProductRef`. The edits are mechanical: one constructor parameter and one `From` argument each. U1 also edits the recipe and variant DTOs, so expect a trivial merge conflict there.
+- The export product type (`ExportModels.cs`) is untouched, per the task.
+- Fixtures that build a `ProductRef` got `isVerified: true`: `IngredientRow.svelte.test.ts`, `draft.test.ts`, `mocks/catalog.ts`, `mocks/variants.ts` and `routes/lodowka/harness-odejmowanie/+page.svelte`.
+- `ProductPicker` runs its own `GET /products?q=` on commit (not the possibly stale combobox results) to decide whether the text matches a product.
+- Cancelling the new-product form leaves the typed text in the field, so the prompt can reappear on the next blur.
+- `product-name.ts` uses `ł` for ł because of the no-Polish-literals test.
+
+### Model changes
+- `products.is_verified boolean NOT NULL DEFAULT false`. Configured with `HasDefaultValue(false)` in `ProductConfiguration`; no migration was added.
+- Data step for the coordinator's migration: `UPDATE products SET is_verified = true WHERE created_by_id IS NULL OR created_by_id IN (SELECT id FROM users WHERE is_admin)`.
+
+### Contract changes
+- `ProductRef.isVerified: boolean` (required, read-only) in API.md §0 and openapi.yaml.
+- The `GET /products` ordering is described in API.md §2 and in the openapi description. API.md §2 also notes the verified rules for `POST /products` and `PUT /admin/products/{id}`.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- Generate the migration for `is_verified` and run the data step above.
+- U1: the merge will touch the `*ProductRef*` records in `RecipeDtos.cs` and `VariantDtos.cs`. Keep both changes.
+
+### Follow-ups
+- The picker in the fridge and shopping dialogs could use `confirmNew` if wanted.
