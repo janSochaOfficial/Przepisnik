@@ -30,7 +30,6 @@ export const fridge = {
 		/** `Śmietanka 30%` + this line: `330 ml · zostało 70 % (~230 ml)`. */
 		remaining: (percent: string, amount: string) => `zostało ${percent} (${amount})`,
 		piecesLeft: (left: string, total: string) => `zostało ${left} z ${total}`,
-		edit: (name: string) => `Zmień: ${name}`,
 		note: 'Notatka'
 	},
 

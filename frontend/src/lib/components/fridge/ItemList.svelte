@@ -28,7 +28,6 @@
 					<li class="border-b border-line last:border-b-0">
 						<button
 							type="button"
-							aria-label={t.fridge.item.edit(item.product.name)}
 							class="flex min-h-14 w-full items-center gap-3 px-4 py-2 text-left hover:bg-cobalt-wash"
 							onclick={() => onEdit(item)}
 						>
