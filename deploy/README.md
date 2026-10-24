@@ -14,8 +14,10 @@ Health checks: `GET /api/health` (liveness, used by the image's `HEALTHCHECK`) a
 
 ```bash
 docker compose -f deploy/compose.yaml up -d --build
-docker compose -f deploy/compose.yaml ps          # wait until api and web are "healthy"
+docker compose -f deploy/compose.yaml ps          # wait until api is "healthy" (web starts after it)
 ```
+
+On the very first start the API logs one EF Core error about a missing `__EFMigrationsHistory` table, right before it creates it and applies the migrations; that is expected.
 
 Open http://localhost:8080. Without a Google client ID the login page says that sign-in is not configured yet; set one up as below.
 Nothing has to be configured for a local try-out: every setting has a default. To change settings, copy the example and edit it:

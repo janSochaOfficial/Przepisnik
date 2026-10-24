@@ -17,7 +17,7 @@ A recipe and fridge app: an ASP.NET Core 10 API with PostgreSQL and a SvelteKit 
 docker compose -f deploy/compose.yaml up -d --build   # PostgreSQL, the API and Caddy
 ```
 
-Open http://localhost:8080 once `docker compose -f deploy/compose.yaml ps` shows `api` and `web` as healthy. Signing in needs a Google OAuth client ID; [deploy/README.md](deploy/README.md) covers that, HTTPS on a domain, backups and upgrades. `docker compose -f deploy/compose.yaml down` stops it (add `-v` to delete the data).
+Open http://localhost:8080 once `docker compose -f deploy/compose.yaml ps` shows `api` as healthy and `web` as running. Signing in needs a Google OAuth client ID; [deploy/README.md](deploy/README.md) covers that, HTTPS on a domain, backups and upgrades. `docker compose -f deploy/compose.yaml down` stops it (add `-v` to delete the data).
 
 ## Quick start: development
 
