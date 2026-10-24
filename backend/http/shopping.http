@@ -1,0 +1,36 @@
+# The per-fridge shopping list (API.md §7). Sign in first with dev-login (see fridges.http).
+@baseUrl = http://localhost:5105/api/v1
+@fridgeId = 00000000-0000-0000-0000-000000000000
+@itemId = 00000000-0000-0000-0000-000000000000
+@productId = 00000000-0000-0000-0000-000000000000
+
+### The list (unchecked first, then by category, then by name)
+GET {{baseUrl}}/fridges/{{fridgeId}}/shopping-list
+
+### Add entries; a product with an unchecked entry is merged (amounts summed, null + x = x)
+POST {{baseUrl}}/fridges/{{fridgeId}}/shopping-list/items
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "items": [
+  { "productId": "{{productId}}", "text": null, "amount": 500 },
+  { "productId": null, "text": "Chleb", "amount": null }
+] }
+
+### Check off (version from the last read; 409 concurrency.conflict when stale)
+PATCH {{baseUrl}}/fridges/{{fridgeId}}/shopping-list/items/{{itemId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "version": 0, "checked": true, "amount": null, "text": null }
+
+### Remove an entry
+DELETE {{baseUrl}}/fridges/{{fridgeId}}/shopping-list/items/{{itemId}}
+X-Requested-With: fetch
+
+### Move checked entries to the fridge (package = amount or product default, at 100 %) and remove them
+POST {{baseUrl}}/fridges/{{fridgeId}}/shopping-list/complete
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "moveToFridge": true }

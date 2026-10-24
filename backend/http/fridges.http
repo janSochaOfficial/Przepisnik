@@ -1,0 +1,95 @@
+# Fridges, members, invites, items and deductions (API.md §6, §7). Sign in first with dev-login (Development only);
+# the cookie is kept between requests. Replace the ids with ones from your database (recipes_b5 for task B5).
+@baseUrl = http://localhost:5105/api/v1
+@fridgeId = 00000000-0000-0000-0000-000000000000
+@inviteId = 00000000-0000-0000-0000-000000000000
+@token = replace-with-an-invite-token
+@userId = 00000000-0000-0000-0000-000000000000
+@itemId = 00000000-0000-0000-0000-000000000000
+@productId = 00000000-0000-0000-0000-000000000000
+@deductionId = 00000000-0000-0000-0000-000000000000
+
+### Sign in (dev-login)
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "anna@test.local", "nickname": "anna" }
+
+### My fridges
+GET {{baseUrl}}/fridges
+
+### Create a fridge (I become its owner)
+POST {{baseUrl}}/fridges
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "Działka" }
+
+### A fridge with its members (404 fridge.not_found for non-members)
+GET {{baseUrl}}/fridges/{{fridgeId}}
+
+### Rename (owner; 403 fridge.owner_required for members)
+PUT {{baseUrl}}/fridges/{{fridgeId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "Kuchnia" }
+
+### Delete (owner)
+DELETE {{baseUrl}}/fridges/{{fridgeId}}
+X-Requested-With: fetch
+
+### Create an invite link (owner; valid for 7 days)
+POST {{baseUrl}}/fridges/{{fridgeId}}/invites
+X-Requested-With: fetch
+
+### Active invites (owner)
+GET {{baseUrl}}/fridges/{{fridgeId}}/invites
+
+### Revoke an invite (owner)
+DELETE {{baseUrl}}/fridges/{{fridgeId}}/invites/{{inviteId}}
+X-Requested-With: fetch
+
+### Preview an invite (404 invite.not_found when expired or revoked)
+GET {{baseUrl}}/invites/{{token}}
+
+### Join (idempotent for members)
+POST {{baseUrl}}/invites/{{token}}/accept
+X-Requested-With: fetch
+
+### Remove a member (owner), or leave (member; 400 fridge.owner_cannot_leave for the owner)
+DELETE {{baseUrl}}/fridges/{{fridgeId}}/members/{{userId}}
+X-Requested-With: fetch
+
+### Items
+GET {{baseUrl}}/fridges/{{fridgeId}}/items
+
+### Add an item (package in base units, percent 0–100)
+POST {{baseUrl}}/fridges/{{fridgeId}}/items
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "productId": "{{productId}}", "packageAmount": 330, "remainingPercent": 100, "note": null }
+
+### Edit an item (version from the last read; 409 concurrency.conflict when stale; 0 % deletes → 204)
+PUT {{baseUrl}}/fridges/{{fridgeId}}/items/{{itemId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "productId": "{{productId}}", "packageAmount": 330, "remainingPercent": 70, "note": null, "version": 0 }
+
+### Remove an item
+DELETE {{baseUrl}}/fridges/{{fridgeId}}/items/{{itemId}}
+X-Requested-With: fetch
+
+### Deduct a cooked recipe (most-used package first; shortfalls reported)
+POST {{baseUrl}}/fridges/{{fridgeId}}/deductions
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "recipeId": null, "variantId": null, "lines": [{ "productId": "{{productId}}", "amount": 200 }] }
+
+### Undo (409 deduction.items_changed / deduction.already_undone)
+POST {{baseUrl}}/fridges/{{fridgeId}}/deductions/{{deductionId}}/undo
+X-Requested-With: fetch
