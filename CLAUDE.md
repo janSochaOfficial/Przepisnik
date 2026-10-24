@@ -8,7 +8,8 @@ A recipe and fridge app. **The UI is in Polish; code, comments, API and docs are
 - [docs/API.md](docs/API.md) + `docs/api/openapi.yaml`: the HTTP contract. Change both together, or neither.
 - [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md): waves, file ownership, coordination rules (§4) and fixed interfaces (§5).
 - [docs/COORDINATOR.md](docs/COORDINATOR.md): the coordinator (main session) runbook and **status board**. If you are the coordinator, start there.
-- `docs/tasks/<ID>-*.md`: your assignment when you are a task agent.
+- `docs/tasks/<ID>-*.md`: your assignment when you are a task agent (the v1 task files were removed once merged).
+- [docs/AGENT_DECISIONS.md](docs/AGENT_DECISIONS.md): every decision an agent made rather than the user, plus known open issues.
 
 ## Skills (in `.claude/skills/`, provenance in `SOURCES.md`)
 - Svelte work → `svelte-core-bestpractices`, and run `svelte-code-writer`'s autofixer on every changed `.svelte` / `.svelte.ts` file.

@@ -6,7 +6,7 @@ The visual direction of the app, set once in task F0 (TECHNICAL §4.3). F3–F6 
 report it in your task's Report, rather than inventing new colours, sizes or shadows.
 
 Live reference: `npm run dev`, then open **`/ui`** (the showcase renders every primitive in every
-state; it is excluded from production builds). Screenshots: `docs/tasks/F0-screenshots/`.
+state; it is excluded from production builds).
 
 ---
 

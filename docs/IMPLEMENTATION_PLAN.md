@@ -1,7 +1,7 @@
 # Implementation plan
 
 Inputs: [PROJECT.md](../PROJECT.md) (what), [TECHNICAL.md](../TECHNICAL.md) (how), [API.md](API.md) (contract).
-Task files for agents: [docs/tasks/](tasks/).
+Every v1 task is merged. Their task files were removed after the merge; they are in git history (`git show 1200bc8:docs/tasks/<ID>-<slug>.md`), and the decisions from their reports are in [AGENT_DECISIONS.md](AGENT_DECISIONS.md). New tasks go in a new `docs/tasks/`.
 
 ## 1. Strategy
 

@@ -34,8 +34,9 @@ Lock files (`package-lock.json`, `packages.lock.json` with `RestorePackagesWithL
 ├── docs/
 │   ├── API.md                      # human-readable contract
 │   ├── api/openapi.yaml            # normative machine contract (generated from API.md in T00, then kept in sync)
-│   ├── IMPLEMENTATION_PLAN.md
-│   └── tasks/                      # one file per agent task
+│   ├── IMPLEMENTATION_PLAN.md  COORDINATOR.md
+│   ├── AGENT_DECISIONS.md          # decisions agents made, for review
+│   └── tasks/                      # one file per agent task (only while a wave is in progress)
 ├── shared/
 │   ├── test-vectors/<kind>/<TaskID>.json   # fixtures used by BOTH backend and frontend tests; one file per task
 │   ├── samples/                    # sample files (e.g. export-v1.json)

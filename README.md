@@ -6,6 +6,7 @@ A recipe and fridge app: an ASP.NET Core 10 API with PostgreSQL and a SvelteKit 
 - [TECHNICAL.md](TECHNICAL.md): stack, architecture, conventions, testing
 - [docs/API.md](docs/API.md) + [docs/api/openapi.yaml](docs/api/openapi.yaml): the HTTP contract
 - [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md): waves, ownership and coordination rules
+- [docs/AGENT_DECISIONS.md](docs/AGENT_DECISIONS.md): decisions made by agents rather than the user, and known open issues
 
 ## Prerequisites
 
