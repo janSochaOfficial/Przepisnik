@@ -30,7 +30,7 @@ Servings-based scaling, expiry dates, a direct Google Keep API, offline/PWA, lan
 
 ## 2. Users and authentication
 
-- Users sign in **only with Google**. On first login the user picks a **nickname** (unique, case-insensitive, 3–30 characters, letters/digits/`_`/`-`, Polish letters allowed).
+- Users sign in **only with Google**. (In Development there is also a dev-login form for test users, shown below the Google button when both are available; D-36.) On first login the user picks a **nickname** (unique, case-insensitive, 3–30 characters, letters/digits/`_`/`-`, Polish letters allowed).
 - The nickname is public. The Google email is stored but **never shown to other users**.
 - Sessions last 30 days and slide (renewed on use). The app has an explicit "Wyloguj" (log out).
 - **Admin** is a flag on the user, granted through configuration (`Admin__Emails`). Admins can edit and merge products in the shared catalog (§7.3).
@@ -73,8 +73,8 @@ On mobile the bottom tab bar shows **Przepisy** · **Lodówka** · **Lista zakup
 
 ### 4.2 Ingredients
 Each ingredient row has:
-- **product**: a reference to the shared product catalog (§7). A product can be created inline from the editor.
-- **quantity** as the author entered it: a value plus a unit (`g`, `kg`, `ml`, `l`, `szklanka`, `łyżka`, `łyżeczka`, `kropla`, `szczypta`, `szt.`), plus a piece size (`mała`/`średnia`/`duża`) for products that have sizes.
+- **product**: a reference to the shared product catalog (§7). When the author types a name that is not in the catalog and leaves the field, the editor asks **"„X” nie ma w bazie produktów. Dodać?"** ("X is not in the product catalog. Add it?"). Confirming opens the short new-product form prefilled with the name; declining clears the field (D-32).
+- **quantity** as the author entered it: a value plus a unit (`g`, `kg`, `ml`, `l`, `szklanka`, `łyżka`, `łyżeczka`, `kropla`, `szczypta`, `szt.`, or a **custom unit**, §5.6), plus a piece size (`mała`/`średnia`/`duża`) for products that have sizes.
 - or **no quantity**, meaning "do smaku" (to taste). It is never scaled or deducted.
 - **note** (e.g. "pokrojona w kostkę"), and an **optional** flag ("opcjonalnie").
 
@@ -123,7 +123,13 @@ Because a base recipe can only change when it has no variants (or they are delet
 
 ### 4.7 Export and import (JSON)
 - **Export** is available to anyone who can see the recipe. It produces one self-contained file: the recipe, **all its variants that the exporter can see**, and every referenced photo embedded as base64. Products, tags and utensils are referenced **by name and properties**, not by database ID. Format: [docs/API.md §8](docs/API.md).
-- **Import** creates a **new private recipe owned by the importer**, together with all its variants, also private and owned by the importer. Each keeps an "originally by @nick" note. Products, tags and utensils are matched by normalized name and created if missing. The format is versioned (`formatVersion: 1`), and the file limit is 25 MB.
+- **Import** creates a **new private recipe owned by the importer**, together with all its variants, also private and owned by the importer. Each keeps an "originally by @nick" note. Products, tags, utensils and custom units are matched by normalized name and created if missing. The format is versioned (`formatVersion: 1`), and the file limit is 25 MB.
+- **Importing a recipe that already exists** (D-35). Before importing, the app looks for recipes the importer can see, that are not archived, and whose title matches the file's recipe title (normalized: case, diacritics and spaces ignored). If there are any, it asks **"Ten przepis już istnieje"** and offers:
+  - **"Dodaj jako wariant"** of one of the matches (listed with title, author and visibility). The file's recipe becomes a variant of the match named **"Wersja @<autor>"**, and each variant in the file becomes another variant of the match with its own name. Name clashes get " (2)", " (3)". All of them are private and owned by the importer, and keep the "originally by @nick" note. A file recipe or variant that turns out identical to the match is skipped, and the result says how many were skipped.
+  - **"Importuj jako nowy przepis"**: the normal import above.
+  - **"Anuluj"**.
+
+  The differences are computed against the match the same way the variant editor does (§6.2), aligning rows in order: ingredients by product, steps by text. Rows of the match that have no counterpart are removed in the variant, extra rows of the file are added, and row order is never changed (D-20).
 
 ## 5. Quantities, units and scaling
 
@@ -197,6 +203,16 @@ Units and piece names have four forms: **one / few / many / fraction**:
 Rules for integers: 1 → *one*; a number ending in 2–4 but not 12–14 → *few*; everything else → *many*. Any amount with a fractional part → *fraction*.
 Products may define their own piece forms (`ząbek / ząbki / ząbków / ząbka`); the default is `szt.`.
 
+### 5.6 Custom units
+Besides the built-in units, recipes can use **custom units** (`własne jednostki`, D-30), such as `puszka`, `kostka`, `pęczek`, `filiżanka` or `garść`.
+- Custom units come from one **shared, growing catalog**, like tags. Any user can add one from the unit picker (**"+ Nowa jednostka…"**) in the recipe and variant editors, in the "Mam:" scaling input and in the shopping list.
+- A unit has a name, its four plural forms (§5.5, e.g. `puszka / puszki / puszek / puszki`) and a definition **"1 <unit> = <amount> <built-in unit>"**:
+  - **for one product** (the default when it is created from an ingredient row): e.g. `1 puszka` of `pomidory krojone` = 400 g, `1 kostka` of `masło` = 200 g. It is offered only for that product.
+  - **for every product** (a switch in the form): e.g. `1 filiżanka` = 150 ml. It is offered for every product whose measure kind it converts to, using the same density and piece-weight rules as the built-in units (§5.2).
+- Duplicates are matched by normalized name within the same scope (the same product, or "every product"); adding one returns the existing unit.
+- Like products, a unit can't be changed by a regular user after it is created, so it never silently changes other people's recipes. Admins can edit the name and plural forms at any time, and the amount only while no recipe, variant or shopping-list item uses the unit.
+- **Scaling and display** (D-31): at factor 1 the amount shows as entered (`2 puszki`). Once scaled, an amount entered in a custom unit **stays in that unit**, rounded to the nearest ¼ with a minimum of ¼ (`1 ½ puszki`, `¾ kostki`), with the `~` prefix rule of §5.4. Fridge items and the deduction dialog keep the metric inventory format (D-19).
+
 ## 6. Variants
 
 ### 6.1 Concept
@@ -258,8 +274,10 @@ Remembered picks are stored **per user on the server** (D-05); the client keeps 
 ### 7.1 Shared and growing
 There is **one global catalog** for recipe ingredients, fridge items and the shopping list (D-06). It is seeded with about 150 common Polish products. Any user can add a product. Duplicates are blocked by normalized name (lower-case, no diacritics, collapsed spaces), and the API returns the existing product instead.
 
+Products are **verified** (seeded, or created or edited by an admin) or **user-added** (D-32). Every product search ranks an exact name match first, then by how the name matches (prefix, word prefix, similar), and **within the same kind of match, verified products come before user-added ones**. The picker marks user-added products with a small "dodany przez użytkownika" hint. An admin who edits a user-added product verifies it.
+
 ### 7.2 Product fields
-`name` (Polish), `category` (warzywa, owoce, mięso, ryby, nabiał, pieczywo, sypkie, przyprawy, oleje i octy, sosy, konserwy, mrożonki, napoje, słodycze, inne), `measureKind`, `displayClass`, `hasSizes`, `allowHalf`, `gramsPerMl?`, `gramsPerPiece?`, `defaultPackageAmount?` (e.g. 330 ml for cream), `pieceForms?`.
+`name` (Polish), `isVerified` (read-only, see §7.1), `category` (warzywa, owoce, mięso, ryby, nabiał, pieczywo, sypkie, przyprawy, oleje i octy, sosy, konserwy, mrożonki, napoje, słodycze, inne), `measureKind`, `displayClass`, `hasSizes`, `allowHalf`, `gramsPerMl?`, `gramsPerPiece?`, `defaultPackageAmount?` (e.g. 330 ml for cream), `pieceForms?`.
 
 ### 7.3 Admin
 Admins can edit any product and **merge** duplicates. A merge re-points every reference (ingredients, variant operations, fridge items, shopping-list items, preferences) to the target product, then deletes the source. Regular users cannot edit a product after creating it. This avoids silently changing other people's recipes.
@@ -288,6 +306,7 @@ At the bottom of the recipe view, the **"Odejmij z lodówki"** (deduct from frid
 - the switch defaults to on when the product is in the fridge,
 - **warnings**: **"Brak w lodówce"** (not in the fridge; switch disabled) and **"Za mało — jest ~120 ml"** (not enough),
 - actions: **"Odejmij zaznaczone"** (deduct selected), **"Odejmij wszystko"** (deduct all available), and **"Dodaj brakujące do listy zakupów"** (add missing items to the shopping list; adds shortfalls and missing items, §10).
+- **Optional ingredients** (D-33): when "Dodaj brakujące do listy zakupów" (here or in the recipe's action bar) would include missing or short **optional** ingredients, the app first asks **"Brakuje też składników opcjonalnych: <nazwy>. Dodać je do listy zakupów?"** with **"Dodaj też opcjonalne"** and **"Tylko wymagane"** (the default button). Without missing optional ingredients there is no question. If only optional ingredients are missing, the question is the same, and "Tylko wymagane" adds nothing and says so.
 
 Server rules (D-10):
 - The deduction happens in base units, against the product's packages in that fridge, **most-used package first** (lowest remaining percent).
@@ -299,7 +318,8 @@ Server rules (D-10):
 
 - There is **one shopping list per fridge**, shared by its members, because buying refills that fridge (D-11).
 - An item is a catalog product with an optional amount, or free text. Each item can be checked off.
-- Adding a product that is already on the list (unchecked) **sums the amounts** instead of creating a duplicate.
+- **Units** (D-34): a product item keeps its amount **in the unit the user chose**: any unit valid for that product (built-in or custom, §5.6), with a piece size for products with sizes. The list shows it as entered (`2 puszki`, `1,5 l`, `3 duże`). In the edit dialog, choosing another unit **converts** the current amount to it (rounded to ¼ for glasses, spoons, pieces and custom units; to 2 decimals for metric units), and the user can then adjust the value. An amount can also be removed. Items added from a recipe ("Dodaj brakujące") have no chosen unit yet and are shown in the metric inventory format (§5.4) until the user picks one.
+- Adding a product that is already on the list (unchecked) **sums the amounts** instead of creating a duplicate. The sum is computed in base units and shown in the existing item's unit (or the new one's, if the existing item has none).
 - **"Przenieś kupione do lodówki"** (move bought items to the fridge): checked catalog items become new fridge items (the package is the amount or the product default, at 100 %) and are removed from the list.
 - **"Usuń kupione"** removes checked items.
 - **Exporting to Google Keep** (D-03): the official Keep API is not available to personal Gmail accounts, so:
@@ -352,3 +372,10 @@ Servings-based scaling · expiry dates and "use soon" highlighting · direct Goo
 | D-27 | An archived recipe is read-only for everyone, its author included: no direct edit (even one that would delete the variants keeping it archived) and no visibility change | user |
 | D-28 | Cooking a recipe (a fridge deduction) never conflicts with editing it: cook counts are stored apart from the versioned recipe and variant rows | user |
 | D-29 | Nickname uniqueness ignores diacritics as well as case (`Łucja` and `Lucja` are the same nickname), using the shared name normalization | assumption (coordinator, to prevent look-alike nicknames) |
+| D-30 | Custom units: a shared, growing catalog; each unit is "1 unit = amount in a built-in unit", either for one product or for every product it converts to; immutable for users, admins edit names anytime and amounts only while unused | user (custom units) + assumption (model) |
+| D-31 | Scaled amounts entered in a custom unit stay in that unit, rounded to the nearest ¼ (minimum ¼), with the usual `~` rule | assumption |
+| D-32 | A product name typed in the recipe editor that is not in the catalog triggers an "add to the catalog?" prompt. User-added products are unverified and rank below verified ones within the same kind of match, in every product search; an admin edit verifies them | user + assumption (ranking within match kind, verification) |
+| D-33 | "Add missing to the shopping list" asks whether to include missing optional ingredients, only when there are any; "only required" is the default | user + assumption (default, when to ask) |
+| D-34 | Shopping-list items keep their amount in the unit the user chose (built-in or custom); changing the unit converts the amount; merging sums in base units and keeps the existing item's unit; an amount can be removed | user (change unit) + assumption (conversion, merge, removal) |
+| D-35 | Import of a recipe whose normalized title matches a visible, non-archived recipe offers adding it as variants of that recipe: the file's recipe becomes "Wersja @author", each file variant another variant, aligned in order (ingredients by product, steps by text); identical ones are skipped | user (prompt to import as a variant) + assumption (matching, naming, alignment) |
+| D-36 | In Development the login page shows Google sign-in and, below it, the dev-login form, when both are available | assumption (coordinator, so several test users stay easy once Google is configured) |

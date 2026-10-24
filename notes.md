@@ -1,0 +1,5 @@
+- There should be an ability to add custom units 
+- When creating a recipie and inputing a ingrediend not present in the database, app should show user a prompt asking a user if this ingredient should be added to the database. Ingridients added this way should have lower priority wehn searching for ingredients in the recipie.
+- when adding missing ingredinets to the shopping list and the recipie has optional ingredients, the app should ask the user if they want to add optional ingredients to the shopping list as well.
+- In the shopping list user should be able to change the unit of the ingredient.
+- when importing recipie the app should check if the recipie already exists in the database and if it does,  the app should prompt the user if they want to upload the recipie as a variant.

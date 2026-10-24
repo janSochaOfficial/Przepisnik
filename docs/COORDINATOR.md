@@ -16,8 +16,17 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 All v1 tasks (T00, B1–B8, S1, F0–F6, T90) were merged on 2026-10-24 and their worktrees and branches removed. The per-task notes are in git history (`git show 1200bc8:docs/COORDINATOR.md`) and summarised in [AGENT_DECISIONS.md](AGENT_DECISIONS.md).
 For a new wave, add rows here:
 
+### Wave v1.1 (notes.md, 2026-10-24)
+Lane A: U1 → U2. Lane B: P1 → S2 → I1 (I1 also needs U1). G1 (Google sign-in) is done by the coordinator, and needs the user's OAuth client ID.
+
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
+| U1 | 1 | todo | task/U1-custom-units | opus/medium |
+| P1 | 2 | todo | task/P1-product-prompt-ranking | sonnet/medium |
+| S2 | 3 | todo | task/S2-optional-missing | sonnet/low |
+| I1 | 4 | todo | task/I1-import-as-variant | opus/medium |
+| U2 | 5 | todo | task/U2-shopping-units | sonnet/medium |
+| G1 | 0 | todo | (coordinator, on main) | waiting for the OAuth client ID |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
