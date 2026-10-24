@@ -5,8 +5,8 @@ using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Fridges;
 using RecipesList.Core.ShoppingLists;
-using RecipesList.IntegrationTests.Infrastructure;
 using RecipesList.Infrastructure.Persistence;
+using RecipesList.IntegrationTests.Infrastructure;
 
 namespace RecipesList.IntegrationTests.Fridges;
 
