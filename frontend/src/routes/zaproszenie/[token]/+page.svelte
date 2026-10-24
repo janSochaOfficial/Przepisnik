@@ -5,7 +5,7 @@
 	import { page } from '$app/state';
 	import { ApiError, createApi, unwrap } from '$lib/api/client';
 	import { Page } from '$lib/components/shell';
-	import { Button, ErrorMessage, Skeleton, toast } from '$lib/components/ui';
+	import { Button, EmptyState, ErrorMessage, Skeleton, toast } from '$lib/components/ui';
 	import { t } from '$lib/i18n';
 
 	const labels = t.fridge.join;
@@ -52,7 +52,13 @@
 </script>
 
 <Page title={t.fridge.inviteTitle}>
-	{#if error && !preview}
+	{#if error instanceof ApiError && error.code === 'invite.not_found'}
+		<EmptyState title={t.auth.invite.expiredTitle} description={t.auth.invite.expiredText}>
+			{#snippet action()}
+				<Button href={resolve('/lodowka')}>{t.auth.invite.toFridges}</Button>
+			{/snippet}
+		</EmptyState>
+	{:else if error && !preview}
 		<ErrorMessage {error} variant="block" retry={load} />
 	{:else if !preview}
 		<div class="flex flex-col gap-3" aria-busy="true">

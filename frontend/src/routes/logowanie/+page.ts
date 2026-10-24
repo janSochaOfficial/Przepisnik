@@ -1,10 +1,6 @@
 import { createApi, unwrap } from '$lib/api/client';
+import { safeNext } from '$lib/state/next';
 import type { PageLoad } from './$types';
-
-/** Only same-app paths are allowed as the post-login target (no open redirects). */
-function safeNext(next: string | null): string {
-	return next && next.startsWith('/') && !next.startsWith('//') ? next : '/przepisy';
-}
 
 export const load: PageLoad = async ({ fetch, url }) => {
 	const config = await unwrap(createApi({ fetch, onUnauthorized: null }).GET('/auth/config'));
