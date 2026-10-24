@@ -1,0 +1,66 @@
+# Auth and current user (API.md §1). Dev-login works only in Development; the cookie is kept between requests.
+# POST /auth/google needs a real Google ID token (copy one from the browser's sign-in request).
+# Uses the B1 slot's API port and its own database (recipes_b1).
+@baseUrl = http://localhost:5101/api/v1
+@fridgeId = 00000000-0000-0000-0000-000000000000
+
+### Public sign-in configuration
+GET {{baseUrl}}/auth/config
+
+### Sign in with Google
+POST {{baseUrl}}/auth/google
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "idToken": "paste-a-google-id-token" }
+
+### Sign in with Google: an invalid token → 401 auth.invalid_token
+POST {{baseUrl}}/auth/google
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "idToken": "not-a-token" }
+
+### Sign in without a nickname (dev-login) → onboarding pending
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "nowa@test.local", "nickname": null }
+
+### The signed-in user
+GET {{baseUrl}}/me
+
+### Gated while onboarding → 403 user.onboarding_required
+GET {{baseUrl}}/recipes
+
+### Is the nickname free?
+GET {{baseUrl}}/users/nickname-available?nickname=Łucja
+
+### Pick a nickname
+PUT {{baseUrl}}/me/nickname
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "nickname": "Łucja" }
+
+### An invalid nickname → 400 nickname.invalid
+PUT {{baseUrl}}/me/nickname
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "nickname": "a b" }
+
+### Settings (the default fridge must be one of mine, else 404 fridge.not_found)
+PUT {{baseUrl}}/me/settings
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "liquidUnits": "metric", "defaultFridgeId": "{{fridgeId}}" }
+
+### Product preferences
+GET {{baseUrl}}/me/product-preferences
+
+### Log out
+POST {{baseUrl}}/auth/logout
+X-Requested-With: fetch
