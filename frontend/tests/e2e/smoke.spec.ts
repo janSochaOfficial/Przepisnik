@@ -246,7 +246,7 @@ test("A picks B's variant, scales and deducts from the shared fridge; the shoppi
 	await dialog.getByRole('button', { name: 'Odejmij zaznaczone' }).click();
 	await expect(a.getByRole('status').filter({ hasText: 'Odjęto 1 produkt' })).toBeVisible();
 
-	// The milk package lost 1000 ml × … of its 1000 ml: it is gone or reduced; B sees the change.
+	// The doubled recipe needs 1000 ml of milk, the whole package: it is gone, and B sees that.
 	await b.goto(`/lodowka/${sharedFridgeId}`);
 	await expect(b.getByRole('button', { name: 'mleko' })).toHaveCount(0);
 
@@ -282,4 +282,29 @@ test('A exports the recipe and B imports it', async () => {
 	expect(recipeIdFrom(b.url())).not.toBe(publicId);
 	await expect(b.getByRole('heading', { level: 1, name: publicTitle })).toBeVisible();
 	await expect(b.getByText(`oryginalnie: @${ania}`)).toBeVisible();
+});
+
+test('the main screens show no untranslated keys or English words', async () => {
+	const screens = [
+		'/przepisy',
+		`/przepisy/${publicId}`,
+		'/przepisy?tab=mine&sub=favorites',
+		`/lodowka/${sharedFridgeId}`,
+		`/lista-zakupow?fridge=${sharedFridgeId}`,
+		'/profil'
+	];
+	// An i18n key or API code leaking (recipe.not_found, common.actions.save), or a template slip.
+	const keyLike = /\b[a-z]+(?:_[a-z]+)*\.[a-z]+(?:_[a-z]+)*(?:\.[a-z_]+)*\b/;
+	const slips = /\b(?:undefined|null|NaN)\b|\[object Object\]/;
+	const english =
+		/\b(?:Save|Cancel|Delete|Edit|Loading|Error|Submit|Search|Close|Back|Remove|Settings|Recipes?|Fridge|Shopping)\b/;
+	for (const path of screens) {
+		await a.goto(path);
+		await expect(a.getByRole('heading', { level: 1 })).toBeVisible();
+		await a.waitForLoadState('networkidle');
+		const text = await a.locator('body').innerText();
+		expect(text, path).not.toMatch(keyLike);
+		expect(text, path).not.toMatch(slips);
+		expect(text, path).not.toMatch(english);
+	}
 });
