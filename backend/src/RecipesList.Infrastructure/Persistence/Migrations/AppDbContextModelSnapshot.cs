@@ -640,6 +640,10 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("product_id");
 
+                    b.Property<Guid?>("QuantityCustomUnitId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("quantity_custom_unit_id");
+
                     b.Property<string>("QuantitySize")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
@@ -663,6 +667,9 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId")
                         .HasDatabaseName("ix_recipe_ingredients_product_id");
+
+                    b.HasIndex("QuantityCustomUnitId")
+                        .HasDatabaseName("ix_recipe_ingredients_quantity_custom_unit_id");
 
                     b.HasIndex("RecipeId", "Position")
                         .HasDatabaseName("ix_recipe_ingredients_recipe_id_position");
@@ -801,6 +808,70 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_shopping_list_items_product_xor_text", "(product_id IS NULL) <> (text IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Units.CustomUnit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("Forms")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("forms");
+
+                    b.Property<string>("MeasureKind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("measure_kind");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("normalized_name");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_custom_units");
+
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_custom_units_created_by_id");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_custom_units_product_id");
+
+                    b.HasIndex("NormalizedName", "ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_custom_units_normalized_name_product_id");
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("NormalizedName", "ProductId"), false);
+
+                    b.ToTable("custom_units", (string)null);
                 });
 
             modelBuilder.Entity("RecipesList.Core.Users.User", b =>
@@ -1232,12 +1303,20 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_recipe_ingredients_products_product_id");
 
+                    b.HasOne("RecipesList.Core.Units.CustomUnit", "CustomUnit")
+                        .WithMany()
+                        .HasForeignKey("QuantityCustomUnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_recipe_ingredients_custom_units_quantity_custom_unit_id");
+
                     b.HasOne("RecipesList.Core.Recipes.Recipe", null)
                         .WithMany("Ingredients")
                         .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_recipe_ingredients_recipes_recipe_id");
+
+                    b.Navigation("CustomUnit");
 
                     b.Navigation("Product");
                 });
@@ -1313,6 +1392,21 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_shopping_list_items_products_product_id");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Units.CustomUnit", b =>
+                {
+                    b.HasOne("RecipesList.Core.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_custom_units_users_created_by_id");
+
+                    b.HasOne("RecipesList.Core.Catalog.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_custom_units_products_product_id");
                 });
 
             modelBuilder.Entity("RecipesList.Core.Users.User", b =>
