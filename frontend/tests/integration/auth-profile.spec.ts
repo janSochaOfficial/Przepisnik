@@ -108,6 +108,72 @@ test.describe('onboarding', () => {
 	});
 });
 
+/** Serves a stand-in for the Google Identity Services script whose button hands back `credential`. */
+async function stubGoogleScript(page: Page, credential: string) {
+	await page.route('https://accounts.google.com/gsi/client', (route) =>
+		route.fulfill({
+			contentType: 'text/javascript',
+			body: `window.google = { accounts: { id: {
+				initialize(config) { window.__gisConfig = config; },
+				renderButton(element) {
+					const button = document.createElement('button');
+					button.type = 'button';
+					button.textContent = 'Google';
+					button.onclick = () => window.__gisConfig.callback({ credential: ${JSON.stringify(credential)} });
+					element.append(button);
+				}
+			} } };`
+		})
+	);
+}
+
+test.describe('the login page', () => {
+	const googleConfig = { googleClientId: 'client-id.apps.googleusercontent.com' };
+
+	test('signs in with Google by sending the ID token to the API', async ({ page }) => {
+		const { handlers } = loginServer(me);
+		let session = false;
+		const api = await mockApi(page, {
+			...handlers,
+			...catalogHandlers,
+			...recipesHandlers,
+			'GET /me': () => (session ? { body: me } : problem(401, 'auth.required')),
+			'GET /auth/config': { body: { ...googleConfig, devLoginEnabled: false } },
+			'POST /auth/google': () => {
+				session = true;
+				return { body: me };
+			}
+		});
+		await stubGoogleScript(page, 'google-id-token');
+
+		await page.goto('/przepisy');
+		await expect(page).toHaveURL(/\/logowanie/);
+		await expect(page.getByRole('heading', { name: 'Logowanie deweloperskie' })).toHaveCount(0);
+		await page.getByRole('button', { name: 'Google' }).click();
+
+		await expect(page).toHaveURL(/\/przepisy$/);
+		expect(api.calls.find((c) => c.key === 'POST /auth/google')?.json).toEqual({
+			idToken: 'google-id-token'
+		});
+	});
+
+	test('keeps the dev-login form below Google sign-in in development (D-36)', async ({ page }) => {
+		const { handlers } = loginServer(me);
+		await mockApi(page, {
+			...handlers,
+			'GET /auth/config': { body: { ...googleConfig, devLoginEnabled: true } }
+		});
+		await stubGoogleScript(page, 'unused');
+
+		await page.goto('/logowanie');
+
+		await expect(page.getByRole('button', { name: 'Google' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Logowanie deweloperskie' })).toBeVisible();
+		await expect(page.getByLabel('E-mail')).toBeVisible();
+		await expectNoViolations(page);
+	});
+});
+
 test.describe('the session', () => {
 	test('a 401 from any API call sends the user to the login page and back', async ({ page }) => {
 		// `/me` still answers, but the fridge call says the session is gone (e.g. expired in another tab).

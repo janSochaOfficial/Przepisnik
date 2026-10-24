@@ -19,7 +19,8 @@
 	let googleFailed = $state(false);
 
 	let clientId = $derived(data.config.googleClientId ?? null);
-	let showDevLogin = $derived(data.config.devLoginEnabled && !clientId);
+	// Development keeps dev-login next to Google so test users stay easy (D-36); production has no dev-login.
+	let showDevLogin = $derived(data.config.devLoginEnabled);
 
 	/** `/witaj` while the user has no nickname, then the page they asked for. */
 	async function afterLogin(me: Me) {
@@ -88,7 +89,8 @@
 					<Button variant="secondary" onclick={mountGoogle}>{t.auth.googleRetry}</Button>
 				{/if}
 			</div>
-		{:else if showDevLogin}
+		{/if}
+		{#if showDevLogin}
 			<form
 				class="flex flex-col gap-5 rounded-card border border-line bg-surface p-5"
 				onsubmit={devLogin}
@@ -117,7 +119,8 @@
 					{t.auth.devLogin.submit}
 				</Button>
 			</form>
-		{:else}
+		{/if}
+		{#if !clientId && !showDevLogin}
 			<p class="text-base">{t.auth.notConfigured}</p>
 		{/if}
 	</div>

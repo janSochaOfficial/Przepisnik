@@ -8,7 +8,7 @@ export const auth = {
 	notConfigured: 'Logowanie nie jest jeszcze skonfigurowane. Skontaktuj się z administratorem.',
 	devLogin: {
 		title: 'Logowanie deweloperskie',
-		hint: 'Dostępne tylko w trybie deweloperskim, gdy nie skonfigurowano logowania Google.',
+		hint: 'Dostępne tylko w trybie deweloperskim. Pozwala zalogować się jako dowolny użytkownik testowy.',
 		email: 'E-mail',
 		nickname: 'Pseudonim',
 		submit: 'Zaloguj się'

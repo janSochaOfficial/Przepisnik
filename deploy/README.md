@@ -32,8 +32,8 @@ Logs are JSON lines: `docker compose -f deploy/compose.yaml logs -f api`.
 
 ## Google sign-in
 
-1. In the [Google Cloud console](https://console.cloud.google.com/apis/credentials), create (or pick) a project, configure the OAuth consent screen (type *External*, scopes `openid`, `email`, `profile`), then **Create credentials → OAuth client ID → Web application**.
-2. Under **Authorized JavaScript origins** add every origin users open: `http://localhost:8080` for a local stack, `https://przepisy.example.com` for a real one. No redirect URIs are needed (the app uses Google Identity Services and sends the ID token to `POST /api/v1/auth/google`).
+1. In the [Google Cloud console](https://console.cloud.google.com/apis/credentials), create (or pick) a project, configure the OAuth consent screen (type *External*, scopes `openid`, `email`, `profile`), then **Create credentials → OAuth client ID → Web application**. While the consent screen is in *Testing*, only the Google accounts listed under **Test users** can sign in: add yours (and your household's), or publish the app.
+2. Under **Authorized JavaScript origins** add every origin users open: `http://localhost` and `http://localhost:8080` for a local stack, `http://localhost:5173` for `npm run dev`, `https://przepisy.example.com` for a real one. No redirect URIs are needed (the app uses Google Identity Services and sends the ID token to `POST /api/v1/auth/google`). A new origin can take a few minutes to start working.
 3. Put the client ID (`…apps.googleusercontent.com`) into `deploy/.env` as `Auth__Google__ClientId=…`, and the administrators' emails as `Admin__Emails__0=…` (`__1`, `__2` for more). Admin rights need a Google-verified email.
 4. `docker compose -f deploy/compose.yaml up -d` to apply.
 

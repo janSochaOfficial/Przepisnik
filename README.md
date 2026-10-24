@@ -37,7 +37,12 @@ npx playwright install chromium   # once, for the integration tests
 npm run dev
 ```
 
-Open http://localhost:5173. In Development with no Google client ID configured, `/logowanie` shows a dev-login form (email + nickname).
+Open http://localhost:5173. In Development `/logowanie` always shows a dev-login form (email + nickname), and the Google button above it once a client ID is set. To try Google sign-in in development, create the client as in [deploy/README.md](deploy/README.md#google-sign-in) (with `http://localhost:5173` among the origins) and add it to the git-ignored `.env.local`:
+
+```bash
+Auth__Google__ClientId=1234-abc.apps.googleusercontent.com
+Admin__Emails__0=you@gmail.com      # optional: admin rights for your account
+```
 
 With a non-default `POSTGRES_PORT`, point the API at it, for example
 `ConnectionStrings__Default="Host=localhost;Port=5433;Database=recipes;Username=recipes;Password=recipes"`.
