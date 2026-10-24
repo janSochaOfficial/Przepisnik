@@ -1,3 +1,2370 @@
 {
-  "products": []
+  "products": [
+    {
+      "name": "cebula",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 110
+    },
+    {
+      "name": "cebula czerwona",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 110
+    },
+    {
+      "name": "szalotka",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 30
+    },
+    {
+      "name": "czosnek",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 5,
+      "pieceForms": {
+        "one": "ząbek",
+        "few": "ząbki",
+        "many": "ząbków",
+        "fraction": "ząbka"
+      }
+    },
+    {
+      "name": "marchew",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 70
+    },
+    {
+      "name": "ziemniaki",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 150
+    },
+    {
+      "name": "pomidor",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 120
+    },
+    {
+      "name": "ogórek",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 150
+    },
+    {
+      "name": "ogórek kiszony",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 80
+    },
+    {
+      "name": "papryka czerwona",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 160
+    },
+    {
+      "name": "papryka żółta",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 160
+    },
+    {
+      "name": "papryka zielona",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 160
+    },
+    {
+      "name": "cukinia",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 250
+    },
+    {
+      "name": "bakłażan",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 300
+    },
+    {
+      "name": "burak",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 120
+    },
+    {
+      "name": "pietruszka korzeń",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 60
+    },
+    {
+      "name": "seler korzeń",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 500
+    },
+    {
+      "name": "pasternak",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 100
+    },
+    {
+      "name": "por",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 200
+    },
+    {
+      "name": "kapusta biała",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 1500,
+      "pieceForms": {
+        "one": "główka",
+        "few": "główki",
+        "many": "główek",
+        "fraction": "główki"
+      }
+    },
+    {
+      "name": "kapusta czerwona",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 1200,
+      "pieceForms": {
+        "one": "główka",
+        "few": "główki",
+        "many": "główek",
+        "fraction": "główki"
+      }
+    },
+    {
+      "name": "kapusta pekińska",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 800,
+      "pieceForms": {
+        "one": "główka",
+        "few": "główki",
+        "many": "główek",
+        "fraction": "główki"
+      }
+    },
+    {
+      "name": "kalafior",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 900,
+      "pieceForms": {
+        "one": "główka",
+        "few": "główki",
+        "many": "główek",
+        "fraction": "główki"
+      }
+    },
+    {
+      "name": "brokuł",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 400,
+      "pieceForms": {
+        "one": "główka",
+        "few": "główki",
+        "many": "główek",
+        "fraction": "główki"
+      }
+    },
+    {
+      "name": "sałata",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 250,
+      "pieceForms": {
+        "one": "główka",
+        "few": "główki",
+        "many": "główek",
+        "fraction": "główki"
+      }
+    },
+    {
+      "name": "dynia",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": true,
+      "gramsPerPiece": 1500
+    },
+    {
+      "name": "batat",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 250
+    },
+    {
+      "name": "rzodkiewka",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 15
+    },
+    {
+      "name": "kukurydza kolba",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 250
+    },
+    {
+      "name": "kalarepa",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 200
+    },
+    {
+      "name": "rzepa",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": false,
+      "gramsPerPiece": 150
+    },
+    {
+      "name": "awokado",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 200
+    },
+    {
+      "name": "szpinak",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "rukola",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "pieczarki",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "boczniaki",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "fasolka szparagowa",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "groszek zielony",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kiszona kapusta",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "szparagi",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "jarmuż",
+      "category": "vegetables",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "koperek",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 30,
+      "pieceForms": {
+        "one": "pęczek",
+        "few": "pęczki",
+        "many": "pęczków",
+        "fraction": "pęczka"
+      }
+    },
+    {
+      "name": "natka pietruszki",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 30,
+      "pieceForms": {
+        "one": "pęczek",
+        "few": "pęczki",
+        "many": "pęczków",
+        "fraction": "pęczka"
+      }
+    },
+    {
+      "name": "szczypiorek",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 25,
+      "pieceForms": {
+        "one": "pęczek",
+        "few": "pęczki",
+        "many": "pęczków",
+        "fraction": "pęczka"
+      }
+    },
+    {
+      "name": "imbir korzeń",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 30
+    },
+    {
+      "name": "chili papryczka",
+      "category": "vegetables",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 10
+    },
+    {
+      "name": "cytryna",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 100
+    },
+    {
+      "name": "limonka",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 70
+    },
+    {
+      "name": "pomarańcza",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 200
+    },
+    {
+      "name": "jabłko",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 180
+    },
+    {
+      "name": "gruszka",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 170
+    },
+    {
+      "name": "banan",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 120
+    },
+    {
+      "name": "brzoskwinia",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": true,
+      "allowHalf": true,
+      "gramsPerPiece": 150
+    },
+    {
+      "name": "śliwka",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 40
+    },
+    {
+      "name": "mandarynka",
+      "category": "fruits",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 80
+    },
+    {
+      "name": "truskawki",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "maliny",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "borówki",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "winogrona",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "wiśnie",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "rodzynki",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "żurawina suszona",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "morele suszone",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "daktyle",
+      "category": "fruits",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "pierś z kurczaka",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mięso mielone wieprzowe",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mięso mielone wołowe",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "schab",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "karkówka",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "wołowina na gulasz",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "szynka",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "boczek",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "wędzony boczek",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "łopatka wieprzowa",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "żeberka",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "wątróbka drobiowa",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "pierś z indyka",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kaczka",
+      "category": "meat",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "udko z kurczaka",
+      "category": "meat",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 180,
+      "pieceForms": {
+        "one": "udko",
+        "few": "udka",
+        "many": "udek",
+        "fraction": "udka"
+      }
+    },
+    {
+      "name": "kiełbasa",
+      "category": "meat",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 200,
+      "pieceForms": {
+        "one": "kiełbasa",
+        "few": "kiełbasy",
+        "many": "kiełbas",
+        "fraction": "kiełbasy"
+      }
+    },
+    {
+      "name": "parówki",
+      "category": "meat",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 50
+    },
+    {
+      "name": "kotlet schabowy",
+      "category": "meat",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 150,
+      "pieceForms": {
+        "one": "kotlet",
+        "few": "kotlety",
+        "many": "kotletów",
+        "fraction": "kotleta"
+      }
+    },
+    {
+      "name": "kurczak cały",
+      "category": "meat",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 1500
+    },
+    {
+      "name": "łosoś filet",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "dorsz filet",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "śledź",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "krewetki",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "wędzony łosoś",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "makrela wędzona",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "pstrąg",
+      "category": "fish",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "tuńczyk w puszce",
+      "category": "fish",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 1,
+      "gramsPerPiece": 170,
+      "pieceForms": {
+        "one": "puszka",
+        "few": "puszki",
+        "many": "puszek",
+        "fraction": "puszki"
+      }
+    },
+    {
+      "name": "mleko",
+      "category": "dairy",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.03,
+      "defaultPackageAmount": 1000
+    },
+    {
+      "name": "śmietana 18%",
+      "category": "dairy",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1,
+      "defaultPackageAmount": 400
+    },
+    {
+      "name": "śmietanka 30%",
+      "category": "dairy",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1,
+      "defaultPackageAmount": 330
+    },
+    {
+      "name": "śmietanka 12%",
+      "category": "dairy",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1,
+      "defaultPackageAmount": 250
+    },
+    {
+      "name": "kefir",
+      "category": "dairy",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.03,
+      "defaultPackageAmount": 400
+    },
+    {
+      "name": "maślanka",
+      "category": "dairy",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.03,
+      "defaultPackageAmount": 500
+    },
+    {
+      "name": "masło",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.91,
+      "defaultPackageAmount": 200
+    },
+    {
+      "name": "jogurt naturalny",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.04,
+      "defaultPackageAmount": 400
+    },
+    {
+      "name": "jogurt grecki",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.05,
+      "defaultPackageAmount": 350
+    },
+    {
+      "name": "twaróg",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 250
+    },
+    {
+      "name": "ser żółty",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 150
+    },
+    {
+      "name": "mozzarella",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 125
+    },
+    {
+      "name": "parmezan",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 100
+    },
+    {
+      "name": "feta",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 200
+    },
+    {
+      "name": "ser mascarpone",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 250
+    },
+    {
+      "name": "ricotta",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 250
+    },
+    {
+      "name": "serek śmietankowy",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 150
+    },
+    {
+      "name": "ser pleśniowy",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 100
+    },
+    {
+      "name": "oscypek",
+      "category": "dairy",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "jajka",
+      "category": "dairy",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 55,
+      "defaultPackageAmount": 10,
+      "pieceForms": {
+        "one": "jajko",
+        "few": "jajka",
+        "many": "jajek",
+        "fraction": "jajka"
+      }
+    },
+    {
+      "name": "chleb",
+      "category": "bakery",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 30,
+      "pieceForms": {
+        "one": "kromka",
+        "few": "kromki",
+        "many": "kromek",
+        "fraction": "kromki"
+      }
+    },
+    {
+      "name": "bułka",
+      "category": "bakery",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 50,
+      "pieceForms": {
+        "one": "bułka",
+        "few": "bułki",
+        "many": "bułek",
+        "fraction": "bułki"
+      }
+    },
+    {
+      "name": "bułka tarta",
+      "category": "bakery",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.45
+    },
+    {
+      "name": "tortilla",
+      "category": "bakery",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 60,
+      "defaultPackageAmount": 8,
+      "pieceForms": {
+        "one": "tortilla",
+        "few": "tortille",
+        "many": "tortilli",
+        "fraction": "tortilli"
+      }
+    },
+    {
+      "name": "ciasto francuskie",
+      "category": "bakery",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 275,
+      "pieceForms": {
+        "one": "płat",
+        "few": "płaty",
+        "many": "płatów",
+        "fraction": "płata"
+      }
+    },
+    {
+      "name": "pita",
+      "category": "bakery",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 60
+    },
+    {
+      "name": "mąka pszenna",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.53
+    },
+    {
+      "name": "mąka żytnia",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "mąka ziemniaczana",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "mąka kukurydziana",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.55
+    },
+    {
+      "name": "cukier",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.85
+    },
+    {
+      "name": "cukier puder",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "cukier waniliowy",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.8
+    },
+    {
+      "name": "cukier brązowy",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.8
+    },
+    {
+      "name": "ryż",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.85,
+      "defaultPackageAmount": 400
+    },
+    {
+      "name": "ryż basmati",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.85
+    },
+    {
+      "name": "kasza gryczana",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.75
+    },
+    {
+      "name": "kasza jaglana",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.8
+    },
+    {
+      "name": "kasza manna",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.7
+    },
+    {
+      "name": "kasza jęczmienna",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.75
+    },
+    {
+      "name": "kuskus",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.7
+    },
+    {
+      "name": "makaron spaghetti",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 500
+    },
+    {
+      "name": "makaron penne",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 500
+    },
+    {
+      "name": "makaron świderki",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 500
+    },
+    {
+      "name": "makaron nitki",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 250
+    },
+    {
+      "name": "makaron lasagne",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "defaultPackageAmount": 250
+    },
+    {
+      "name": "płatki owsiane",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.35
+    },
+    {
+      "name": "musli",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.4
+    },
+    {
+      "name": "soczewica czerwona",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.8
+    },
+    {
+      "name": "fasola biała sucha",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.8
+    },
+    {
+      "name": "ciecierzyca sucha",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.8
+    },
+    {
+      "name": "orzechy włoskie",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.45
+    },
+    {
+      "name": "migdały",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "orzechy laskowe",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "płatki migdałowe",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.35
+    },
+    {
+      "name": "słonecznik",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "sezam",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "mak",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "siemię lniane",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.65
+    },
+    {
+      "name": "drożdże świeże",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "proszek do pieczenia",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.9
+    },
+    {
+      "name": "soda oczyszczona",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.95
+    },
+    {
+      "name": "żelatyna",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kisiel",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "skrobia",
+      "category": "dryGoods",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "sól",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.2
+    },
+    {
+      "name": "pieprz czarny",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "papryka słodka mielona",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "papryka ostra mielona",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "papryka wędzona",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "cynamon",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.55
+    },
+    {
+      "name": "kmin rzymski",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.45
+    },
+    {
+      "name": "kurkuma",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "curry",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "oregano",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.2
+    },
+    {
+      "name": "bazylia suszona",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.2
+    },
+    {
+      "name": "majeranek",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.2
+    },
+    {
+      "name": "tymianek",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.25
+    },
+    {
+      "name": "rozmaryn",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.3
+    },
+    {
+      "name": "zioła prowansalskie",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.2
+    },
+    {
+      "name": "gałka muszkatołowa",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "imbir mielony",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.45
+    },
+    {
+      "name": "czosnek granulowany",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "cebula granulowana",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "chili w płatkach",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.35
+    },
+    {
+      "name": "wanilia ekstrakt",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.95
+    },
+    {
+      "name": "kminek",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.45
+    },
+    {
+      "name": "koperek suszony",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.15
+    },
+    {
+      "name": "vegeta",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.7
+    },
+    {
+      "name": "przyprawa do kurczaka",
+      "category": "spices",
+      "measureKind": "volume",
+      "displayClass": "spice",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.6
+    },
+    {
+      "name": "liść laurowy",
+      "category": "spices",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 0.3,
+      "pieceForms": {
+        "one": "liść",
+        "few": "liście",
+        "many": "liści",
+        "fraction": "liścia"
+      }
+    },
+    {
+      "name": "ziele angielskie",
+      "category": "spices",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 0.2
+    },
+    {
+      "name": "goździki",
+      "category": "spices",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 0.1
+    },
+    {
+      "name": "wanilia laska",
+      "category": "spices",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 3,
+      "pieceForms": {
+        "one": "laska",
+        "few": "laski",
+        "many": "lasek",
+        "fraction": "laski"
+      }
+    },
+    {
+      "name": "olej rzepakowy",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.92
+    },
+    {
+      "name": "oliwa z oliwek",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.91
+    },
+    {
+      "name": "olej słonecznikowy",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.92
+    },
+    {
+      "name": "olej sezamowy",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.92
+    },
+    {
+      "name": "ocet winny",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.01
+    },
+    {
+      "name": "ocet jabłkowy",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.01
+    },
+    {
+      "name": "ocet balsamiczny",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.05
+    },
+    {
+      "name": "ocet spirytusowy",
+      "category": "oilsVinegars",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.01
+    },
+    {
+      "name": "smalec",
+      "category": "oilsVinegars",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.92
+    },
+    {
+      "name": "ketchup",
+      "category": "sauces",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.1
+    },
+    {
+      "name": "sos sojowy",
+      "category": "sauces",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.15
+    },
+    {
+      "name": "sos worcestershire",
+      "category": "sauces",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.1
+    },
+    {
+      "name": "sos sriracha",
+      "category": "sauces",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.1
+    },
+    {
+      "name": "musztarda",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.05
+    },
+    {
+      "name": "majonez",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.95
+    },
+    {
+      "name": "chrzan",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1
+    },
+    {
+      "name": "pesto",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.95
+    },
+    {
+      "name": "koncentrat pomidorowy",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.1
+    },
+    {
+      "name": "tahini",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.95
+    },
+    {
+      "name": "miód",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.42
+    },
+    {
+      "name": "dżem",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.3
+    },
+    {
+      "name": "masło orzechowe",
+      "category": "sauces",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.1
+    },
+    {
+      "name": "passata pomidorowa",
+      "category": "canned",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.05,
+      "defaultPackageAmount": 500
+    },
+    {
+      "name": "pomidory w puszce",
+      "category": "canned",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 400,
+      "defaultPackageAmount": 1,
+      "pieceForms": {
+        "one": "puszka",
+        "few": "puszki",
+        "many": "puszek",
+        "fraction": "puszki"
+      }
+    },
+    {
+      "name": "kukurydza w puszce",
+      "category": "canned",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 340,
+      "defaultPackageAmount": 1,
+      "pieceForms": {
+        "one": "puszka",
+        "few": "puszki",
+        "many": "puszek",
+        "fraction": "puszki"
+      }
+    },
+    {
+      "name": "fasola czerwona w puszce",
+      "category": "canned",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 400,
+      "defaultPackageAmount": 1,
+      "pieceForms": {
+        "one": "puszka",
+        "few": "puszki",
+        "many": "puszek",
+        "fraction": "puszki"
+      }
+    },
+    {
+      "name": "ciecierzyca w puszce",
+      "category": "canned",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 400,
+      "defaultPackageAmount": 1,
+      "pieceForms": {
+        "one": "puszka",
+        "few": "puszki",
+        "many": "puszek",
+        "fraction": "puszki"
+      }
+    },
+    {
+      "name": "groszek w puszce",
+      "category": "canned",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 400,
+      "defaultPackageAmount": 1,
+      "pieceForms": {
+        "one": "puszka",
+        "few": "puszki",
+        "many": "puszek",
+        "fraction": "puszki"
+      }
+    },
+    {
+      "name": "mleko kokosowe",
+      "category": "canned",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.97,
+      "defaultPackageAmount": 400
+    },
+    {
+      "name": "oliwki",
+      "category": "canned",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kapary",
+      "category": "canned",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "ogórki konserwowe",
+      "category": "canned",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mleko skondensowane",
+      "category": "canned",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mrożony szpinak",
+      "category": "frozen",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mrożone owoce leśne",
+      "category": "frozen",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mrożony groszek",
+      "category": "frozen",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mrożone warzywa na patelnię",
+      "category": "frozen",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mrożone pierogi",
+      "category": "frozen",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "mrożona malina",
+      "category": "frozen",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "woda",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1
+    },
+    {
+      "name": "wino białe wytrawne",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.99
+    },
+    {
+      "name": "wino czerwone wytrawne",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.99
+    },
+    {
+      "name": "piwo",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.01
+    },
+    {
+      "name": "sok pomarańczowy",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.04
+    },
+    {
+      "name": "bulion drobiowy",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1
+    },
+    {
+      "name": "bulion warzywny",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1
+    },
+    {
+      "name": "napój owsiany",
+      "category": "drinks",
+      "measureKind": "volume",
+      "displayClass": "liquid",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 1.03
+    },
+    {
+      "name": "kawa mielona",
+      "category": "drinks",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.4
+    },
+    {
+      "name": "herbata",
+      "category": "drinks",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kakao",
+      "category": "drinks",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.5
+    },
+    {
+      "name": "czekolada gorzka",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "czekolada mleczna",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "czekolada biała",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "galaretka",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "biszkopty",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "herbatniki",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "budyń",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "marcepan",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kawałki czekolady",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.65
+    },
+    {
+      "name": "wiórki kokosowe",
+      "category": "sweets",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerMl": 0.35
+    },
+    {
+      "name": "tofu",
+      "category": "other",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 200,
+      "defaultPackageAmount": 1,
+      "pieceForms": {
+        "one": "kostka",
+        "few": "kostki",
+        "many": "kostek",
+        "fraction": "kostki"
+      }
+    },
+    {
+      "name": "tempeh",
+      "category": "other",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "hummus",
+      "category": "other",
+      "measureKind": "mass",
+      "displayClass": "weight",
+      "hasSizes": false,
+      "allowHalf": false
+    },
+    {
+      "name": "kostka rosołowa",
+      "category": "other",
+      "measureKind": "count",
+      "displayClass": "piece",
+      "hasSizes": false,
+      "allowHalf": false,
+      "gramsPerPiece": 10,
+      "pieceForms": {
+        "one": "kostka",
+        "few": "kostki",
+        "many": "kostek",
+        "fraction": "kostki"
+      }
+    }
+  ]
 }

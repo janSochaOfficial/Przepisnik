@@ -1,3 +1,154 @@
 {
-  "utensils": []
+  "utensils": [
+    {
+      "name": "piekarnik"
+    },
+    {
+      "name": "kuchenka"
+    },
+    {
+      "name": "patelnia"
+    },
+    {
+      "name": "garnek"
+    },
+    {
+      "name": "rondel"
+    },
+    {
+      "name": "blender"
+    },
+    {
+      "name": "mikser"
+    },
+    {
+      "name": "robot kuchenny"
+    },
+    {
+      "name": "tarka"
+    },
+    {
+      "name": "sitko"
+    },
+    {
+      "name": "durszlak"
+    },
+    {
+      "name": "wałek"
+    },
+    {
+      "name": "forma do pieczenia"
+    },
+    {
+      "name": "forma do tarty"
+    },
+    {
+      "name": "blacha do pieczenia"
+    },
+    {
+      "name": "termometr kuchenny"
+    },
+    {
+      "name": "deska do krojenia"
+    },
+    {
+      "name": "nóż kuchenny"
+    },
+    {
+      "name": "miska"
+    },
+    {
+      "name": "trzepaczka"
+    },
+    {
+      "name": "łyżka drewniana"
+    },
+    {
+      "name": "szpatułka"
+    },
+    {
+      "name": "chochla"
+    },
+    {
+      "name": "szumówka"
+    },
+    {
+      "name": "tłuczek do ziemniaków"
+    },
+    {
+      "name": "obieraczka"
+    },
+    {
+      "name": "otwieracz do puszek"
+    },
+    {
+      "name": "waga kuchenna"
+    },
+    {
+      "name": "kubek miarowy"
+    },
+    {
+      "name": "łyżeczka miarowa"
+    },
+    {
+      "name": "minutnik"
+    },
+    {
+      "name": "papier do pieczenia"
+    },
+    {
+      "name": "folia aluminiowa"
+    },
+    {
+      "name": "grill"
+    },
+    {
+      "name": "frytkownica"
+    },
+    {
+      "name": "wolnowar"
+    },
+    {
+      "name": "szybkowar"
+    },
+    {
+      "name": "mikrofalówka"
+    },
+    {
+      "name": "toster"
+    },
+    {
+      "name": "opiekacz"
+    },
+    {
+      "name": "moździerz"
+    },
+    {
+      "name": "praska do czosnku"
+    },
+    {
+      "name": "krajalnica"
+    },
+    {
+      "name": "sitko do mąki"
+    },
+    {
+      "name": "nożyczki kuchenne"
+    },
+    {
+      "name": "pędzelek kuchenny"
+    },
+    {
+      "name": "garnek do pary"
+    },
+    {
+      "name": "wok"
+    },
+    {
+      "name": "patelnia grillowa"
+    },
+    {
+      "name": "forma do muffinek"
+    }
+  ]
 }
