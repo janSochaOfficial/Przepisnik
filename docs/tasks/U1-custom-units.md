@@ -68,3 +68,39 @@ type CustomUnitWrite = {
 - Admin: changing the amount of a used unit → 400 `unit.in_use`; renaming it works.
 - Export/import with a custom unit round-trips; importing into a database that already has an identical unit reuses it.
 - `scripts/verify.sh --agent` is green.
+
+## Report
+
+### Summary
+- **Contract** (API.md §0, new §2.1, §8, §9 + openapi.yaml): `Unit` gains `custom`; new `BuiltInUnit`; `Quantity.customUnitId` / read-only `customUnit`; `CustomUnitRef`, `CustomUnitWrite`, `CustomUnitEquals`; `GET/POST /units`, `PUT /admin/units/{id}`; export `customUnits` + `ExportQuantity` (`customUnitKey`); codes `unit.not_found`, `unit.invalid`, `unit.in_use`.
+- **Backend**: `Core/Units` (`CustomUnit`, `CustomUnitRules` for validation/definition/unique names, `CustomUnitLookup` that loads all units of a set of quantities in one query); `Quantity` record gets `CustomUnitId` + `IsWellFormed`; `IQuantityConverter` gets an overload taking the unit (the 2-arg one is unchanged; `NativeAmount`, `ConvertKind`, `RoundBase` are public helpers U2 can reuse). Recipes and variants validate and convert custom quantities; every response quantity embeds `customUnit` (recipe detail via one extra `ThenInclude`, resolved/detail/matrix via one extra query only when a custom unit is used). `Api/Features/Units` (catalog, admin with in-use check over ingredients and variant-op jsonb, product-merge move with " (2)" renaming, wired from `ProductAdmin.MergeAsync`). Export/import round-trip units; import reuses name + scope + kind + amount within 1 %, otherwise creates (renaming on clash). `backend/http/units.http`.
+- **Frontend**: `domain/units.ts` (custom conversion, `customUnitFits`, `convertKind`), `format.ts` (`formatInCustomUnit`: ¼ rounding, minimum ¼, 5 % `~` rule; as-entered display), `plural.ts` (`suggestPluralForms`, suffix rules in `i18n/pl/units.ts`), `components/units/` (`UnitSelect`, `NewUnitDialog`, cached `units-client.ts`, `options.ts`), used in the recipe/variant editor row and the "Mam:" sheet. i18n `customUnits` + error messages.
+- **Tests**: `shared/test-vectors/quantities/U1.json` (11 cases) and `formatting/U1.json` (12 cases) run on both sides; backend unit tests (rules, converter, export validator) and integration tests (`Units/CustomUnitEndpointsTests`, `CustomUnitUsageTests`: endpoints, admin, merge, recipes, variants incl. matrix, export/import round trip and reuse); Vitest (domain, draft, `IngredientRow` with custom units and the dialog); Playwright `custom-units.spec.ts` (create "puszka" = 400 g in the editor and save "2 puszki"; view shows `2 puszki`, ×0.75 `1 ½ puszki`, 480 g `1 ¼ puszki`; filiżanka not offered for flour without density).
+
+### Deviations
+- **×0.6 → `1 ¼ puszki`, not `~1 ¼ puszki`.** 1.2 → 1.25 is 4.2 % off, and PROJECT §5.4/D-31 put `~` only above 5 %. PROJECT.md wins over the task file; the vectors and the Playwright test assert `1 ¼ puszki`, and a 9 % case (`~1 puszka`) covers the marker.
+- Files touched outside "Owns": `components/recipe-editor/draft.ts` (+ test, `IngredientRowHarness.test.svelte`) for the draft's `customUnit`; `domain/types.ts` (re-exports only); `Core/Variants/VariantModels.cs` (an additive `Units` init property on three models); `i18n/pl/index.ts` (adds `t.customUnits`); the vector schemas `shared/test-vectors/schemas/{common,quantities,formatting}.schema.json` (additive optional `customUnit`, `gramsPerMl`/`gramsPerPiece` on formatting products, `custom` in the unit enum); `IQuantityConverter` gained an overload; one assertion in `recipe-editor.spec.ts` now expects the "+ Nowa jednostka…" entry.
+- `Program.cs`: `AddUnits()` / `MapUnits()` were not wired; I added the two lines (plus the `using`).
+- Unknown `customUnitId` → 400 `validation.failed` with field code `unit.not_found` (the task did not specify; documented in API.md §2.1). A custom quantity without an id, or an id on a built-in unit → `quantity.invalid`.
+- The "+ Nowa jednostka…" entry is also in the "Mam:" picker (PROJECT §5.6 lists it there). A global unit created from a row whose product it doesn't fit is created but not selected.
+- `UnitSelect` loads units in an `$effect` (network sync on product change); the autofixer only suggests, no issue.
+
+### Model changes (migration needed, not added)
+- New table `custom_units`: `id uuid PK`, `name varchar(40)`, `normalized_name varchar(40)`, `forms jsonb`, `product_id uuid NULL FK products ON DELETE RESTRICT`, `measure_kind varchar(32)`, `amount numeric`, `created_by_id uuid NULL FK users ON DELETE SET NULL`, `created_at timestamptz`; unique index `(normalized_name, product_id)` **NULLS NOT DISTINCT**; index on `product_id`.
+- `recipe_ingredients.quantity_custom_unit_id uuid NULL` FK `custom_units` ON DELETE RESTRICT (+ index). `quantity_unit` can now hold `Custom`.
+- Variant ops' jsonb quantities carry `customUnitId` (no schema change; old rows read as null).
+
+### Contract changes
+API.md §0 (Unit, BuiltInUnit, Quantity, CustomUnitRef), new §2.1 Custom units, §8 (customUnits, ExportQuantity, import matching), §9 (three codes); openapi.yaml correspondingly (new tag `units`, paths `/units`, `/admin/units/{id}`, schemas `BuiltInUnit`, `CustomUnitRef`, `CustomUnitEquals`, `CustomUnitWrite`, `ExportCustomUnit`, `ExportQuantity`). `formatVersion` stays 1; exports without units are byte-identical to before (`customUnits` and `customUnitKey` are omitted when empty).
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- **U2**: add shopping-list usage to `UnitAdmin.IsInUseAsync` (`Api/Features/Units/UnitAdmin.cs`) once `shopping_list_items.quantity_custom_unit_id` exists; reuse `UnitSelect` (`allowNew`), `formatQuantityAsEntered`, `QuantityDto.From` and the converter helpers (`QuantityConverter.NativeAmount` / `ConvertKind`).
+- **I1**: export/import now carries `customUnits`; the importer resolves units in `ResolveUnitsAsync` before the recipe, reuse it for "import as variant".
+
+### Follow-ups
+- No admin UI for editing units (only the API, as specified).
+- Plural-form guessing is a small suffix heuristic (first word only); the user corrects it in the dialog.
+
