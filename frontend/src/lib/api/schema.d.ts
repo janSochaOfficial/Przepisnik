@@ -1056,6 +1056,9 @@ export interface components {
 		NameWrite: {
 			name: string;
 		};
+		CatalogNameWrite: {
+			name: string;
+		};
 		GoogleLoginRequest: {
 			idToken: string;
 		};
@@ -2149,7 +2152,7 @@ export interface operations {
 		};
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['NameWrite'];
+				'application/json': components['schemas']['CatalogNameWrite'];
 			};
 		};
 		responses: {
@@ -2212,7 +2215,7 @@ export interface operations {
 		};
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['NameWrite'];
+				'application/json': components['schemas']['CatalogNameWrite'];
 			};
 		};
 		responses: {

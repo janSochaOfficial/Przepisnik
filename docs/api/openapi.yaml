@@ -349,7 +349,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/NameWrite' }
+            schema: { $ref: '#/components/schemas/CatalogNameWrite' }
       responses:
         '200':
           description: An existing tag matched the normalized name.
@@ -395,7 +395,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/NameWrite' }
+            schema: { $ref: '#/components/schemas/CatalogNameWrite' }
       responses:
         '200':
           description: An existing utensil matched the normalized name.
@@ -1643,6 +1643,12 @@ components:
       required: [name]
       properties:
         name: { type: string, minLength: 1, maxLength: 80 }
+      additionalProperties: false
+    CatalogNameWrite:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60 }
       additionalProperties: false
 
     # ───────────── 1. Auth and current user ─────────────

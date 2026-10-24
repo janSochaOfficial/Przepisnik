@@ -78,12 +78,12 @@ Every endpoint other than `/auth/*`, `/me*` and `/users/nickname-available` retu
 | GET | `/products` | `q?` (trigram + prefix on normalized name), `category?`, `limit` (≤ 50, default 20) | `200 ProductRef[]` | |
 | GET | `/products/{id}` | — | `200 ProductRef` | 404 `product.not_found` |
 | POST | `/products` | `ProductWrite` | `201 ProductRef` | 409 `product.duplicate` + extension `existingId` |
-| PUT | `/admin/products/{id}` | `ProductWrite` | `200 ProductRef` | 403 `admin.required`, 409 `product.duplicate` |
+| PUT | `/admin/products/{id}` | `ProductWrite` | `200 ProductRef` | 403 `admin.required`, 409 `product.duplicate`, 400 `product.invalid_combination` (`errors.measureKind: in_use`) when `measureKind` changes on a product in use |
 | POST | `/admin/products/{id}/merge` | `{ targetId: Uuid }` | `204` | 403, 404, 400 `product.merge_incompatible` (measureKind differs) |
 | GET | `/tags` | `q?`, `limit` | `200 TagRef[]` | |
-| POST | `/tags` | `{ name: string }` | `201 TagRef` (or `200` with the existing tag on a normalized match) | 400 `tag.reserved` (`szybkie`) |
+| POST | `/tags` | `{ name: string }` (1–60 chars) | `201 TagRef` (or `200` with the existing tag on a normalized match) | 400 `tag.reserved` (`szybkie`) |
 | GET | `/utensils` | `q?`, `limit` | `200 UtensilRef[]` | |
-| POST | `/utensils` | `{ name: string }` | `201` / `200` existing | |
+| POST | `/utensils` | `{ name: string }` (1–60 chars) | `201` / `200` existing | |
 
 ```ts
 type ProductWrite = {
