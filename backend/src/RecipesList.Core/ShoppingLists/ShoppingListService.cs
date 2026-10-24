@@ -40,7 +40,7 @@ public interface IShoppingListService
     /// <summary>
     /// Removes the checked entries. With <paramref name="moveToFridge"/>, checked product entries first become fridge
     /// items at 100 % (package = the amount, or the product's default package); a product entry with neither stays on
-    /// the list. Free-text entries are just removed.
+    /// the list. Free-text entries are just removed. The created items come back in shopping-list order.
     /// </summary>
     Task<CompleteShoppingListModel> CompleteAsync(Guid fridgeId, bool moveToFridge, CancellationToken ct);
 }
@@ -215,12 +215,18 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
     {
         await access.RequireMemberAsync(fridgeId, ct);
         var me = currentUser.Id;
-        var checkedItems = await db.ShoppingListItems
+        var loaded = await db.ShoppingListItems
             .Include(i => i.Product)
             .Where(i => i.FridgeId == fridgeId && i.Checked)
-            .OrderBy(i => i.CreatedAt)
-            .ThenBy(i => i.Id)
             .ToListAsync(ct);
+        // List order (as in ListAsync), so createdFridgeItems is deterministic: a batch shares one CreatedAt.
+        var checkedItems = loaded
+            .OrderBy(i => i.Product is null ? 1 : 0)
+            .ThenBy(i => i.Product?.Category ?? ProductCategory.Other)
+            .ThenBy(i => i.Product?.NormalizedName ?? NameNormalizer.Normalize(i.Text ?? ""), StringComparer.Ordinal)
+            .ThenBy(i => i.CreatedAt)
+            .ThenBy(i => i.Id)
+            .ToList();
 
         var now = time.GetUtcNow();
         var created = new List<FridgeItem>();
