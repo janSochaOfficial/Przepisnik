@@ -18,7 +18,11 @@ const base = {
 	hasSizes: false,
 	allowHalf: false,
 	category: 'other',
-	displayClass: 'weight'
+	displayClass: 'weight',
+	gramsPerMl: null,
+	gramsPerPiece: null,
+	defaultPackageAmount: null,
+	pieceForms: null
 } as const;
 const flour: ProductRef = { ...base, id: 'p-flour', name: 'mąka', measureKind: 'mass' };
 const flourDense: ProductRef = { ...flour, gramsPerMl: 0.5 };
