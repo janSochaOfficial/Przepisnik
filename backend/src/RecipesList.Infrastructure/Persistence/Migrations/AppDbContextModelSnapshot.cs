@@ -321,7 +321,6 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasName("pk_fridges");
 
                     b.HasIndex("OwnerId")
-                        .IsUnique()
                         .HasDatabaseName("ix_fridges_owner_id");
 
                     b.ToTable("fridges", (string)null);
