@@ -1663,9 +1663,9 @@ export interface components {
 			cookMinutes?: number | null;
 			utensilsAdded: string[];
 			utensilsRemoved: string[];
-			/** @description Same shapes as `IngredientOp`, with ids → keys and `productId` → `productKey`. */
+			/** @description Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey` (the server-computed `baseAmount` is not exported). */
 			ingredientOps: unknown[];
-			/** @description Same shapes as `StepOp`, with ids → keys and `imageId` → `imageKey`. */
+			/** @description Same shapes as `StepOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `imageId` → `imageKey` in blocks. */
 			stepOps: unknown[];
 		};
 	};
