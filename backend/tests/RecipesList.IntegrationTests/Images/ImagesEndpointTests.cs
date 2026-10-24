@@ -152,6 +152,28 @@ public sealed class ImagesEndpointTests : IClassFixture<ApiFactory>, IAsyncLifet
         await ContractAssert.IsProblemAsync(response, HttpStatusCode.UnsupportedMediaType, "request.invalid");
     }
 
+    [Fact]
+    public async Task Upload_IsRateLimitedPerUser()
+    {
+        using var limited = _web.WithWebHostBuilder(b => b.UseSetting("RateLimiting:ImagesPerMinute", "1"));
+        using var first = ApiClients.Create(limited);
+        using var second = ApiClients.Create(limited);
+        await first.LoginAsync("limitowana");
+        await second.LoginAsync("druga");
+
+        static Task<HttpResponseMessage> Upload(ApiClient client)
+        {
+            var file = new ByteArrayContent(ImageFixtures.Png(8, 8));
+            file.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
+            var content = new MultipartFormDataContent { { file, "file", "a.png" } };
+            return client.Http.PostAsync("/api/v1/images", content, TestContext.Current.CancellationToken);
+        }
+
+        (await Upload(first)).StatusCode.ShouldBe(HttpStatusCode.Created);
+        await ContractAssert.IsProblemAsync(await Upload(first), HttpStatusCode.TooManyRequests, "rate_limited");
+        (await Upload(second)).StatusCode.ShouldBe(HttpStatusCode.Created);
+    }
+
     private ApiClient NewClient() =>
         ApiClients.Create(_web);
 
