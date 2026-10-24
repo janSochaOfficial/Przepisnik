@@ -1,0 +1,21 @@
+# Recipe export and import (API.md §4, §8). Sign in first with dev-login (Development only); the cookie is kept between requests.
+@baseUrl = http://localhost:5106/api/v1
+@recipeId = 00000000-0000-0000-0000-000000000000
+
+### Sign in (dev-login)
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "ania@test.local", "nickname": "ania" }
+
+### Export a recipe you can see, with the variants you can see (404 when not visible)
+GET {{baseUrl}}/recipes/{{recipeId}}/export
+
+### Import the sample file: creates a private recipe and private variants owned by you
+### (400 import.invalid_format, 400 import.unsupported_version, 413 import.too_large, 429 rate_limited)
+POST {{baseUrl}}/recipes/import
+Content-Type: application/json
+X-Requested-With: fetch
+
+< ../../shared/samples/export-v1.json
