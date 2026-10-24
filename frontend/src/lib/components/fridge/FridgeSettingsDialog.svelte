@@ -2,7 +2,7 @@
 	import Copy from '@lucide/svelte/icons/copy';
 	import Share2 from '@lucide/svelte/icons/share-2';
 	import UserMinus from '@lucide/svelte/icons/user-minus';
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { ApiError, createApi, unwrap } from '$lib/api/client';
 	import {
 		Avatar,
@@ -61,13 +61,12 @@
 		error = e instanceof ApiError ? e : new ApiError(0, 'server.error');
 	}
 
-	$effect(() => {
+	onMount(() => {
 		if (!isOwner) return;
-		untrack(() => {
-			unwrap(
-				createApi().GET('/fridges/{id}/invites', { params: { path: { id: fridge.id } } })
-			).then((list) => (invites = list), fail);
-		});
+		unwrap(createApi().GET('/fridges/{id}/invites', { params: { path: { id: fridge.id } } })).then(
+			(list) => (invites = list),
+			fail
+		);
 	});
 
 	async function rename(event: SubmitEvent) {
