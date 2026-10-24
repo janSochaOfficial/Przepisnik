@@ -17,6 +17,7 @@ test('an anonymous user is sent to the login page and can use dev-login', async 
 	const api = await mockApi(page, {
 		'GET /me': () => (session ? { body: me } : problem(401, 'auth.required')),
 		'GET /auth/config': { body: authConfig },
+		'GET /fridges': { body: [] },
 		'POST /auth/dev-login': () => {
 			session = true;
 			return { body: me };
