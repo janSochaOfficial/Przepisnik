@@ -30,6 +30,7 @@ internal sealed class ProductAdmin(AppDbContext db, ICurrentUser currentUser, Pr
         product.Name = name;
         product.NormalizedName = normalized;
         ProductMapping.Apply(product, input);
+        product.IsVerified = true;
 
         try
         {

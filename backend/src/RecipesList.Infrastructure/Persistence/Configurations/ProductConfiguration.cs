@@ -17,6 +17,7 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasMethod("gin")
             .HasOperators("gin_trgm_ops");
         b.HasIndex(x => x.Category);
+        b.Property(x => x.IsVerified).HasDefaultValue(false);
         b.Property(x => x.PieceForms).HasJsonbConversion();
 
         b.HasOne<User>()

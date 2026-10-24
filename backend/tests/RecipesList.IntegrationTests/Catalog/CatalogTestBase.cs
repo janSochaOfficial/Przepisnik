@@ -52,7 +52,8 @@ public abstract class CatalogTestBase(ApiFactory factory) : IClassFixture<ApiFac
         string name,
         MeasureKind kind = MeasureKind.Mass,
         DisplayClass display = DisplayClass.Weight,
-        ProductCategory category = ProductCategory.Other)
+        ProductCategory category = ProductCategory.Other,
+        bool isVerified = false)
     {
         await using var db = Factory.CreateDbContext();
         var product = new Product
@@ -62,6 +63,7 @@ public abstract class CatalogTestBase(ApiFactory factory) : IClassFixture<ApiFac
             Category = category,
             MeasureKind = kind,
             DisplayClass = display,
+            IsVerified = isVerified,
             CreatedAt = TestData.Now,
         };
         db.Products.Add(product);

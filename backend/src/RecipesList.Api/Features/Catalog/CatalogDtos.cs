@@ -16,11 +16,12 @@ internal sealed record CatalogProductDto(
     decimal? GramsPerMl,
     decimal? GramsPerPiece,
     decimal? DefaultPackageAmount,
-    PluralForms? PieceForms)
+    PluralForms? PieceForms,
+    bool IsVerified)
 {
     public static CatalogProductDto From(Product p) => new(
         p.Id, p.Name, p.Category, p.MeasureKind, p.DisplayClass, p.HasSizes, p.AllowHalf,
-        p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms);
+        p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms, p.IsVerified);
 }
 
 /// <summary>A tag (API.md §0 <c>TagRef</c>).</summary>
