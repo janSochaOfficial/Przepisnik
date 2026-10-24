@@ -29,6 +29,9 @@ export const errors = {
 	'recipe.archived': 'Ten przepis jest zarchiwizowany i nie można go zmieniać.',
 	'quantity.unit_incompatible': 'Tej jednostki nie można użyć dla tego produktu.',
 	'quantity.invalid': 'Nieprawidłowa ilość.',
+	'unit.not_found': 'Tej jednostki nie ma już w bazie.',
+	'unit.invalid': 'Tej jednostki nie da się przeliczyć dla wybranego produktu.',
+	'unit.in_use': 'Jednostka jest używana — można zmienić tylko jej nazwę i odmianę.',
 
 	'variant.not_found': 'Nie znaleziono wariantu.',
 	'variant.not_author': 'Tylko autor może zmienić ten wariant.',

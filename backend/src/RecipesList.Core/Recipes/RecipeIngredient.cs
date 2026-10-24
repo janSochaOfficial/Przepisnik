@@ -1,5 +1,6 @@
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Quantities;
+using RecipesList.Core.Units;
 
 namespace RecipesList.Core.Recipes;
 
@@ -24,6 +25,11 @@ public sealed class RecipeIngredient
 
     public PieceSize? QuantitySize { get; set; }
 
+    /// <summary>The custom unit of the quantity; set iff <see cref="QuantityUnit"/> is <see cref="Unit.Custom"/>.</summary>
+    public Guid? QuantityCustomUnitId { get; set; }
+
+    public CustomUnit? CustomUnit { get; set; }
+
     /// <summary>Canonical amount (g, ml or medium pieces); null iff there is no quantity.</summary>
     public decimal? BaseAmount { get; set; }
 
@@ -34,12 +40,13 @@ public sealed class RecipeIngredient
     /// <summary>The entered quantity, or null for "do smaku".</summary>
     public Quantity? Quantity
     {
-        get => QuantityValue is { } value && QuantityUnit is { } unit ? new Quantity(value, unit, QuantitySize) : null;
+        get => QuantityValue is { } value && QuantityUnit is { } unit ? new Quantity(value, unit, QuantitySize, QuantityCustomUnitId) : null;
         set
         {
             QuantityValue = value?.Value;
             QuantityUnit = value?.Unit;
             QuantitySize = value?.Size;
+            QuantityCustomUnitId = value?.CustomUnitId;
         }
     }
 }

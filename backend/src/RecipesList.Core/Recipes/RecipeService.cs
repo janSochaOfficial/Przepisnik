@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Quantities;
+using RecipesList.Core.Units;
 using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
 
@@ -216,13 +217,13 @@ public sealed class RecipeService(
         recipe.PrepMinutes = input.PrepMinutes;
         recipe.CookMinutes = input.CookMinutes;
 
-        ApplyIngredients(recipe, input, refs.Products);
+        ApplyIngredients(recipe, input, refs.Products, refs.Units);
         ApplySteps(recipe, input);
         await ApplyTagsAsync(recipe, input, refs.TagIds, ct);
         ApplyUtensils(recipe, refs.UtensilIds);
     }
 
-    private void ApplyIngredients(Recipe recipe, RecipeWriteInput input, Dictionary<Guid, Product> products)
+    private void ApplyIngredients(Recipe recipe, RecipeWriteInput input, Dictionary<Guid, Product> products, Dictionary<Guid, CustomUnit> units)
     {
         var existing = recipe.Ingredients.ToDictionary(i => i.Id);
         var kept = new HashSet<Guid>();
@@ -245,7 +246,7 @@ public sealed class RecipeService(
             row.Position = position;
             row.ProductId = source.ProductId;
             row.Quantity = source.Quantity;
-            row.BaseAmount = converter.ToBaseAmount(source.Quantity, products[source.ProductId]);
+            row.BaseAmount = converter.ToBaseAmount(source.Quantity, products[source.ProductId], units.UnitOf(source.Quantity));
             row.Note = string.IsNullOrWhiteSpace(source.Note) ? null : source.Note;
             row.Optional = source.Optional;
         }
@@ -379,6 +380,7 @@ public sealed class RecipeService(
 
         var productIds = input.Ingredients.Select(i => i.ProductId).Distinct().ToList();
         var products = await db.Products.Where(p => productIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, ct);
+        var units = await db.LoadCustomUnitsAsync(input.Ingredients.Select(i => i.Quantity), ct);
         for (var i = 0; i < input.Ingredients.Count; i++)
         {
             var ingredient = input.Ingredients[i];
@@ -386,10 +388,16 @@ public sealed class RecipeService(
             {
                 errors.Add($"ingredients[{i}].productId", ErrorCodes.ProductNotFound);
             }
-            else if (ingredient.Quantity is { } quantity && quantity.Value > 0
-                && converter.ToBaseAmount(quantity, product) is null)
+            else if (ingredient.Quantity is { IsWellFormed: true } quantity)
             {
-                errors.Add($"ingredients[{i}].quantity", ErrorCodes.QuantityUnitIncompatible);
+                if (quantity.Unit == Unit.Custom && units.UnitOf(quantity) is null)
+                {
+                    errors.Add($"ingredients[{i}].quantity", ErrorCodes.UnitNotFound);
+                }
+                else if (converter.ToBaseAmount(quantity, product, units.UnitOf(quantity)) is null)
+                {
+                    errors.Add($"ingredients[{i}].quantity", ErrorCodes.QuantityUnitIncompatible);
+                }
             }
         }
 
@@ -420,7 +428,7 @@ public sealed class RecipeService(
         }
 
         await CheckImagesAsync(recipe, input, errors, me, ct);
-        return new References(products, tagIds, utensilIds);
+        return new References(products, units, tagIds, utensilIds);
     }
 
     // Images may be referenced by their uploader, or when the recipe already references them (API.md §3).
@@ -474,5 +482,5 @@ public sealed class RecipeService(
         }
     }
 
-    private sealed record References(Dictionary<Guid, Product> Products, HashSet<Guid> TagIds, HashSet<Guid> UtensilIds);
+    private sealed record References(Dictionary<Guid, Product> Products, Dictionary<Guid, CustomUnit> Units, HashSet<Guid> TagIds, HashSet<Guid> UtensilIds);
 }

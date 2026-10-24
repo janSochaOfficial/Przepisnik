@@ -1,0 +1,39 @@
+# Custom units (API.md §2.1, PROJECT §5.6). Sign in first with dev-login (Development only).
+# For the admin call sign in with an email listed in Admin__Emails__0. Task U1 uses database recipes_u1.
+@baseUrl = http://localhost:5101/api/v1
+@productId = 00000000-0000-0000-0000-000000000000
+@unitId = 00000000-0000-0000-0000-000000000000
+
+### Sign in (dev-login)
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "anna@test.local", "nickname": "anna" }
+
+### Units for every product, plus the units of one product (product units first)
+GET {{baseUrl}}/units?productId={{productId}}
+
+### Search by name
+GET {{baseUrl}}/units?q=fili&limit=10
+
+### A unit for one product: 1 puszka = 400 g (201, or 200 with the existing unit)
+POST {{baseUrl}}/units
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "puszka", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" }, "productId": "{{productId}}", "equals": { "value": 400, "unit": "g" } }
+
+### A unit for every product: 1 filiżanka = 150 ml
+POST {{baseUrl}}/units
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "filiżanka", "forms": { "one": "filiżanka", "few": "filiżanki", "many": "filiżanek", "fraction": "filiżanki" }, "productId": null, "equals": { "value": 150, "unit": "ml" } }
+
+### Edit a unit (admin; the amount only while nothing uses it, 400 unit.in_use otherwise)
+PUT {{baseUrl}}/admin/units/{{unitId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "puszka", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" }, "productId": "{{productId}}", "equals": { "value": 425, "unit": "g" } }

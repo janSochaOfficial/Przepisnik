@@ -277,6 +277,52 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/units': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * List custom units
+		 * @description The units for every product, plus the ones for `productId` when given; product units first, then by name.
+		 */
+		get: operations['SearchUnits'];
+		put?: never;
+		/**
+		 * Create a custom unit, or return the existing one
+		 * @description An existing unit with the same normalized name in the same scope is returned with `200`.
+		 */
+		post: operations['CreateUnit'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/admin/units/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		get?: never;
+		/**
+		 * Edit a custom unit (admin)
+		 * @description The scope (`productId`) cannot change; the amount can change only while nothing uses the unit (`unit.in_use`).
+		 */
+		put: operations['AdminUpdateUnit'];
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/images': {
 		parameters: {
 			query?: never;
@@ -960,7 +1006,13 @@ export interface components {
 			| 'sweets'
 			| 'other';
 		/** @enum {string} */
-		Unit: 'g' | 'kg' | 'ml' | 'l' | 'glass' | 'tbsp' | 'tsp' | 'drop' | 'pinch' | 'piece';
+		BuiltInUnit: 'g' | 'kg' | 'ml' | 'l' | 'glass' | 'tbsp' | 'tsp' | 'drop' | 'pinch' | 'piece';
+		/**
+		 * @description A built-in unit, or `custom` for a unit of the custom-unit catalog (API.md §2.1).
+		 * @enum {string}
+		 */
+		Unit:
+			'g' | 'kg' | 'ml' | 'l' | 'glass' | 'tbsp' | 'tsp' | 'drop' | 'pinch' | 'piece' | 'custom';
 		/** @enum {string} */
 		PieceSize: 'small' | 'medium' | 'large';
 		/** @enum {string} */
@@ -1017,11 +1069,41 @@ export interface components {
 			/** @description Read-only. Seeded or admin-curated products are verified; user-added ones are not and rank below verified ones in search. */
 			isVerified: boolean;
 		};
-		/** @description As entered by the author; `size` only for unit `piece` and products with sizes. */
+		/**
+		 * @description As entered by the author; `size` only for unit `piece` and products with sizes. `customUnitId` is required iff
+		 *     `unit` is `custom` (and `size` is then not allowed). `customUnit` is read-only: responses embed it with every
+		 *     custom quantity, and it is ignored on write.
+		 */
 		Quantity: {
 			value: number;
 			unit: components['schemas']['Unit'];
 			size?: components['schemas']['PieceSize'] | null;
+			customUnitId?: components['schemas']['Uuid'] | null;
+			customUnit?: components['schemas']['CustomUnitRef'] | null;
+		};
+		/** @description A custom unit (API.md §2.1): "1 <name>" = `amount` base units of `measureKind`. */
+		CustomUnitRef: {
+			id: components['schemas']['Uuid'];
+			name: string;
+			forms: components['schemas']['PluralForms'];
+			/** @description Null for a unit for every product. */
+			productId: components['schemas']['Uuid'] | null;
+			measureKind: components['schemas']['MeasureKind'];
+			/** @description Base units of `measureKind` (g, ml or medium pieces) in one unit. */
+			amount: number;
+		};
+		/** @description The built-in quantity that one custom unit equals. */
+		CustomUnitEquals: {
+			value: number;
+			unit: components['schemas']['BuiltInUnit'];
+			size?: components['schemas']['PieceSize'] | null;
+		};
+		CustomUnitWrite: {
+			name: string;
+			forms: components['schemas']['PluralForms'];
+			/** @description Null (or absent) for a unit for every product. */
+			productId?: components['schemas']['Uuid'] | null;
+			equals: components['schemas']['CustomUnitEquals'];
 		};
 		ContentBlock: components['schemas']['TextBlock'] | components['schemas']['ImageBlock'];
 		/** @description Plain text; line breaks are kept. */
@@ -1586,6 +1668,8 @@ export interface components {
 			exportedAt: components['schemas']['DateTime'];
 			/** @description Every product referenced anywhere in the file. */
 			products: components['schemas']['ExportProduct'][];
+			/** @description Every custom unit referenced anywhere in the file; absent in files without custom units. */
+			customUnits?: components['schemas']['ExportCustomUnit'][];
 			/** @description localImageKey → image. */
 			images: {
 				[key: string]: components['schemas']['ExportImage'];
@@ -1611,6 +1695,22 @@ export interface components {
 			defaultPackageAmount?: number | null;
 			pieceForms?: components['schemas']['PluralForms'] | null;
 		};
+		ExportCustomUnit: {
+			key: string;
+			name: string;
+			forms: components['schemas']['PluralForms'];
+			/** @description Null for a unit for every product. */
+			productKey?: string | null;
+			measureKind: components['schemas']['MeasureKind'];
+			amount: number;
+		};
+		/** @description `Quantity` with `customUnitKey` (a key of `customUnits`, required iff `unit` is `custom`) instead of `customUnitId`. */
+		ExportQuantity: {
+			value: number;
+			unit: components['schemas']['Unit'];
+			size?: components['schemas']['PieceSize'] | null;
+			customUnitKey?: string | null;
+		};
 		ExportBlock:
 			components['schemas']['ExportTextBlock'] | components['schemas']['ExportImageBlock'];
 		ExportTextBlock: {
@@ -1633,7 +1733,7 @@ export interface components {
 		ExportIngredient: {
 			key: string;
 			productKey: string;
-			quantity?: components['schemas']['Quantity'] | null;
+			quantity?: components['schemas']['ExportQuantity'] | null;
 			note?: string | null;
 			optional: boolean;
 		};
@@ -1665,7 +1765,7 @@ export interface components {
 			cookMinutes?: number | null;
 			utensilsAdded: string[];
 			utensilsRemoved: string[];
-			/** @description Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey` (the server-computed `baseAmount` is not exported). */
+			/** @description Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey`, and quantities are `ExportQuantity` (`customUnitId` → `customUnitKey`); the server-computed `baseAmount` is not exported. */
 			ingredientOps: unknown[];
 			/** @description Same shapes as `StepOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `imageId` → `imageKey` in blocks. */
 			stepOps: unknown[];
@@ -2243,6 +2343,118 @@ export interface operations {
 			400: components['responses']['BadRequest'];
 			401: components['responses']['Unauthorized'];
 			403: components['responses']['Forbidden'];
+		};
+	};
+	SearchUnits: {
+		parameters: {
+			query?: {
+				productId?: components['schemas']['Uuid'];
+				/** @description Search text (normalized server-side). */
+				q?: components['parameters']['Q'];
+				limit?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Matching units. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['CustomUnitRef'][];
+				};
+			};
+			400: components['responses']['BadRequest'];
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+		};
+	};
+	CreateUnit: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CustomUnitWrite'];
+			};
+		};
+		responses: {
+			/** @description The existing unit. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['CustomUnitRef'];
+				};
+			};
+			/** @description Created. */
+			201: {
+				headers: {
+					Location: components['headers']['Location'];
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['CustomUnitRef'];
+				};
+			};
+			/** @description `unit.invalid` (`equals` cannot be converted for the product) or `validation.failed`. */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/problem+json': components['schemas']['ProblemDetails'];
+				};
+			};
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+			404: components['responses']['NotFound'];
+		};
+	};
+	AdminUpdateUnit: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CustomUnitWrite'];
+			};
+		};
+		responses: {
+			/** @description The updated unit. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['CustomUnitRef'];
+				};
+			};
+			/** @description `unit.in_use`, `unit.invalid` or `validation.failed`. */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/problem+json': components['schemas']['ProblemDetails'];
+				};
+			};
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+			404: components['responses']['NotFound'];
 		};
 	};
 	UploadImage: {

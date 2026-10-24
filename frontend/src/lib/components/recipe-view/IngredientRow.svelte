@@ -2,11 +2,12 @@
 	import Check from '@lucide/svelte/icons/check';
 	import Heart from '@lucide/svelte/icons/heart';
 	import Pin from '@lucide/svelte/icons/pin';
-	import { compatibleUnits, defaultUnit } from '$lib/components/recipe-editor/draft';
+	import { defaultUnit } from '$lib/components/recipe-editor/draft';
+	import UnitSelect from '$lib/components/units/UnitSelect.svelte';
 	import { BottomSheet, Button, NumberField, Select } from '$lib/components/ui';
 	import { formatIngredientAmount } from '$lib/domain/format';
 	import type { RankedOption } from '$lib/domain/matching';
-	import type { PieceSize, Unit } from '$lib/domain/types';
+	import type { CustomUnitRef, PieceSize, Unit } from '$lib/domain/types';
 	import { toBaseAmount } from '$lib/domain/units';
 	import { t } from '$lib/i18n';
 	import type { SelectionState } from '$lib/state/selection.svelte';
@@ -48,13 +49,11 @@
 
 	// "Mam: …" form; it starts over whenever the sheet opens.
 	let have = $state<number | null>(null);
-	let unit = $state<string>('g');
+	let unit = $state<Unit | null>('g');
+	let customUnit = $state<CustomUnitRef | null>(null);
 	let size = $state<string>('medium');
 	let scaleError = $state<string | null>(null);
 
-	let unitItems = $derived(
-		compatibleUnits(product).map((u) => ({ value: u, label: units.unitLabels[u] }))
-	);
 	let showSize = $derived(unit === 'piece' && product?.hasSizes === true);
 	const sizeItems = (['small', 'medium', 'large'] as const).map((s) => ({
 		value: s,
@@ -65,7 +64,11 @@
 		if (!next) return;
 		have = null;
 		scaleError = null;
-		if (product) unit = ingredient?.quantity?.unit ?? defaultUnit(product);
+		if (product) {
+			unit = ingredient?.quantity?.unit ?? defaultUnit(product);
+			customUnit = ingredient?.quantity?.customUnit ?? null;
+			if (unit === 'custom' && !customUnit) unit = defaultUnit(product);
+		}
 		size = ingredient?.quantity?.size ?? 'medium';
 	}
 
@@ -74,9 +77,19 @@
 			scaleError = labels.sheet.enterAmount;
 			return;
 		}
+		if (unit === null) {
+			scaleError = labels.sheet.incompatible;
+			return;
+		}
 		const base = toBaseAmount(
-			{ value: have, unit: unit as Unit, ...(showSize ? { size: size as PieceSize } : {}) },
-			product
+			{
+				value: have,
+				unit,
+				...(showSize ? { size: size as PieceSize } : {}),
+				...(unit === 'custom' ? { customUnitId: customUnit?.id ?? null } : {})
+			},
+			product,
+			customUnit
 		);
 		if (base === null || !(base > 0)) {
 			scaleError = labels.sheet.incompatible;
@@ -220,11 +233,12 @@
 					>
 						<NumberField label={labels.sheet.have} bind:value={have} min={0} error={scaleError} />
 						<div class="flex gap-3">
-							<Select
+							<UnitSelect
 								class="flex-1"
 								label={labels.sheet.haveUnit}
-								items={unitItems}
-								bind:value={unit}
+								{product}
+								bind:unit
+								bind:customUnit
 							/>
 							{#if showSize}
 								<Select

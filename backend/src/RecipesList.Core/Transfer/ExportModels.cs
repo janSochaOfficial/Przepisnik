@@ -30,6 +30,10 @@ public sealed record RecipeExportDocument
 
     public required IReadOnlyList<ExportProduct> Products { get; init; }
 
+    /// <summary>Every custom unit referenced in the file; absent (null) in files without any (PROJECT §5.6).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<ExportCustomUnit>? CustomUnits { get; init; }
+
     /// <summary>Local image key → image.</summary>
     public required IReadOnlyDictionary<string, ExportImage> Images { get; init; }
 
@@ -72,6 +76,36 @@ public sealed record ExportProduct
     public PluralForms? PieceForms { get; init; }
 }
 
+/// <summary>
+/// A custom unit with its definition in base units, so import can match or create it: "1 <see cref="Name"/>" =
+/// <see cref="Amount"/> base units of <see cref="MeasureKind"/>. <see cref="ProductKey"/> is null for a unit for every product.
+/// </summary>
+public sealed record ExportCustomUnit
+{
+    public required string Key { get; init; }
+
+    public required string Name { get; init; }
+
+    public required PluralForms Forms { get; init; }
+
+    public string? ProductKey { get; init; }
+
+    public required MeasureKind MeasureKind { get; init; }
+
+    public required decimal Amount { get; init; }
+}
+
+/// <summary>
+/// A quantity of the file (API.md §8 <c>ExportQuantity</c>): <c>Quantity</c> with <see cref="CustomUnitKey"/> (a key of
+/// <see cref="RecipeExportDocument.CustomUnits"/>, set iff the unit is <see cref="Unit.Custom"/>) instead of an id.
+/// The key is left out when null, so files without custom units look exactly as before.
+/// </summary>
+public sealed record ExportQuantity(
+    decimal Value,
+    Unit Unit,
+    PieceSize? Size = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CustomUnitKey = null);
+
 /// <summary>The base recipe of the file.</summary>
 public sealed record ExportRecipe
 {
@@ -107,7 +141,7 @@ public sealed record ExportIngredient
 
     public required string ProductKey { get; init; }
 
-    public Quantity? Quantity { get; init; }
+    public ExportQuantity? Quantity { get; init; }
 
     public string? Note { get; init; }
 
@@ -158,7 +192,7 @@ public sealed record ExportVariant
 
 /// <summary>
 /// An ingredient operation (API.md §5 <c>IngredientOp</c>) with <c>id</c> → <c>key</c>, <c>targetId</c> → <c>targetKey</c>,
-/// <c>afterId</c> → <c>afterKey</c> and <c>productId</c> → <c>productKey</c>.
+/// <c>afterId</c> → <c>afterKey</c> and <c>productId</c> → <c>productKey</c>; quantities are <see cref="ExportQuantity"/>.
 /// </summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "op")]
 [JsonDerivedType(typeof(ExportModifyIngredientOp), "modify")]
@@ -166,11 +200,11 @@ public sealed record ExportVariant
 [JsonDerivedType(typeof(ExportAddIngredientOp), "add")]
 public abstract record ExportIngredientOp;
 
-public sealed record ExportModifyIngredientOp(string TargetKey, string ProductKey, Quantity? Quantity, string? Note, bool Optional) : ExportIngredientOp;
+public sealed record ExportModifyIngredientOp(string TargetKey, string ProductKey, ExportQuantity? Quantity, string? Note, bool Optional) : ExportIngredientOp;
 
 public sealed record ExportRemoveIngredientOp(string TargetKey) : ExportIngredientOp;
 
-public sealed record ExportAddIngredientOp(string Key, string? AfterKey, string ProductKey, Quantity? Quantity, string? Note, bool Optional) : ExportIngredientOp;
+public sealed record ExportAddIngredientOp(string Key, string? AfterKey, string ProductKey, ExportQuantity? Quantity, string? Note, bool Optional) : ExportIngredientOp;
 
 /// <summary>A step operation (API.md §5 <c>StepOp</c>) with keys instead of ids and <c>imageKey</c> in its blocks.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "op")]

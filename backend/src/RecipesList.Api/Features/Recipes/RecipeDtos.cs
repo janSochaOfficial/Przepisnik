@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using RecipesList.Api.Features.Images;
+using RecipesList.Api.Features.Units;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
@@ -41,9 +42,9 @@ internal sealed record RecipeProductRefDto(
 
 /// <summary>
 /// An ingredient row of a recipe. <c>Quantity</c> is as the author entered it (null means "do smaku");
-/// <c>BaseAmount</c> is the server-computed canonical amount (g, ml or medium pieces), null iff there is no quantity.
+/// a custom unit is embedded in it; <c>BaseAmount</c> is the server-computed canonical amount (g, ml or medium pieces), null iff there is no quantity.
 /// </summary>
-internal sealed record IngredientDto(Guid Id, RecipeProductRefDto Product, Quantity? Quantity, decimal? BaseAmount, string? Note, bool Optional);
+internal sealed record IngredientDto(Guid Id, RecipeProductRefDto Product, QuantityDto? Quantity, decimal? BaseAmount, string? Note, bool Optional);
 
 /// <summary>A prep or instruction step.</summary>
 internal sealed record StepDto(Guid Id, IReadOnlyList<ContentBlock> Blocks);

@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "id": "U1-can-2",
+      "description": "800 g entered as puszki (1 puszka = 400 g) stays in puszki",
+      "base": 800,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "2 puszki", "approximate": false }
+    },
+    {
+      "id": "U1-can-x0.75",
+      "description": "2 puszki scaled by 0.75 is exactly 1 ½",
+      "base": 600,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "1 ½ puszki", "approximate": false }
+    },
+    {
+      "id": "U1-can-x0.6",
+      "description": "1.2 puszki rounds to 1 ¼; 4.2 % off, so no ~ (the 5 % rule of PROJECT §5.4)",
+      "base": 480,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "1 ¼ puszki", "approximate": false }
+    },
+    {
+      "id": "U1-can-x0.55",
+      "description": "1.1 puszki rounds to 1; 9 % off, so approximate",
+      "base": 440,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "1 puszka", "approximate": true }
+    },
+    {
+      "id": "U1-can-minimum-quarter",
+      "description": "0.1 puszki is shown as the minimum ¼",
+      "base": 40,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "¼ puszki", "approximate": true }
+    },
+    {
+      "id": "U1-can-many",
+      "description": "5 takes the many form",
+      "base": 2000,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "metric", "context": "recipe" },
+      "expected": { "text": "5 puszek", "approximate": false }
+    },
+    {
+      "id": "U1-can-22",
+      "description": "22 takes the few form, 12 the many form",
+      "base": 8800,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "22 puszki", "approximate": false }
+    },
+    {
+      "id": "U1-can-12",
+      "base": 4800,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product", "forms": { "one": "puszka", "few": "puszki", "many": "puszek", "fraction": "puszki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "12 puszek", "approximate": false }
+    },
+    {
+      "id": "U1-butter-three-quarters",
+      "description": "150 g of butter in kostki (200 g)",
+      "base": 150,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "mass", "amount": 200, "scope": "product", "forms": { "one": "kostka", "few": "kostki", "many": "kostek", "fraction": "kostki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "¾ kostki", "approximate": false }
+    },
+    {
+      "id": "U1-cup-flour-density",
+      "description": "a volume unit for every product on a mass product converts back through gramsPerMl (159 g = 300 ml = 2 filiżanki)",
+      "base": 159,
+      "product": { "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "pieceForms": null, "gramsPerMl": 0.53 },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all", "forms": { "one": "filiżanka", "few": "filiżanki", "many": "filiżanek", "fraction": "filiżanki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "2 filiżanki", "approximate": false }
+    },
+    {
+      "id": "U1-cup-milk-tie",
+      "description": "1.125 filiżanki is a tie between 1 and 1 ¼ and rounds up (11 % off, so approximate)",
+      "base": 168.75,
+      "product": { "measureKind": "volume", "displayClass": "liquid", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all", "forms": { "one": "filiżanka", "few": "filiżanki", "many": "filiżanek", "fraction": "filiżanki" } },
+      "options": { "liquidUnits": "metric", "context": "recipe" },
+      "expected": { "text": "1 ¼ filiżanki", "approximate": true }
+    },
+    {
+      "id": "U1-cup-milk-over-5-percent",
+      "description": "0.9 filiżanki rounds to 1; 11 % off",
+      "base": 135,
+      "product": { "measureKind": "volume", "displayClass": "liquid", "hasSizes": false, "allowHalf": false, "pieceForms": null },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all", "forms": { "one": "filiżanka", "few": "filiżanki", "many": "filiżanek", "fraction": "filiżanki" } },
+      "options": { "liquidUnits": "kitchen", "context": "recipe" },
+      "expected": { "text": "1 filiżanka", "approximate": true }
+    }
+  ]
+}

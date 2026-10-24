@@ -9,6 +9,7 @@ using RecipesList.Api.Features.Images;
 using RecipesList.Api.Features.Recipes;
 using RecipesList.Api.Features.ShoppingLists;
 using RecipesList.Api.Features.Transfer;
+using RecipesList.Api.Features.Units;
 using RecipesList.Api.Features.Variants;
 using RecipesList.Api.Hosting;
 using RecipesList.Api.Middleware;
@@ -44,6 +45,7 @@ builder.Services.AddFavorites();
 builder.Services.AddFridges();
 builder.Services.AddShoppingLists();
 builder.Services.AddTransfer();
+builder.Services.AddUnits();
 
 var app = builder.Build();
 
@@ -80,6 +82,7 @@ api.MapFavorites();
 api.MapFridges();
 api.MapShoppingLists();
 api.MapTransfer();
+api.MapUnits();
 
 await app.RunAsync();
 

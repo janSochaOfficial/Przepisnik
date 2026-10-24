@@ -1,0 +1,92 @@
+{
+  "cases": [
+    {
+      "id": "U1-can-tomatoes-2",
+      "description": "2 puszki of a product unit (1 puszka of pomidory krojone = 400 g)",
+      "quantity": { "value": 2, "unit": "custom" },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": null, "gramsPerPiece": null },
+      "expected": 800
+    },
+    {
+      "id": "U1-can-tomatoes-half",
+      "description": "½ puszki",
+      "quantity": { "value": 0.5, "unit": "custom" },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "product" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": null, "gramsPerPiece": null },
+      "expected": 200
+    },
+    {
+      "id": "U1-butter-cube-quarter",
+      "description": "¼ kostki of butter (1 kostka = 200 g)",
+      "quantity": { "value": 0.25, "unit": "custom" },
+      "customUnit": { "measureKind": "mass", "amount": 200, "scope": "product" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": 0.91, "gramsPerPiece": null },
+      "expected": 50
+    },
+    {
+      "id": "U1-product-unit-other-product",
+      "description": "a product unit is not valid for another product",
+      "quantity": { "value": 1, "unit": "custom" },
+      "customUnit": { "measureKind": "mass", "amount": 400, "scope": "otherProduct" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": null, "gramsPerPiece": null },
+      "expected": null
+    },
+    {
+      "id": "U1-cup-milk",
+      "description": "1 filiżanka (a unit for every product, 150 ml) of milk",
+      "quantity": { "value": 1, "unit": "custom" },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all" },
+      "product": { "measureKind": "volume", "hasSizes": false, "gramsPerMl": 1.03, "gramsPerPiece": null },
+      "expected": 150
+    },
+    {
+      "id": "U1-cup-flour-density",
+      "description": "2 filiżanki of flour convert through gramsPerMl",
+      "quantity": { "value": 2, "unit": "custom" },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": 0.53, "gramsPerPiece": null },
+      "expected": 159
+    },
+    {
+      "id": "U1-cup-flour-no-density",
+      "description": "without a density a volume unit does not fit a mass product",
+      "quantity": { "value": 1, "unit": "custom" },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": null, "gramsPerPiece": null },
+      "expected": null
+    },
+    {
+      "id": "U1-cup-oil-rounding",
+      "description": "a third of a filiżanka of oil, rounded to 4 decimals",
+      "quantity": { "value": 0.3333, "unit": "custom" },
+      "customUnit": { "measureKind": "volume", "amount": 150, "scope": "all" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": 0.92, "gramsPerPiece": null },
+      "expected": 45.9954
+    },
+    {
+      "id": "U1-bunch-count-to-mass",
+      "description": "a count unit for every product (1 = 1 medium piece) converts through gramsPerPiece",
+      "quantity": { "value": 3, "unit": "custom" },
+      "customUnit": { "measureKind": "count", "amount": 1, "scope": "all" },
+      "product": { "measureKind": "mass", "hasSizes": false, "gramsPerMl": null, "gramsPerPiece": 50 },
+      "expected": 150
+    },
+    {
+      "id": "U1-handful-mass-to-count",
+      "description": "a mass unit for every product (1 garść = 30 g) on a count product",
+      "quantity": { "value": 2, "unit": "custom" },
+      "customUnit": { "measureKind": "mass", "amount": 30, "scope": "all" },
+      "product": { "measureKind": "count", "hasSizes": true, "gramsPerMl": null, "gramsPerPiece": 20 },
+      "expected": 3
+    },
+    {
+      "id": "U1-handful-count-no-weight",
+      "description": "a mass unit on a count product without a piece weight is incompatible",
+      "quantity": { "value": 2, "unit": "custom" },
+      "customUnit": { "measureKind": "mass", "amount": 30, "scope": "all" },
+      "product": { "measureKind": "count", "hasSizes": false, "gramsPerMl": null, "gramsPerPiece": null },
+      "expected": null
+    }
+  ]
+}

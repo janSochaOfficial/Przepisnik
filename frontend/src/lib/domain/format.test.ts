@@ -5,11 +5,12 @@ import { describe, expect, it } from 'vitest';
 import {
 	formatBaseAmount,
 	formatIngredientAmount,
+	formatInCustomUnit,
 	formatNumberPl,
 	formatQuantityAsEntered,
 	type FormatOptions
 } from './format';
-import type { Ingredient, ProductRef, Quantity } from './types';
+import type { CustomUnitRef, Ingredient, ProductRef, Quantity } from './types';
 
 type Case = {
 	id: string;
@@ -19,6 +20,7 @@ type Case = {
 		'measureKind' | 'displayClass' | 'hasSizes' | 'allowHalf' | 'pieceForms'
 	>;
 	options: FormatOptions;
+	customUnit?: Pick<CustomUnitRef, 'forms' | 'measureKind' | 'amount'>;
 	expected: { text: string; approximate: boolean };
 };
 
@@ -37,7 +39,11 @@ describe('shared formatting vectors', () => {
 	});
 
 	it.each(cases.map((c) => [c.id, c] as const))('formatBaseAmount passes %s', (_id, c) => {
-		expect(formatBaseAmount(c.base, c.product as ProductRef, c.options)).toEqual(c.expected);
+		const product = c.product as ProductRef;
+		const actual = c.customUnit
+			? formatInCustomUnit(c.base, c.customUnit, product)
+			: formatBaseAmount(c.base, product, c.options);
+		expect(actual).toEqual(c.expected);
 	});
 });
 
@@ -150,5 +156,58 @@ describe('formatIngredientAmount', () => {
 	it('scales the entered value when there is no base amount', () => {
 		const i = ingredient({ value: 2, unit: 'tbsp' }, null);
 		expect(formatIngredientAmount(i, 2, kitchen)).toEqual({ text: '4 łyżki', approximate: false });
+	});
+});
+
+describe('custom units (D-31)', () => {
+	const tomatoes = ref({
+		measureKind: 'mass',
+		displayClass: 'weight',
+		gramsPerMl: null,
+		gramsPerPiece: null
+	});
+	const can: CustomUnitRef = {
+		id: 'can',
+		name: 'puszka',
+		forms: { one: 'puszka', few: 'puszki', many: 'puszek', fraction: 'puszki' },
+		productId: 'p',
+		measureKind: 'mass',
+		amount: 400
+	};
+	const twoCans: Ingredient = {
+		id: 'i',
+		product: tomatoes,
+		quantity: { value: 2, unit: 'custom', customUnitId: 'can', customUnit: can },
+		baseAmount: 800,
+		note: null,
+		optional: false
+	};
+	const kitchen: FormatOptions = { liquidUnits: 'kitchen' };
+	const show = (factor: number) => {
+		const a = formatIngredientAmount(twoCans, factor, kitchen);
+		return a ? `${a.approximate ? '~' : ''}${a.text}` : null;
+	};
+
+	it('shows the amount as entered at factor 1', () => {
+		expect(formatQuantityAsEntered(twoCans.quantity!, tomatoes)).toBe('2 puszki');
+		expect(show(1)).toBe('2 puszki');
+	});
+
+	it('stays in the unit when scaled, rounded to a quarter with the ~ rule', () => {
+		expect(show(0.75)).toBe('1 ½ puszki');
+		expect(show(0.6)).toBe('1 ¼ puszki');
+		expect(show(0.55)).toBe('~1 puszka');
+		expect(show(0.05)).toBe('~¼ puszki');
+	});
+
+	it('falls back to the number when the unit is not embedded', () => {
+		expect(
+			formatQuantityAsEntered({ value: 1.5, unit: 'custom', customUnitId: 'x' }, tomatoes)
+		).toBe('1 ½');
+	});
+
+	it('is null when the base amount cannot be converted to the unit', () => {
+		const cup = { ...can, measureKind: 'volume' as const, amount: 150 };
+		expect(formatInCustomUnit(100, cup, tomatoes)).toBeNull();
 	});
 });

@@ -7,6 +7,7 @@ using RecipesList.Core.Images;
 using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.Transfer;
+using RecipesList.Core.Units;
 using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
 
@@ -39,8 +40,9 @@ internal sealed class RecipeImporter(
             using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
             var imageIds = await StoreImagesAsync(images, storedIds, ct);
             var products = await ResolveProductsAsync(document, ct);
-            var recipeId = await CreateRecipeAsync(document, imageIds, products, ct);
-            await CreateVariantsAsync(document, recipeId, imageIds, products, ct);
+            var units = await ResolveUnitsAsync(document, products, ct);
+            var recipeId = await CreateRecipeAsync(document, imageIds, products, units, ct);
+            await CreateVariantsAsync(document, recipeId, imageIds, new FileRefs(products, units), ct);
             scope.Complete();
             return recipeId;
         }
@@ -145,6 +147,66 @@ internal sealed class RecipeImporter(
         return result;
     }
 
+    /// <summary>
+    /// Reuses a unit with the same normalized name, scope, measure kind and an amount within 1 % (API.md §8), or creates
+    /// one, renamed " (2)", " (3)" … when the name is taken in its scope. Saved here: recipe validation looks units up.
+    /// </summary>
+    private async Task<Dictionary<string, CustomUnit>> ResolveUnitsAsync(RecipeExportDocument document, Dictionary<string, Product> products, CancellationToken ct)
+    {
+        var result = new Dictionary<string, CustomUnit>(StringComparer.Ordinal);
+        var fileUnits = document.CustomUnits ?? [];
+        if (fileUnits.Count == 0)
+        {
+            return result;
+        }
+
+        var scopeIds = fileUnits.Select(u => u.ProductKey).OfType<string>().Select(k => products[k].Id).Distinct().ToList();
+        var known = await db.CustomUnits.AsNoTracking()
+            .Where(u => u.ProductId == null || scopeIds.Contains(u.ProductId.Value))
+            .ToListAsync(ct);
+
+        var now = time.GetUtcNow();
+        foreach (var source in fileUnits)
+        {
+            Guid? scope = source.ProductKey is { } productKey ? products[productKey].Id : null;
+            var name = ProductRules.CleanName(source.Name);
+            var normalized = NameNormalizer.Normalize(name);
+            var inScope = known.Where(u => u.ProductId == scope).ToList();
+            var match = inScope.FirstOrDefault(u =>
+                u.NormalizedName == normalized && u.MeasureKind == source.MeasureKind && CustomUnitRules.IsSameAmount(u.Amount, source.Amount));
+            if (match is null)
+            {
+                var unique = CustomUnitRules.UniqueName(name, inScope.Select(u => u.NormalizedName).ToHashSet(StringComparer.Ordinal));
+                match = new CustomUnit
+                {
+                    Name = unique,
+                    NormalizedName = NameNormalizer.Normalize(unique),
+                    Forms = new PluralForms(
+                        ProductRules.CleanName(source.Forms.One),
+                        ProductRules.CleanName(source.Forms.Few),
+                        ProductRules.CleanName(source.Forms.Many),
+                        ProductRules.CleanName(source.Forms.Fraction)),
+                    ProductId = scope,
+                    MeasureKind = source.MeasureKind,
+                    Amount = QuantityConverter.RoundBase(source.Amount),
+                    CreatedById = currentUser.Id,
+                    CreatedAt = now,
+                };
+                db.CustomUnits.Add(match);
+                known.Add(match);
+            }
+
+            result[source.Key] = match;
+        }
+
+        await db.SaveChangesAsync(ct);
+        return result;
+    }
+
+    private static Quantity? ToQuantity(ExportQuantity? q, Dictionary<string, CustomUnit> units) => q is null
+        ? null
+        : new Quantity(q.Value, q.Unit, q.Size, q.CustomUnitKey is { } key ? units[key].Id : null);
+
     private async Task<List<Guid>> ResolveTagsAsync(IEnumerable<string> names, CancellationToken ct)
     {
         var quick = NameNormalizer.Normalize(Tag.QuickTagName);
@@ -186,6 +248,7 @@ internal sealed class RecipeImporter(
         RecipeExportDocument document,
         Dictionary<string, Guid> imageIds,
         Dictionary<string, Product> products,
+        Dictionary<string, CustomUnit> units,
         CancellationToken ct)
     {
         var recipe = document.Recipe;
@@ -197,7 +260,7 @@ internal sealed class RecipeImporter(
             recipe.CookMinutes,
             await ResolveTagsAsync(recipe.Tags, ct),
             await ResolveUtensilsAsync(recipe.Utensils, ct),
-            [.. recipe.Ingredients.Select(i => new IngredientWriteInput(null, products[i.ProductKey].Id, i.Quantity, i.Note, i.Optional))],
+            [.. recipe.Ingredients.Select(i => new IngredientWriteInput(null, products[i.ProductKey].Id, ToQuantity(i.Quantity, units), i.Note, i.Optional))],
             [.. recipe.PrepSteps.Select(s => new StepWriteInput(null, Blocks(s.Blocks, imageIds)))],
             [.. recipe.InstructionSteps.Select(s => new StepWriteInput(null, Blocks(s.Blocks, imageIds)))]);
 
@@ -208,7 +271,7 @@ internal sealed class RecipeImporter(
         RecipeExportDocument document,
         Guid recipeId,
         Dictionary<string, Guid> imageIds,
-        Dictionary<string, Product> products,
+        FileRefs refs,
         CancellationToken ct)
     {
         if (document.Variants.Count == 0)
@@ -246,7 +309,7 @@ internal sealed class RecipeImporter(
 
             var addedIngredients = new Dictionary<string, Guid>(StringComparer.Ordinal);
             var addedSteps = new Dictionary<string, Guid>(StringComparer.Ordinal);
-            variant.IngredientOps = [.. source.IngredientOps.Select((op, i) => IngredientOp(op, i, baseIngredients, addedIngredients, products))];
+            variant.IngredientOps = [.. source.IngredientOps.Select((op, i) => IngredientOp(op, i, baseIngredients, addedIngredients, refs))];
             variant.StepOps = [.. source.StepOps.Select(op => StepOp(op, baseSteps, addedSteps, imageIds))];
             db.Variants.Add(variant);
         }
@@ -272,20 +335,23 @@ internal sealed class RecipeImporter(
         int index,
         Dictionary<string, Guid> baseIngredients,
         Dictionary<string, Guid> added,
-        Dictionary<string, Product> products)
+        FileRefs refs)
     {
+        var products = refs.Products;
         switch (op)
         {
             case ExportModifyIngredientOp m:
+                var modified = ToQuantity(m.Quantity, refs.Units);
                 return new ModifyIngredientOp(
-                    baseIngredients[m.TargetKey], products[m.ProductKey].Id, m.Quantity, BaseAmount(m.Quantity, products[m.ProductKey], index), Clean(m.Note), m.Optional);
+                    baseIngredients[m.TargetKey], products[m.ProductKey].Id, modified, BaseAmount(modified, products[m.ProductKey], refs, index), Clean(m.Note), m.Optional);
             case ExportRemoveIngredientOp r:
                 return new RemoveIngredientOp(baseIngredients[r.TargetKey]);
             case ExportAddIngredientOp a:
                 var id = Guid.CreateVersion7();
                 added[a.Key] = id;
                 var after = a.AfterKey is { } key ? (baseIngredients.TryGetValue(key, out var baseId) ? baseId : added[key]) : (Guid?)null;
-                return new AddIngredientOp(id, after, products[a.ProductKey].Id, a.Quantity, BaseAmount(a.Quantity, products[a.ProductKey], index), Clean(a.Note), a.Optional);
+                var addedQuantity = ToQuantity(a.Quantity, refs.Units);
+                return new AddIngredientOp(id, after, products[a.ProductKey].Id, addedQuantity, BaseAmount(addedQuantity, products[a.ProductKey], refs, index), Clean(a.Note), a.Optional);
             default:
                 throw new InvalidOperationException("Unknown ingredient operation.");
         }
@@ -310,20 +376,24 @@ internal sealed class RecipeImporter(
     }
 
     // The server computes the canonical amount when an op is stored (VariantService does the same).
-    private decimal? BaseAmount(Quantity? quantity, Product product, int opIndex)
+    private decimal? BaseAmount(Quantity? quantity, Product product, FileRefs refs, int opIndex)
     {
         if (quantity is null)
         {
             return null;
         }
 
-        var amount = quantity.Value > 0 && (quantity.Size is null || (quantity.Unit == Unit.Piece && product.HasSizes))
-            ? converter.ToBaseAmount(quantity, product)
+        var unit = quantity.CustomUnitId is { } unitId ? refs.Units.Values.FirstOrDefault(u => u.Id == unitId) : null;
+        var amount = quantity.IsWellFormed && (quantity.Size is null || product.HasSizes)
+            ? converter.ToBaseAmount(quantity, product, unit)
             : null;
         return amount ?? throw new DomainValidationException(
             ErrorCodes.ImportInvalidFormat,
             new Dictionary<string, string[]> { [$"ingredientOps[{opIndex}].quantity"] = [ErrorCodes.QuantityUnitIncompatible] });
     }
+
+    /// <summary>The catalog entries the file's keys resolved to.</summary>
+    private sealed record FileRefs(Dictionary<string, Product> Products, Dictionary<string, CustomUnit> Units);
 
     private static string? Clean(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 

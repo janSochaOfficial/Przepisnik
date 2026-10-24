@@ -1,16 +1,25 @@
 using RecipesList.Core.Catalog;
+using RecipesList.Core.Units;
 
 namespace RecipesList.Core.Quantities;
 
-/// <summary>Converts an entered quantity to the product's canonical base amount (PROJECT §5.1–5.2).</summary>
+/// <summary>Converts an entered quantity to the product's canonical base amount (PROJECT §5.1–5.2, §5.6).</summary>
 public interface IQuantityConverter
 {
     /// <summary>
     /// Returns the base amount (g, ml or medium-equivalent pieces, depending on <see cref="Product.MeasureKind"/>),
     /// <c>null</c> for "do smaku" (<paramref name="q"/> is null) and <c>null</c> when the unit cannot be converted
     /// for this product (missing density or piece weight). Validation of the value itself (&gt; 0) is the caller's job.
+    /// A <see cref="Unit.Custom"/> quantity needs its unit: use the overload that takes it (here it gives <c>null</c>).
     /// </summary>
     decimal? ToBaseAmount(Quantity? q, Product product);
+
+    /// <summary>
+    /// As <see cref="ToBaseAmount(Quantity?, Product)"/>, with the definition of the quantity's custom unit (PROJECT §5.6):
+    /// <c>value × amount</c> in the unit's measure kind, then the normal conversion to the product's kind. <c>null</c>
+    /// when the unit is missing, is not the quantity's unit, or belongs to another product.
+    /// </summary>
+    decimal? ToBaseAmount(Quantity? q, Product product, CustomUnit? customUnit);
 }
 
 /// <summary>The fixed conversion constants (D-07). The frontend mirrors them; shared vectors keep both in sync.</summary>
@@ -43,7 +52,10 @@ public static class QuantityConstants
 public sealed class QuantityConverter : IQuantityConverter
 {
     /// <inheritdoc />
-    public decimal? ToBaseAmount(Quantity? q, Product product)
+    public decimal? ToBaseAmount(Quantity? q, Product product) => ToBaseAmount(q, product, null);
+
+    /// <inheritdoc />
+    public decimal? ToBaseAmount(Quantity? q, Product product, CustomUnit? customUnit)
     {
         ArgumentNullException.ThrowIfNull(product);
         if (q is null)
@@ -51,32 +63,65 @@ public sealed class QuantityConverter : IQuantityConverter
             return null;
         }
 
-        var (kind, amount) = ToNativeAmount(q, product);
-        var converted = Convert(amount, kind, product.MeasureKind, product);
-        return converted is null
-            ? null
-            : Math.Round(converted.Value, QuantityConstants.BaseAmountDecimals, MidpointRounding.AwayFromZero);
+        (MeasureKind Kind, decimal Amount)? native;
+        if (q.Unit == Unit.Custom)
+        {
+            // A product unit is offered (and valid) for its own product only.
+            native = customUnit is not null && customUnit.Id == q.CustomUnitId
+                && (customUnit.ProductId is null || customUnit.ProductId == product.Id)
+                ? (customUnit.MeasureKind, q.Value * customUnit.Amount)
+                : null;
+        }
+        else
+        {
+            native = NativeAmount(q, product.HasSizes);
+        }
+
+        if (native is not { } n)
+        {
+            return null;
+        }
+
+        var converted = ConvertKind(n.Amount, n.Kind, product.MeasureKind, product);
+        return converted is null ? null : RoundBase(converted.Value);
     }
 
-    // The amount in the unit's own base unit: grams, millilitres or medium pieces.
-    private static (MeasureKind Kind, decimal Amount) ToNativeAmount(Quantity q, Product product) => q.Unit switch
-    {
-        Unit.G => (MeasureKind.Mass, q.Value),
-        Unit.Kg => (MeasureKind.Mass, q.Value * QuantityConstants.GramsPerKilogram),
-        Unit.Ml => (MeasureKind.Volume, q.Value),
-        Unit.L => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerLitre),
-        Unit.Glass => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerGlass),
-        Unit.Tbsp => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerTablespoon),
-        Unit.Tsp => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerTeaspoon),
-        Unit.Drop => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerDrop),
-        Unit.Pinch => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerPinch),
-        // A size only counts for products that have sizes; otherwise every piece is a "medium" piece.
-        Unit.Piece => (MeasureKind.Count, q.Value * (product.HasSizes && q.Size is { } size ? QuantityConstants.SizeFactor(size) : 1m)),
-        _ => throw new ArgumentOutOfRangeException(nameof(q), q.Unit, "Unknown unit."),
-    };
+    /// <summary>Rounds a base amount to <see cref="QuantityConstants.BaseAmountDecimals"/>, half away from zero.</summary>
+    public static decimal RoundBase(decimal amount) =>
+        Math.Round(amount, QuantityConstants.BaseAmountDecimals, MidpointRounding.AwayFromZero);
 
-    private static decimal? Convert(decimal amount, MeasureKind from, MeasureKind to, Product p)
+    /// <summary>
+    /// The amount of a built-in quantity in its unit's own base unit: grams, millilitres or medium pieces. A size counts
+    /// only when <paramref name="useSizes"/> (the product has sizes); otherwise every piece is a medium piece.
+    /// <c>null</c> for <see cref="Unit.Custom"/>, which has no native kind of its own.
+    /// </summary>
+    public static (MeasureKind Kind, decimal Amount)? NativeAmount(Quantity q, bool useSizes)
     {
+        ArgumentNullException.ThrowIfNull(q);
+        return q.Unit switch
+        {
+            Unit.G => (MeasureKind.Mass, q.Value),
+            Unit.Kg => (MeasureKind.Mass, q.Value * QuantityConstants.GramsPerKilogram),
+            Unit.Ml => (MeasureKind.Volume, q.Value),
+            Unit.L => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerLitre),
+            Unit.Glass => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerGlass),
+            Unit.Tbsp => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerTablespoon),
+            Unit.Tsp => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerTeaspoon),
+            Unit.Drop => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerDrop),
+            Unit.Pinch => (MeasureKind.Volume, q.Value * QuantityConstants.MlPerPinch),
+            Unit.Piece => (MeasureKind.Count, q.Value * (useSizes && q.Size is { } size ? QuantityConstants.SizeFactor(size) : 1m)),
+            Unit.Custom => null,
+            _ => throw new ArgumentOutOfRangeException(nameof(q), q.Unit, "Unknown unit."),
+        };
+    }
+
+    /// <summary>
+    /// Converts an amount between measure kinds with the product's density (mass ↔ volume) and piece weight
+    /// (count ↔ mass); <c>null</c> when the product lacks the needed data.
+    /// </summary>
+    public static decimal? ConvertKind(decimal amount, MeasureKind from, MeasureKind to, Product p)
+    {
+        ArgumentNullException.ThrowIfNull(p);
         if (from == to)
         {
             return amount;

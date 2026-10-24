@@ -28,6 +28,8 @@ tags:
     description: Auth and current user (API.md §1)
   - name: catalog
     description: Products, tags and utensils (API.md §2)
+  - name: units
+    description: Custom units (API.md §2.1)
   - name: images
     description: Images (API.md §3)
   - name: recipes
@@ -412,6 +414,97 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ───────────────────────────── 2.1 Custom units ─────────────────────────────
+  /units:
+    get:
+      tags: [units]
+      operationId: SearchUnits
+      summary: List custom units
+      description: The units for every product, plus the ones for `productId` when given; product units first, then by name.
+      parameters:
+        - name: productId
+          in: query
+          schema: { $ref: '#/components/schemas/Uuid' }
+        - $ref: '#/components/parameters/Q'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 50 }
+      responses:
+        '200':
+          description: Matching units.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CustomUnitRef' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [units]
+      operationId: CreateUnit
+      summary: Create a custom unit, or return the existing one
+      description: An existing unit with the same normalized name in the same scope is returned with `200`.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomUnitWrite' }
+      responses:
+        '200':
+          description: The existing unit.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomUnitRef' }
+        '201':
+          description: Created.
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomUnitRef' }
+        '400':
+          description: '`unit.invalid` (`equals` cannot be converted for the product) or `validation.failed`.'
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /admin/units/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [units]
+      operationId: AdminUpdateUnit
+      summary: Edit a custom unit (admin)
+      description: The scope (`productId`) cannot change; the amount can change only while nothing uses the unit (`unit.in_use`).
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomUnitWrite' }
+      responses:
+        '200':
+          description: The updated unit.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomUnitRef' }
+        '400':
+          description: '`unit.in_use`, `unit.invalid` or `validation.failed`.'
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   # ───────────────────────────── 3. Images ─────────────────────────────
   /images:
@@ -1500,9 +1593,13 @@ components:
     ProductCategory:
       type: string
       enum: [vegetables, fruits, meat, fish, dairy, bakery, dryGoods, spices, oilsVinegars, sauces, canned, frozen, drinks, sweets, other]
-    Unit:
+    BuiltInUnit:
       type: string
       enum: [g, kg, ml, l, glass, tbsp, tsp, drop, pinch, piece]
+    Unit:
+      description: A built-in unit, or `custom` for a unit of the custom-unit catalog (API.md §2.1).
+      type: string
+      enum: [g, kg, ml, l, glass, tbsp, tsp, drop, pinch, piece, custom]
     PieceSize:
       type: string
       enum: [small, medium, large]
@@ -1581,7 +1678,10 @@ components:
       additionalProperties: false
 
     Quantity:
-      description: As entered by the author; `size` only for unit `piece` and products with sizes.
+      description: |
+        As entered by the author; `size` only for unit `piece` and products with sizes. `customUnitId` is required iff
+        `unit` is `custom` (and `size` is then not allowed). `customUnit` is read-only: responses embed it with every
+        custom quantity, and it is ignored on write.
       type: object
       required: [value, unit]
       properties:
@@ -1591,6 +1691,59 @@ components:
           oneOf:
             - $ref: '#/components/schemas/PieceSize'
             - type: 'null'
+        customUnitId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        customUnit:
+          oneOf:
+            - $ref: '#/components/schemas/CustomUnitRef'
+            - type: 'null'
+      additionalProperties: false
+
+    CustomUnitRef:
+      description: 'A custom unit (API.md §2.1): "1 <name>" = `amount` base units of `measureKind`.'
+      type: object
+      required: [id, name, forms, productId, measureKind, amount]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+        forms: { $ref: '#/components/schemas/PluralForms' }
+        productId:
+          description: Null for a unit for every product.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        measureKind: { $ref: '#/components/schemas/MeasureKind' }
+        amount:
+          description: Base units of `measureKind` (g, ml or medium pieces) in one unit.
+          type: number
+          exclusiveMinimum: 0
+      additionalProperties: false
+    CustomUnitEquals:
+      description: The built-in quantity that one custom unit equals.
+      type: object
+      required: [value, unit]
+      properties:
+        value: { type: number, exclusiveMinimum: 0 }
+        unit: { $ref: '#/components/schemas/BuiltInUnit' }
+        size:
+          oneOf:
+            - $ref: '#/components/schemas/PieceSize'
+            - type: 'null'
+      additionalProperties: false
+    CustomUnitWrite:
+      type: object
+      required: [name, forms, equals]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+        forms: { $ref: '#/components/schemas/PluralForms' }
+        productId:
+          description: Null (or absent) for a unit for every product.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+        equals: { $ref: '#/components/schemas/CustomUnitEquals' }
       additionalProperties: false
 
     ContentBlock:
@@ -2585,6 +2738,10 @@ components:
           description: Every product referenced anywhere in the file.
           type: array
           items: { $ref: '#/components/schemas/ExportProduct' }
+        customUnits:
+          description: Every custom unit referenced anywhere in the file; absent in files without custom units.
+          type: array
+          items: { $ref: '#/components/schemas/ExportCustomUnit' }
         images:
           description: localImageKey → image.
           type: object
@@ -2620,6 +2777,32 @@ components:
             - $ref: '#/components/schemas/PluralForms'
             - type: 'null'
       additionalProperties: false
+    ExportCustomUnit:
+      type: object
+      required: [key, name, forms, measureKind, amount]
+      properties:
+        key: { type: string }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        forms: { $ref: '#/components/schemas/PluralForms' }
+        productKey:
+          description: Null for a unit for every product.
+          type: [string, 'null']
+        measureKind: { $ref: '#/components/schemas/MeasureKind' }
+        amount: { type: number, exclusiveMinimum: 0 }
+      additionalProperties: false
+    ExportQuantity:
+      description: '`Quantity` with `customUnitKey` (a key of `customUnits`, required iff `unit` is `custom`) instead of `customUnitId`.'
+      type: object
+      required: [value, unit]
+      properties:
+        value: { type: number, exclusiveMinimum: 0 }
+        unit: { $ref: '#/components/schemas/Unit' }
+        size:
+          oneOf:
+            - $ref: '#/components/schemas/PieceSize'
+            - type: 'null'
+        customUnitKey: { type: [string, 'null'] }
+      additionalProperties: false
     ExportBlock:
       oneOf:
         - $ref: '#/components/schemas/ExportTextBlock'
@@ -2652,7 +2835,7 @@ components:
         productKey: { type: string }
         quantity:
           oneOf:
-            - $ref: '#/components/schemas/Quantity'
+            - $ref: '#/components/schemas/ExportQuantity'
             - type: 'null'
         note: { type: [string, 'null'] }
         optional: { type: boolean }
@@ -2711,7 +2894,7 @@ components:
           type: array
           items: { type: string }
         ingredientOps:
-          description: Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey` (the server-computed `baseAmount` is not exported).
+          description: Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey`, and quantities are `ExportQuantity` (`customUnitId` → `customUnitKey`); the server-computed `baseAmount` is not exported.
           type: array
           items: {}
         stepOps:

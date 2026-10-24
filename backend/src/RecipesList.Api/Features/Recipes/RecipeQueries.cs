@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RecipesList.Api.Features.Images;
+using RecipesList.Api.Features.Units;
 using RecipesList.Core.Common;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.Visibility;
@@ -121,6 +122,7 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             .Include(r => r.Author)
             .Include(r => r.CoverImage)
             .Include(r => r.Ingredients).ThenInclude(i => i.Product)
+            .Include(r => r.Ingredients).ThenInclude(i => i.CustomUnit)
             .Include(r => r.Steps)
             .Include(r => r.Tags).ThenInclude(t => t.Tag)
             .Include(r => r.Utensils).ThenInclude(u => u.Utensil)
@@ -167,7 +169,7 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             [.. recipe.Tags.Select(t => new TagRefDto(t.Tag!.Id, t.Tag.Name, t.Tag.IsSystem)).OrderBy(t => t.Name, StringComparer.Ordinal)],
             [.. recipe.Utensils.Select(u => new UtensilRefDto(u.Utensil!.Id, u.Utensil.Name)).OrderBy(u => u.Name, StringComparer.Ordinal)],
             [.. recipe.Ingredients.OrderBy(i => i.Position).Select(i => new IngredientDto(
-                i.Id, RecipeProductRefDto.From(i.Product!), i.Quantity, i.BaseAmount, i.Note, i.Optional))],
+                i.Id, RecipeProductRefDto.From(i.Product!), QuantityDto.From(i.Quantity, i.CustomUnit), i.BaseAmount, i.Note, i.Optional))],
             Steps(recipe, StepSection.Prep),
             Steps(recipe, StepSection.Instructions),
             cookCount,

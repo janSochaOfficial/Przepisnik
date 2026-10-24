@@ -1,6 +1,9 @@
+using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Images;
+using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
+using RecipesList.Core.Units;
 
 namespace RecipesList.Core.Transfer;
 
@@ -95,6 +98,38 @@ public static class ExportValidator
             }
         }
 
+        var unitKeys = new HashSet<string>(StringComparer.Ordinal);
+        var units = document.CustomUnits ?? [];
+        for (var i = 0; i < units.Count; i++)
+        {
+            var unit = units[i];
+            if (string.IsNullOrEmpty(unit.Key) || !unitKeys.Add(unit.Key))
+            {
+                fail($"customUnits[{i}].key", "duplicate");
+            }
+
+            if (ProductRules.CleanName(unit.Name ?? "").Length is < 1 or > CustomUnitRules.MaxName)
+            {
+                fail($"customUnits[{i}].name", "out_of_range");
+            }
+
+            if (unit.Forms is null || new[] { unit.Forms.One, unit.Forms.Few, unit.Forms.Many, unit.Forms.Fraction }
+                    .Any(f => ProductRules.CleanName(f ?? "").Length is < 1 or > CustomUnitRules.MaxForm))
+            {
+                fail($"customUnits[{i}].forms", "invalid");
+            }
+
+            if (unit.Amount <= 0)
+            {
+                fail($"customUnits[{i}].amount", "out_of_range");
+            }
+
+            if (unit.ProductKey is { } productKey && !productKeys.Contains(productKey))
+            {
+                fail($"customUnits[{i}].productKey", "unknown_key");
+            }
+        }
+
         foreach (var (key, image) in document.Images)
         {
             if (image.ContentType != ExportFormat.ImageContentType)
@@ -126,6 +161,8 @@ public static class ExportValidator
             {
                 fail($"recipe.ingredients[{i}].productKey", "unknown_key");
             }
+
+            CheckQuantity(ingredient.Quantity, unitKeys, $"recipe.ingredients[{i}].quantity", fail);
         }
 
         var stepKeys = new Dictionary<string, StepSection>(StringComparer.Ordinal);
@@ -134,7 +171,7 @@ public static class ExportValidator
 
         for (var i = 0; i < document.Variants.Count; i++)
         {
-            CheckVariant(document, document.Variants[i], $"variants[{i}]", productKeys, ingredientKeys, stepKeys, fail);
+            CheckVariant(document, document.Variants[i], $"variants[{i}]", new(productKeys, unitKeys, ingredientKeys, stepKeys), fail);
         }
 
         void RegisterSteps(string path, IReadOnlyList<ExportStep> steps, StepSection section)
@@ -155,11 +192,10 @@ public static class ExportValidator
         RecipeExportDocument document,
         ExportVariant variant,
         string path,
-        HashSet<string> productKeys,
-        HashSet<string> baseIngredientKeys,
-        Dictionary<string, StepSection> baseStepKeys,
+        FileKeys fileKeys,
         Action<string, string> fail)
     {
+        var (productKeys, unitKeys, baseIngredientKeys, baseStepKeys) = fileKeys;
         var name = (variant.Name ?? "").Trim();
         if (name.Length is < 1 or > MaxVariantName)
         {
@@ -177,12 +213,14 @@ public static class ExportValidator
                 case ExportModifyIngredientOp modify:
                     RequireKey(baseIngredientKeys, modify.TargetKey, $"{at}.targetKey");
                     RequireKey(productKeys, modify.ProductKey, $"{at}.productKey");
+                    CheckQuantity(modify.Quantity, unitKeys, $"{at}.quantity", fail);
                     break;
                 case ExportRemoveIngredientOp remove:
                     RequireKey(baseIngredientKeys, remove.TargetKey, $"{at}.targetKey");
                     break;
                 case ExportAddIngredientOp add:
                     RequireKey(productKeys, add.ProductKey, $"{at}.productKey");
+                    CheckQuantity(add.Quantity, unitKeys, $"{at}.quantity", fail);
                     if (add.AfterKey is { } after && !baseIngredientKeys.Contains(after) && !ingredientsAdded.Contains(after))
                     {
                         fail($"{at}.afterKey", "unknown_key");
@@ -250,6 +288,34 @@ public static class ExportValidator
             }
         }
     }
+
+    // A custom quantity names a unit of the file; any other quantity names none.
+    private static void CheckQuantity(ExportQuantity? quantity, HashSet<string> unitKeys, string path, Action<string, string> fail)
+    {
+        if (quantity is null)
+        {
+            return;
+        }
+
+        if (quantity.Unit == Unit.Custom)
+        {
+            if (quantity.CustomUnitKey is not { } key || !unitKeys.Contains(key))
+            {
+                fail($"{path}.customUnitKey", "unknown_key");
+            }
+        }
+        else if (quantity.CustomUnitKey is not null)
+        {
+            fail($"{path}.customUnitKey", "invalid");
+        }
+    }
+
+    /// <summary>The keys a variant may reference: products, custom units, base ingredients and base steps.</summary>
+    private sealed record FileKeys(
+        HashSet<string> Products,
+        HashSet<string> Units,
+        HashSet<string> BaseIngredients,
+        Dictionary<string, StepSection> BaseSteps);
 
     private static void CheckBlocks(RecipeExportDocument document, IReadOnlyList<ExportBlock> blocks, string path, Action<string, string> fail)
     {

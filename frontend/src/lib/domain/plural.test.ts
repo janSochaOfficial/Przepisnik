@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pluralCategory } from './plural';
+import { pluralCategory, suggestPluralForms } from './plural';
 
 describe('pluralCategory', () => {
 	it.each([
@@ -31,5 +31,22 @@ describe('pluralCategory', () => {
 
 	it.each([0.5, 1.5, 2.25, 0.75])('%d has the fraction form', (n) => {
 		expect(pluralCategory(n)).toBe('fraction');
+	});
+});
+
+describe('suggestPluralForms', () => {
+	it.each([
+		['puszka', ['puszka', 'puszki', 'puszek', 'puszki']],
+		['filiżanka', ['filiżanka', 'filiżanki', 'filiżanek', 'filiżanki']],
+		['kostka', ['kostka', 'kostki', 'kostek', 'kostki']],
+		['szczypta', ['szczypta', 'szczypty', 'szczypt', 'szczypty']],
+		['porcja', ['porcja', 'porcje', 'porcji', 'porcji']],
+		['pęczek', ['pęczek', 'pęczki', 'pęczków', 'pęczka']],
+		['garść', ['garść', 'garści', 'garści', 'garści']],
+		['słoik', ['słoik', 'słoiki', 'słoików', 'słoika']],
+		['  puszka   duża ', ['puszka duża', 'puszki duża', 'puszek duża', 'puszki duża']],
+		['xyz', ['xyz', 'xyz', 'xyz', 'xyz']]
+	])('guesses the forms of %s', (name, [one, few, many, fraction]) => {
+		expect(suggestPluralForms(name)).toEqual({ one, few, many, fraction });
 	});
 });

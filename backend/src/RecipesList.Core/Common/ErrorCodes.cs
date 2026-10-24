@@ -30,6 +30,10 @@ public static class ErrorCodes
     public const string QuantityUnitIncompatible = "quantity.unit_incompatible";
     public const string QuantityInvalid = "quantity.invalid";
 
+    public const string UnitNotFound = "unit.not_found";
+    public const string UnitInvalid = "unit.invalid";
+    public const string UnitInUse = "unit.in_use";
+
     public const string VariantNotFound = "variant.not_found";
     public const string VariantNotAuthor = "variant.not_author";
     public const string VariantNoChanges = "variant.no_changes";
