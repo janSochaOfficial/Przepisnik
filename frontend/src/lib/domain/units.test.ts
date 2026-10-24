@@ -120,7 +120,12 @@ describe('toBaseAmount', () => {
 });
 
 describe('custom units', () => {
-	const flour = asProduct({ measureKind: 'mass', hasSizes: false, gramsPerMl: 0.53, gramsPerPiece: null });
+	const flour = asProduct({
+		measureKind: 'mass',
+		hasSizes: false,
+		gramsPerMl: 0.53,
+		gramsPerPiece: null
+	});
 	const can: CustomUnitRef = {
 		id: 'can',
 		name: 'puszka',
@@ -131,7 +136,9 @@ describe('custom units', () => {
 	};
 
 	it('uses the unit embedded in the quantity', () => {
-		expect(toBaseAmount({ value: 2, unit: 'custom', customUnitId: 'can', customUnit: can }, flour)).toBe(800);
+		expect(
+			toBaseAmount({ value: 2, unit: 'custom', customUnitId: 'can', customUnit: can }, flour)
+		).toBe(800);
 	});
 
 	it('is null without a unit or for a different unit id', () => {

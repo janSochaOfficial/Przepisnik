@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ProductRef } from '$lib/domain/types';
+import type { CustomUnitRef, ProductRef } from '$lib/domain/types';
 import {
 	compatibleUnits,
 	defaultUnit,
@@ -206,5 +206,67 @@ describe('draftSignature', () => {
 		expect(draftSignature(a)).toBe(draftSignature(b));
 		b.title = 'x';
 		expect(draftSignature(a)).not.toBe(draftSignature(b));
+	});
+});
+
+describe('custom units in the draft', () => {
+	const can: CustomUnitRef = {
+		id: 'can',
+		name: 'puszka',
+		forms: { one: 'puszka', few: 'puszki', many: 'puszek', fraction: 'puszki' },
+		productId: 'p-flour',
+		measureKind: 'mass',
+		amount: 400
+	};
+
+	function withCan(): RecipeDraft {
+		const d = filled();
+		const row = d.ingredients[0];
+		if (row) Object.assign(row, { product: flour, value: 2, unit: 'custom', customUnit: can });
+		return d;
+	}
+
+	it('sends the unit by id only', () => {
+		const { write } = toRecipeWrite(withCan(), { tagIds: [], utensilIds: [] });
+		expect(write.ingredients[0]?.quantity).toEqual({
+			value: 2,
+			unit: 'custom',
+			customUnitId: 'can'
+		});
+	});
+
+	it('takes the embedded unit from a recipe', () => {
+		const draft = draftFromRecipe({
+			title: 'T',
+			description: null,
+			coverImage: null,
+			prepMinutes: null,
+			cookMinutes: null,
+			tags: [],
+			utensils: [],
+			ingredients: [
+				{
+					id: 'i1',
+					product: flour,
+					quantity: { value: 2, unit: 'custom', customUnitId: 'can', customUnit: can },
+					baseAmount: 800,
+					note: null,
+					optional: false
+				}
+			],
+			prepSteps: [],
+			instructionSteps: [{ id: 's1', blocks: [{ type: 'text', text: 'x' }] }]
+		});
+		expect(draft.ingredients[0]).toMatchObject({ unit: 'custom', customUnit: can, value: 2 });
+	});
+
+	it('accepts a fitting custom unit and flags a missing or foreign one', () => {
+		expect(validateDraft(withCan())).toEqual({});
+		const missing = withCan();
+		if (missing.ingredients[0]) missing.ingredients[0].customUnit = null;
+		expect(validateDraft(missing)['ingredients[0].quantity']).toBeDefined();
+		const foreign = withCan();
+		if (foreign.ingredients[0]) foreign.ingredients[0].product = milk;
+		expect(validateDraft(foreign)['ingredients[0].quantity']).toBeDefined();
 	});
 });

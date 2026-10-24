@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { NumberField, Select, Switch, TextField } from '$lib/components/ui';
 	import ProductPicker from '$lib/components/catalog/ProductPicker.svelte';
-	import type { PieceSize, ProductRef, Unit } from '$lib/domain/types';
+	import UnitSelect from '$lib/components/units/UnitSelect.svelte';
+	import type { PieceSize, ProductRef } from '$lib/domain/types';
+	import { customUnitFits } from '$lib/domain/units';
 	import { t } from '$lib/i18n';
 	import { compatibleUnits, defaultUnit, type DraftIngredient } from './draft';
 
 	/**
 	 * The fields of one ingredient: product (with inline "Dodaj produkt"), amount, a unit select that
-	 * lists only the units compatible with the product (F1 `toBaseAmount` ≠ null), the size for
-	 * products with sizes, "do smaku", "opcjonalny" and a note.
+	 * lists only the units compatible with the product (built-in, then custom units, then "+ Nowa
+	 * jednostka…"; PROJECT §5.6), the size for products with sizes, "do smaku", "opcjonalny" and a note.
 	 */
 	type Props = {
 		ingredient: DraftIngredient;
@@ -19,8 +21,6 @@
 
 	const labels = t.recipes.ingredients;
 
-	let units = $derived(compatibleUnits(ingredient.product));
-	let unitItems = $derived(units.map((u) => ({ value: u, label: labels.unitLabels[u] })));
 	const sizeItems = (['small', 'medium', 'large'] as const).map((s) => ({
 		value: s,
 		label: labels.sizeLabels[s]
@@ -29,8 +29,13 @@
 
 	function productChanged(product: ProductRef | null) {
 		if (!product) return;
-		if (ingredient.unit === null || !compatibleUnits(product).includes(ingredient.unit)) {
+		const keeps =
+			ingredient.unit === 'custom'
+				? ingredient.customUnit !== null && customUnitFits(ingredient.customUnit, product)
+				: ingredient.unit !== null && compatibleUnits(product).includes(ingredient.unit);
+		if (!keeps) {
 			ingredient.unit = defaultUnit(product);
+			ingredient.customUnit = null;
 		}
 		if (!product.hasSizes) ingredient.size = null;
 	}
@@ -51,11 +56,14 @@
 				min={0}
 				error={errors.quantity ?? null}
 			/>
-			<Select
+			<UnitSelect
 				label={labels.unit}
-				items={unitItems}
-				value={ingredient.unit ?? ''}
-				onValueChange={(v) => (ingredient.unit = v as Unit)}
+				product={ingredient.product}
+				bind:unit={ingredient.unit}
+				bind:customUnit={ingredient.customUnit}
+				onChange={(unit) => {
+					if (unit !== 'piece') ingredient.size = null;
+				}}
 			/>
 		</div>
 		{#if showSize}

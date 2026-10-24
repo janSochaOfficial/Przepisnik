@@ -218,9 +218,7 @@ export function formatQuantityAsEntered(q: Quantity, p: ProductRef): string {
 	switch (q.unit) {
 		case 'custom':
 			// The embedded unit is always sent with a custom quantity; without it only the number is known.
-			return q.customUnit
-				? withForms(q.value, q.customUnit.forms)
-				: formatQuantityNumber(q.value);
+			return q.customUnit ? withForms(q.value, q.customUnit.forms) : formatQuantityNumber(q.value);
 		case 'g':
 		case 'kg':
 		case 'ml':

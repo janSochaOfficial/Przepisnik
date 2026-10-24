@@ -23,7 +23,9 @@ export function suggestPluralForms(name: string): PluralForms {
 	const head = space < 0 ? clean : clean.slice(0, space);
 	const tail = space < 0 ? '' : clean.slice(space);
 	const lower = head.toLowerCase();
-	const rule = pluralSuffixRules.find((r) => lower.endsWith(r.suffix) && lower.length > r.suffix.length);
+	const rule = pluralSuffixRules.find(
+		(r) => lower.endsWith(r.suffix) && lower.length > r.suffix.length
+	);
 	if (!rule) return { one: clean, few: clean, many: clean, fraction: clean };
 	const stem = head.slice(0, head.length - rule.suffix.length);
 	return {

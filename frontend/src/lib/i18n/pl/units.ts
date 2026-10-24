@@ -76,7 +76,6 @@ export const customUnits = {
 		unit: 'Jednostka',
 		submit: 'Dodaj jednostkę',
 		created: (name: string) => `Dodano jednostkę „${name}”`,
-		existing: (name: string) => `Jednostka „${name}” już istnieje — użyto jej`,
 		required: 'Uzupełnij to pole',
 		tooLong: 'Najwyżej 40 znaków',
 		valueRequired: 'Podaj ilość większą od zera',

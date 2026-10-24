@@ -3,7 +3,14 @@
 import type { components } from '$lib/api/schema';
 import { t } from '$lib/i18n';
 import { toBaseAmount } from '$lib/domain/units';
-import type { PieceSize, ProductRef, Quantity, Unit } from '$lib/domain/types';
+import type {
+	BuiltInUnit,
+	CustomUnitRef,
+	PieceSize,
+	ProductRef,
+	Quantity,
+	Unit
+} from '$lib/domain/types';
 import { fromContentBlocks, newKey, textBlock, toContentBlocks, type DraftBlock } from './blocks';
 
 type Schemas = components['schemas'];
@@ -27,6 +34,8 @@ export type DraftIngredient = {
 	product: ProductRef | null;
 	value: number | null;
 	unit: Unit | null;
+	/** The custom unit when `unit` is `custom` (PROJECT §5.6). */
+	customUnit: CustomUnitRef | null;
 	size: PieceSize | null;
 	toTaste: boolean;
 	note: string;
@@ -60,8 +69,8 @@ export type RecipeDraft = {
 
 export type EditorMode = 'recipe' | 'variant';
 
-/** Units in the order they appear in the unit select. */
-export const UNITS: readonly Unit[] = [
+/** Built-in units in the order they appear in the unit select. */
+export const UNITS: readonly BuiltInUnit[] = [
 	'g',
 	'kg',
 	'ml',
@@ -75,15 +84,15 @@ export const UNITS: readonly Unit[] = [
 ];
 
 /** Units that convert to the product's base kind (F1 `toBaseAmount` ≠ null). */
-export function compatibleUnits(product: ProductRef | null): Unit[] {
+export function compatibleUnits(product: ProductRef | null): BuiltInUnit[] {
 	if (!product) return [...UNITS];
 	return UNITS.filter((unit) => toBaseAmount({ value: 1, unit }, product) !== null);
 }
 
 /** The unit a fresh row of `product` starts with. */
-export function defaultUnit(product: ProductRef): Unit {
+export function defaultUnit(product: ProductRef): BuiltInUnit {
 	const units = compatibleUnits(product);
-	const natural: Unit =
+	const natural: BuiltInUnit =
 		product.measureKind === 'mass' ? 'g' : product.measureKind === 'volume' ? 'ml' : 'piece';
 	return units.includes(natural) ? natural : (units[0] ?? 'g');
 }
@@ -94,6 +103,7 @@ export function emptyIngredient(base = false): DraftIngredient {
 		product: null,
 		value: null,
 		unit: null,
+		customUnit: null,
 		size: null,
 		toTaste: false,
 		note: '',
@@ -161,6 +171,7 @@ export function draftFromRecipe(recipe: RecipeLike, options: { base?: boolean } 
 			product: i.product,
 			value: i.quantity?.value ?? null,
 			unit: i.quantity?.unit ?? null,
+			customUnit: i.quantity?.customUnit ?? null,
 			size: i.quantity?.size ?? null,
 			toTaste: i.quantity === null,
 			note: i.note ?? '',
@@ -185,8 +196,14 @@ export type BuiltBody = {
 	maps: RowMaps;
 };
 
+/** The quantity of a row; a custom unit is sent by id only (`customUnit` is read-only in the API). */
 function quantityOf(i: DraftIngredient): Quantity | undefined {
 	if (i.toTaste || i.value === null || i.unit === null) return undefined;
+	if (i.unit === 'custom') {
+		return i.customUnit
+			? { value: i.value, unit: 'custom', customUnitId: i.customUnit.id }
+			: undefined;
+	}
 	const q: Quantity = { value: i.value, unit: i.unit };
 	if (i.unit === 'piece' && i.product?.hasSizes && i.size) q.size = i.size;
 	return q;
@@ -294,9 +311,21 @@ export function validateDraft(draft: RecipeDraft, mode: EditorMode = 'recipe'): 
 		if (!i.product) errors[`${path}.product`] = fe.productRequired;
 		if (i.note.length > LIMITS.note) errors[`${path}.note`] = fe.too_long;
 		if (!i.toTaste) {
-			if (i.value === null || i.value <= 0 || i.unit === null) {
+			if (
+				i.value === null ||
+				i.value <= 0 ||
+				i.unit === null ||
+				(i.unit === 'custom' && !i.customUnit)
+			) {
 				errors[`${path}.quantity`] = fe.quantityRequired;
-			} else if (i.product && toBaseAmount({ value: i.value, unit: i.unit }, i.product) === null) {
+			} else if (
+				i.product &&
+				toBaseAmount(
+					{ value: i.value, unit: i.unit, customUnitId: i.customUnit?.id ?? null },
+					i.product,
+					i.customUnit
+				) === null
+			) {
 				errors[`${path}.quantity`] = fe.unitIncompatible;
 			}
 		}

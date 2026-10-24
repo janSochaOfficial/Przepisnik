@@ -85,7 +85,8 @@ export function convertKind(
  */
 export function nativeAmount(q: Quantity, useSizes: boolean): [MeasureKind, number] | null {
 	if (q.unit === 'custom') return null;
-	if (q.unit === 'piece') return ['count', q.value * (useSizes && q.size ? SIZE_FACTOR[q.size] : 1)];
+	if (q.unit === 'piece')
+		return ['count', q.value * (useSizes && q.size ? SIZE_FACTOR[q.size] : 1)];
 	const [kind, factor] = UNIT_NATIVE[q.unit];
 	return [kind, q.value * factor];
 }
