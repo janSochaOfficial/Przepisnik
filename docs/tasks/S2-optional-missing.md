@@ -28,3 +28,30 @@ PROJECT §9, §10 · `frontend/DESIGN.md` · the current code: `components/deduc
 - A recipe with no optional ingredients missing → no question.
 - Unit tests for the line selection, plus a Playwright integration test of both answers.
 - `scripts/verify.sh --agent` is green.
+
+## Report
+
+### Summary
+Both entry points (dialog button and action bar) go through `addRowsToShoppingList` in `components/deduction/addMissing.ts`. It adds directly when no optional line is missing. Otherwise it asks via `OptionalPrompt.svelte`, which is mounted imperatively so it works from either entry point. "Tylko wymagane" is focused and adds only required lines (or shows "Niczego nie brakuje."). "Dodaj też opcjonalne" adds all. Escape or an outside click cancels and adds nothing. The toast counts the lines actually added. `DeductionRow` and `NeededIngredient` gained `optional`; `toShoppingLines(rows, {includeOptional})` and `missingOptionalRows` are pure and unit-tested. Playwright covers both answers and cancel. The harness page takes `?optional=1` to add a missing optional "rodzynki".
+
+### Deviations
+- A custom AlertDialog (`OptionalPrompt.svelte`) is used instead of `ConfirmDialog`, because `ConfirmDialog` cannot tell Escape (cancel) apart from its cancel button (here "Tylko wymagane").
+- The dialog's switches do not affect the add-missing lines, as before; missing rows are disabled anyway.
+- Touched `routes/lodowka/harness-odejmowanie/+page.svelte` (not in Owns) to add the `?optional=1` fixture.
+- A product on several recipe lines counts as optional only if all its lines are optional.
+- Resumed after a machine crash; the work was intact and unchanged.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+None.
+
+### Follow-ups
+None.
