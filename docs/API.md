@@ -128,7 +128,7 @@ type CustomUnitWrite = {
 };
 ```
 - **Stored amount.** For a product unit: the base amount of `equals` for that product (PROJECT §5.2), so it is in the product's measure kind. For a unit for every product: the native amount of `equals` in its own kind (`g`/`kg` → `mass`, volume units → `volume`, `piece` → `count`; sizes are ignored).
-- **Converting** `{ value, unit: 'custom', customUnitId }` for a product: the native amount `value × amount` in the unit's `measureKind`, then the normal density / piece-weight conversion to the product's kind (§5.2). A product unit used with another product, or an impossible conversion → 400 `quantity.unit_incompatible`. An unknown `customUnitId` → 400 `validation.failed` (`…quantity.customUnitId: unit.not_found`).
+- **Converting** `{ value, unit: 'custom', customUnitId }` for a product: the native amount `value × amount` in the unit's `measureKind`, then the normal density / piece-weight conversion to the product's kind (§5.2). A product unit used with another product, or an impossible conversion → 400 `quantity.unit_incompatible`. An unknown `customUnitId` → 400 `validation.failed` (field code `unit.not_found` on the `…quantity` path).
 - `PUT /admin/units/{id}` with `productId` different from the stored scope → 400 `validation.failed` (`productId: immutable`). A name that clashes with another unit of the same scope → 400 `validation.failed` (`name: duplicate`).
 - When an admin merges products (§2), units bound to the source move to the target; on a name clash in the target's scope the moved unit is renamed with " (2)", " (3)", ….
 
