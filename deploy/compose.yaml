@@ -1,0 +1,71 @@
+# The full stack (TECHNICAL §9): PostgreSQL, the API and Caddy serving the SPA.
+#   docker compose -f deploy/compose.yaml up -d --build      # http://localhost:8080
+# Settings come from deploy/.env (copy deploy/.env.example); every one has a default that works locally.
+# See deploy/README.md for Google sign-in, HTTPS, backups and upgrades.
+name: recipes-list
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-recipes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-recipes}
+      POSTGRES_DB: ${POSTGRES_DB:-recipes}
+    volumes:
+      # postgres:18 keeps its data in a major-version subdirectory of /var/lib/postgresql.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ..
+      dockerfile: backend/src/RecipesList.Api/Dockerfile
+    image: recipes-list-api:local
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=${POSTGRES_DB:-recipes};Username=${POSTGRES_USER:-recipes};Password=${POSTGRES_PASSWORD:-recipes};GSS Encryption Mode=Disable"
+      Database__MigrateOnStartup: "true"
+      Auth__Google__ClientId: ${Auth__Google__ClientId:-}
+      Admin__Emails__0: ${Admin__Emails__0:-}
+      Seed__Enabled: ${Seed__Enabled:-true}
+      RateLimiting__AuthPerMinute: ${RateLimiting__AuthPerMinute:-10}
+      RateLimiting__ImagesPerMinute: ${RateLimiting__ImagesPerMinute:-30}
+      RateLimiting__ImportPerMinute: ${RateLimiting__ImportPerMinute:-10}
+    volumes:
+      - images:/data/images
+      # Data-protection keys sign the session cookie; keeping them means an upgrade does not sign everyone out.
+      - dpkeys:/home/app/.aspnet/DataProtection-Keys
+    depends_on:
+      db:
+        condition: service_healthy
+    # Not published: only Caddy talks to the API.
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    image: recipes-list-web:local
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:8080}
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  images:
+  dpkeys:
+  caddy_data:
+  caddy_config:

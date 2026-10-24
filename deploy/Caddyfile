@@ -1,0 +1,42 @@
+# RecipesList web server (TECHNICAL §9): the static SPA plus a reverse proxy for /api.
+# SITE_ADDRESS: ":8080" (default, plain http) or a domain name such as "przepisy.example.com" (automatic HTTPS).
+{
+	admin off
+}
+
+{$SITE_ADDRESS::8080} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		Cross-Origin-Opener-Policy "same-origin-allow-popups"
+		# The script/style policy is a <meta> in index.html (SvelteKit hashes its inline bootstrap script);
+		# a header can still add what a <meta> cannot.
+		Content-Security-Policy "frame-ancestors 'none'"
+		-Server
+	}
+
+	# Browsers ignore HSTS over plain http, so it is safe to send it always; it only binds a real HTTPS domain.
+	header Strict-Transport-Security "max-age=31536000"
+
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+
+	handle {
+		root * /srv
+
+		# Hashed build output never changes; everything else (index.html) must be revalidated.
+		@immutable path /_app/immutable/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+		@shell not path /_app/immutable/*
+		header @shell Cache-Control "no-cache"
+
+		# SPA fallback: unknown paths get index.html and the client router takes over.
+		try_files {path} /index.html
+		file_server
+	}
+}
