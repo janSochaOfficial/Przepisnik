@@ -176,7 +176,17 @@ public sealed class DeductionService(
         }
 
         deduction.UndoneAt = time.GetUtcNow();
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            // A simultaneous undo (or edit) got there first: the re-inserted id or an item's version clashed.
+            var undone = await db.Deductions.AsNoTracking().AnyAsync(d => d.Id == deductionId && d.UndoneAt != null, ct);
+            throw new ConflictException(undone ? ErrorCodes.DeductionAlreadyUndone : ErrorCodes.DeductionItemsChanged);
+        }
+
         return deduction;
     }
 
