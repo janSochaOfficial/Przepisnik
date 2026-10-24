@@ -131,7 +131,7 @@ export class ShoppingListState {
 		await this.load(this.#fridgeId, { quiet: true });
 	}
 
-	/** "Przenieś kupione do lodówki" / "Usuń kupione". */
+	/** Move the bought entries to the fridge, or just remove them. */
 	async complete(moveToFridge: boolean): Promise<{ removed: number; moved: number }> {
 		const result = await unwrap(
 			createApi().POST('/fridges/{id}/shopping-list/complete', {

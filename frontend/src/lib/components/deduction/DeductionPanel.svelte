@@ -27,7 +27,7 @@
 	import { addRowsToShoppingList } from './addMissing';
 
 	/**
-	 * "Odejmij z lodówki" (PROJECT §9). Opened from the recipe view with the **resolved** ingredients and
+	 * the deduction dialog (PROJECT §9). Opened from the recipe view with the **resolved** ingredients and
 	 * the scaling `factor`:
 	 *
 	 * ```svelte

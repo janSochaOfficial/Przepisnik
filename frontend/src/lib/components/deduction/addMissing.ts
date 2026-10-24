@@ -26,7 +26,7 @@ export async function addRowsToShoppingList(
 }
 
 /**
- * "Dodaj brakujące do listy zakupów" without opening the dialog (recipe action bar): compares the
+ * "Add missing to the shopping list" without opening the dialog (recipe action bar): compares the
  * recipe at `factor` with the fridge and adds the missing and short amounts to that fridge's list,
  * then shows a toast. Without `fridgeId` the user's oldest fridge is used.
  */

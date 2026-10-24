@@ -4,7 +4,7 @@
 	import DeductionPanel from './DeductionPanel.svelte';
 
 	/**
-	 * "Odejmij z lodówki" (PROJECT §9), to be hosted by the recipe view with the **resolved**
+	 * the deduction dialog (PROJECT §9), to be hosted by the recipe view with the **resolved**
 	 * ingredients and the scaling `factor`:
 	 *
 	 * ```svelte

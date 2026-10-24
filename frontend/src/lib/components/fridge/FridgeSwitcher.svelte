@@ -5,7 +5,7 @@
 	import type { FridgeSummary } from './types';
 
 	/**
-	 * Picks one of the user's fridges, with "Nowa lodówka" as the last choice (it opens a small name
+	 * Picks one of the user's fridges, with "new fridge" as the last choice (it opens a small name
 	 * dialog and reports the created fridge through `onCreated`).
 	 */
 	type Props = {

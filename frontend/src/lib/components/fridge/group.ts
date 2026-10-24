@@ -22,11 +22,11 @@ export const CATEGORY_ORDER: ProductCategory[] = [
 
 export type ItemGroup = { category: ProductCategory; items: FridgeItem[] };
 
-/** Lower case without diacritics, so "maka" finds "mąka". */
+/** Lower case without diacritics, so a search without accents still matches. */
 export function normalizeSearch(text: string): string {
 	return text
 		.toLocaleLowerCase('pl')
-		.replace(/ł/g, 'l')
+		.replace(/\u0142/g, 'l')
 		.normalize('NFD')
 		.replace(/\p{M}/gu, '')
 		.trim();

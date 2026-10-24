@@ -21,7 +21,7 @@
 
 	/**
 	 * Rename, members, invites and delete (PROJECT §8.1). The owner sees everything; a member sees
-	 * the members list and "Opuść lodówkę". Mount it only while open.
+	 * the members list and a leave button. Mount it only while open.
 	 */
 	type Props = {
 		open?: boolean;

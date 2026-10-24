@@ -32,7 +32,7 @@ export function baseUnitLabel(product: ProductRef): string {
 	return units.ml;
 }
 
-/** `Śmietanka 30%` style line parts for a fridge item (PROJECT §8.2). */
+/** The "remaining" part of a fridge item line (PROJECT §8.2). */
 export function remainingText(
 	item: { remainingPercent: number; remainingAmount: number; product: ProductRef },
 	liquidUnits: LiquidUnits
