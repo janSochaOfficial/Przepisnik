@@ -11,7 +11,15 @@ A recipe and fridge app: an ASP.NET Core 10 API with PostgreSQL and a SvelteKit 
 
 .NET 10 SDK, Node 24 LTS (`nvm use`), Docker Engine with the compose plugin (the backend integration tests use Testcontainers).
 
-## Quick start
+## Quick start: the whole app in Docker
+
+```bash
+docker compose -f deploy/compose.yaml up -d --build   # PostgreSQL, the API and Caddy
+```
+
+Open http://localhost:8080 once `docker compose -f deploy/compose.yaml ps` shows `api` and `web` as healthy. Signing in needs a Google OAuth client ID; [deploy/README.md](deploy/README.md) covers that, HTTPS on a domain, backups and upgrades. `docker compose -f deploy/compose.yaml down` stops it (add `-v` to delete the data).
+
+## Quick start: development
 
 ```bash
 # 1. Database (postgres:18). If something already listens on 5432, pick another host port:
@@ -33,6 +41,15 @@ Open http://localhost:5173. In Development with no Google client ID configured, 
 With a non-default `POSTGRES_PORT`, point the API at it, for example
 `ConnectionStrings__Default="Host=localhost;Port=5433;Database=recipes;Username=recipes;Password=recipes"`.
 All configuration variables are listed in [deploy/.env.example](deploy/.env.example).
+
+A second API from the **same** checkout (for example on another `API_PORT` with another database) must not rebuild while the first one runs, because both would race on the build output. Build once, then start the second one with `--no-build`:
+
+```bash
+API_PORT=5190 ConnectionStrings__Default="Host=localhost;Port=5432;Database=recipes_second;Username=recipes;Password=recipes" \
+  dotnet run --no-build --project backend/src/RecipesList.Api
+```
+
+Separate git worktrees have their own build output and are not affected.
 
 ## Ports
 
@@ -56,10 +73,13 @@ printf 'API_PORT=5100\nWEB_PORT=5200\nPREVIEW_PORT=5300\n' > .env.local
 ```bash
 scripts/verify.sh            # full gate: format, build, all tests, contract, frontend, shared JSON
 scripts/verify.sh --agent    # task agents: same, without the MigrationsAreInSync test
+scripts/verify.sh --e2e      # full gate, then the E2E smoke suite against the compose stack (Docker, port 8080)
 dotnet test backend          # backend unit + integration tests (Docker needed)
 cd frontend && npm run check && npm run lint && npm test && npm run test:integration
 npm run gen:api              # in frontend/: regenerate src/lib/api/schema.d.ts from openapi.yaml
 ```
+
+`npm run test:e2e` (in `frontend/`) runs the Playwright suite in `frontend/tests/e2e` against a running stack (`E2E_BASE_URL`, default http://localhost:8080); `--e2e` starts and removes that stack itself (see [deploy/README.md](deploy/README.md)).
 
 `scripts/verify.sh` is the only definition of "green" (plan §4.6). It runs `npm ci` itself when `frontend/node_modules` is missing or older than the lockfile.
 
