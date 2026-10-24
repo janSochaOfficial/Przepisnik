@@ -167,7 +167,7 @@ public sealed class VariantService(
         };
         Apply(variant, diff);
         db.Variants.Add(variant);
-        await db.SaveChangesAsync(ct);
+        await SaveCatchingNameRaceAsync(variant.RecipeId, name, variant.Id, ct);
 
         return await GetAsync(variant.Id, ct);
     }
@@ -203,9 +203,31 @@ public sealed class VariantService(
 
         // Options of the old ops may be gone: drop remembered picks of them in the same SaveChanges.
         await selections.DropStalePicksAsync(recipe, excludeVariantId: null, ct);
-        await db.SaveChangesAsync(ct);
+        await SaveCatchingNameRaceAsync(variant.RecipeId, name, id, ct);
 
         return await GetAsync(id, ct);
+    }
+
+    /// <summary>
+    /// Saves; when a simultaneous request took the same name first (the unique index caught it after the pre-check),
+    /// answers 409 <c>variant.name_taken</c> instead of a 500.
+    /// </summary>
+    private async Task SaveCatchingNameRaceAsync(Guid recipeId, string name, Guid variantId, CancellationToken ct)
+    {
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException e) when (e is not DbUpdateConcurrencyException)
+        {
+            var userId = currentUser.Id;
+            if (await db.Variants.AsNoTracking().AnyAsync(v => v.RecipeId == recipeId && v.AuthorId == userId && v.Name == name && v.Id != variantId, ct))
+            {
+                throw new ConflictException(ErrorCodes.VariantNameTaken);
+            }
+
+            throw;
+        }
     }
 
     /// <inheritdoc />
