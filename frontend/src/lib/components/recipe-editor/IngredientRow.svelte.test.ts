@@ -16,7 +16,8 @@ const base: ProductRef = {
 	gramsPerMl: null,
 	gramsPerPiece: null,
 	defaultPackageAmount: null,
-	pieceForms: null
+	pieceForms: null,
+	isVerified: true
 };
 
 async function unitOptions(): Promise<string[]> {

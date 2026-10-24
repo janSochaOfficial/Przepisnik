@@ -25,11 +25,12 @@ internal sealed record FridgeProductRefDto(
     decimal? GramsPerMl,
     decimal? GramsPerPiece,
     decimal? DefaultPackageAmount,
-    PluralForms? PieceForms)
+    PluralForms? PieceForms,
+    bool IsVerified)
 {
     public static FridgeProductRefDto From(Product p) => new(
         p.Id, p.Name, p.Category, p.MeasureKind, p.DisplayClass, p.HasSizes, p.AllowHalf,
-        p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms);
+        p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms, p.IsVerified);
 }
 
 /// <summary>Body of <c>POST /fridges</c> and <c>PUT /fridges/{id}</c> (1–80 characters after trimming).</summary>

@@ -19,6 +19,7 @@ const product = (
 	gramsPerPiece: null,
 	defaultPackageAmount: null,
 	pieceForms: null,
+	isVerified: true,
 	...over
 });
 

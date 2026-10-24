@@ -31,11 +31,12 @@ internal sealed record RecipeProductRefDto(
     decimal? GramsPerMl,
     decimal? GramsPerPiece,
     decimal? DefaultPackageAmount,
-    PluralForms? PieceForms)
+    PluralForms? PieceForms,
+    bool IsVerified)
 {
     public static RecipeProductRefDto From(Product p) => new(
         p.Id, p.Name, p.Category, p.MeasureKind, p.DisplayClass, p.HasSizes, p.AllowHalf,
-        p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms);
+        p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms, p.IsVerified);
 }
 
 /// <summary>

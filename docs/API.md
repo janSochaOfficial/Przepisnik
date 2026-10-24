@@ -33,6 +33,7 @@ type ProductRef = {               // embedded wherever a product is referenced
   gramsPerMl?: number; gramsPerPiece?: number;
   defaultPackageAmount?: number;  // base units
   pieceForms?: PluralForms;
+  isVerified: boolean;            // read-only: seeded or admin-curated; user-added products are false (D-32)
 };
 
 type Quantity = { value: number; unit: Unit; size?: PieceSize };  // as entered by the author; size only for unit 'piece' + hasSizes
@@ -76,6 +77,8 @@ Every endpoint other than `/auth/*`, `/me*` and `/users/nickname-available` retu
 | Method | Path | Body / query | Response | Errors |
 |---|---|---|---|---|
 | GET | `/products` | `q?` (trigram + prefix on normalized name), `category?`, `limit` (≤ 50, default 20) | `200 ProductRef[]` | |
+
+Ordering of `GET /products` with `q`: an exact normalized match first; then prefix, word-prefix and trigram-similar matches, in that order; **within each of those, verified products before user-added ones**; then similarity and name. Without `q`: verified first, then name. `POST /products` by an admin creates a verified product, by anyone else an unverified one; `PUT /admin/products/{id}` verifies the product.
 | GET | `/products/{id}` | — | `200 ProductRef` | 404 `product.not_found` |
 | POST | `/products` | `ProductWrite` | `201 ProductRef` | 409 `product.duplicate` + extension `existingId` |
 | PUT | `/admin/products/{id}` | `ProductWrite` | `200 ProductRef` | 403 `admin.required`, 409 `product.duplicate`, 400 `product.invalid_combination` (`errors.measureKind: in_use`) when `measureKind` changes on a product in use |

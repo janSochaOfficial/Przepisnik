@@ -54,6 +54,43 @@ public sealed class ProductEndpointsTests(ApiFactory factory) : CatalogTestBase(
     }
 
     [Fact]
+    public async Task Search_VerifiedBeatsUserAddedWithinATier_ButExactMatchBeatsVerifiedPrefix()
+    {
+        await AddProductAsync("Cebula marynowana");
+        await AddProductAsync("Cebulka", isVerified: true);
+        await AddProductAsync("Ceb");
+        using var client = await LoginAsync("ania");
+
+        // Exact "Ceb" first, then the verified prefix match before the user-added one; "cebu" matches "Ceb" only by similarity.
+        Names(await SearchAsync(client, "?q=ceb")).ShouldBe(["Ceb", "Cebulka", "Cebula marynowana"]);
+        Names(await SearchAsync(client, "?q=cebu")).ShouldBe(["Cebulka", "Cebula marynowana", "Ceb"]);
+    }
+
+    [Fact]
+    public async Task Search_WithoutQuery_ListsVerifiedFirst()
+    {
+        await AddProductAsync("Anyż");
+        await AddProductAsync("Zioła", isVerified: true);
+        using var client = await LoginAsync("ania");
+
+        Names(await SearchAsync(client, "")).ShouldBe(["Zioła", "Anyż"]);
+    }
+
+    [Fact]
+    public async Task Create_ByAUser_IsNotVerified_ByAnAdmin_IsVerified()
+    {
+        using var client = await LoginAsync("ania");
+        var user = await ContractAssert.IsJsonAsync(
+            await client.PostJsonAsync("/api/v1/products", ProductBody("Kozieradka")), HttpStatusCode.Created, "ProductRef");
+        user.GetProperty("isVerified").GetBoolean().ShouldBeFalse();
+
+        using var admin = await LoginAdminAsync();
+        var curated = await ContractAssert.IsJsonAsync(
+            await admin.PostJsonAsync("/api/v1/products", ProductBody("Lubczyk")), HttpStatusCode.Created, "ProductRef");
+        curated.GetProperty("isVerified").GetBoolean().ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Search_FindsFuzzyTypos()
     {
         await AddProductAsync("Pomidor");

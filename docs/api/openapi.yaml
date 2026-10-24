@@ -211,7 +211,7 @@ paths:
       tags: [catalog]
       operationId: SearchProducts
       summary: Search the product catalog
-      description: Trigram + prefix search on the normalized name.
+      description: Trigram + prefix search on the normalized name. With `q`, an exact match comes first, then prefix, word-prefix and similar matches; within each, verified products before user-added ones, then similarity and name. Without `q`, verified first, then name.
       parameters:
         - $ref: '#/components/parameters/Q'
         - name: category
@@ -1557,7 +1557,7 @@ components:
 
     ProductRef:
       type: object
-      required: [id, name, category, measureKind, displayClass, hasSizes, allowHalf, gramsPerMl, gramsPerPiece, defaultPackageAmount, pieceForms]
+      required: [id, name, category, measureKind, displayClass, hasSizes, allowHalf, gramsPerMl, gramsPerPiece, defaultPackageAmount, pieceForms, isVerified]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         name: { type: string }
@@ -1575,6 +1575,9 @@ components:
           oneOf:
             - $ref: '#/components/schemas/PluralForms'
             - type: 'null'
+        isVerified:
+          description: Read-only. Seeded or admin-curated products are verified; user-added ones are not and rank below verified ones in search.
+          type: boolean
       additionalProperties: false
 
     Quantity:

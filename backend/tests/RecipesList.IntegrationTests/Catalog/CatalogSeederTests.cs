@@ -55,6 +55,7 @@ public sealed class CatalogSeederTests(ApiFactory factory) : CatalogTestBase(fac
         onion.PieceForms!.Few.ShouldBe("sztuki");
         onion.GramsPerPiece.ShouldBe(110m);
         onion.CreatedById.ShouldBeNull();
+        onion.IsVerified.ShouldBeTrue();
     }
 
     [Fact]

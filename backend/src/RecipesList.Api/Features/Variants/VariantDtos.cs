@@ -248,12 +248,13 @@ public sealed record VariantProductRef(
     decimal? GramsPerMl,
     decimal? GramsPerPiece,
     decimal? DefaultPackageAmount,
-    PluralForms? PieceForms)
+    PluralForms? PieceForms,
+    bool IsVerified)
 {
     public static VariantProductRef From(Product p)
     {
         ArgumentNullException.ThrowIfNull(p);
-        return new(p.Id, p.Name, p.Category, p.MeasureKind, p.DisplayClass, p.HasSizes, p.AllowHalf, p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms);
+        return new(p.Id, p.Name, p.Category, p.MeasureKind, p.DisplayClass, p.HasSizes, p.AllowHalf, p.GramsPerMl, p.GramsPerPiece, p.DefaultPackageAmount, p.PieceForms, p.IsVerified);
     }
 }
 

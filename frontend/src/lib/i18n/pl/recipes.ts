@@ -196,6 +196,11 @@ export const recipes = {
 		submit: 'Dodaj produkt',
 		created: (name: string) => `Dodano produkt „${name}”.`,
 		existing: (name: string) => `Taki produkt już jest: „${name}”.`,
+		userAdded: 'dodany przez użytkownika',
+		unknownTitle: (name: string) => `„${name}” nie ma w bazie produktów. Dodać?`,
+		unknownDescription: 'Produkt trafi do wspólnej bazy, z której korzystają wszyscy.',
+		unknownAdd: 'Dodaj do bazy',
+		unknownDecline: 'Nie dodawaj',
 		categories: {
 			vegetables: 'warzywa',
 			fruits: 'owoce',

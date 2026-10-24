@@ -31,6 +31,18 @@ public sealed class ProductAdminTests(ApiFactory factory) : CatalogTestBase(fact
     }
 
     [Fact]
+    public async Task Update_MakesAUserAddedProductVerified()
+    {
+        var id = await AddProductAsync("Kozieradka");
+        using var admin = await LoginAdminAsync();
+
+        var product = await ContractAssert.IsJsonAsync(
+            await admin.PutJsonAsync($"/api/v1/admin/products/{id}", ProductBody("Kozieradka")), HttpStatusCode.OK, "ProductRef");
+
+        product.GetProperty("isVerified").GetBoolean().ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Update_KeepingTheSameName_IsNotADuplicate()
     {
         var id = await AddProductAsync("Cebula");

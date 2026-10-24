@@ -77,6 +77,7 @@ public sealed class CatalogSeeder(IAppDbContext db, TimeProvider time)
                 GramsPerPiece = input.GramsPerPiece,
                 DefaultPackageAmount = input.DefaultPackageAmount,
                 PieceForms = input.PieceForms,
+                IsVerified = true,
                 CreatedById = null,
                 CreatedAt = time.GetUtcNow(),
             });

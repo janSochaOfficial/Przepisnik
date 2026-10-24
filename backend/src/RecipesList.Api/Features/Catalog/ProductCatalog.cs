@@ -5,8 +5,8 @@ using RecipesList.Core.Common;
 namespace RecipesList.Api.Features.Catalog;
 
 /// <summary>
-/// Read and create side of the product catalog (API.md §2, PROJECT §7). Search ranks prefix matches above word-prefix
-/// matches above trigram similarity, all on the normalized name.
+/// Read and create side of the product catalog (API.md §2, PROJECT §7). Search ranks an exact match above prefix matches above
+/// word-prefix matches above trigram similarity, all on the normalized name; within each tier verified products come first (D-32).
 /// </summary>
 internal sealed class ProductCatalog(IAppDbContext db, ICurrentUser currentUser, TimeProvider time)
 {
@@ -28,7 +28,7 @@ internal sealed class ProductCatalog(IAppDbContext db, ICurrentUser currentUser,
         var term = NameNormalizer.Normalize(q ?? "");
         if (term.Length == 0)
         {
-            return await products.OrderBy(p => p.NormalizedName).Take(take).ToListAsync(ct);
+            return await products.OrderByDescending(p => p.IsVerified).ThenBy(p => p.NormalizedName).Take(take).ToListAsync(ct);
         }
 
         var escaped = NameSearch.EscapeLike(term);
@@ -39,8 +39,10 @@ internal sealed class ProductCatalog(IAppDbContext db, ICurrentUser currentUser,
             .Where(p => EF.Functions.Like(p.NormalizedName, prefix, NameSearch.LikeEscape)
                 || EF.Functions.Like(p.NormalizedName, wordPrefix, NameSearch.LikeEscape)
                 || EF.Functions.TrigramsSimilarity(p.NormalizedName, term) > SimilarityThreshold)
-            .OrderBy(p => EF.Functions.Like(p.NormalizedName, prefix, NameSearch.LikeEscape) ? 0
-                : EF.Functions.Like(p.NormalizedName, wordPrefix, NameSearch.LikeEscape) ? 1 : 2)
+            .OrderBy(p => p.NormalizedName == term ? 0
+                : EF.Functions.Like(p.NormalizedName, prefix, NameSearch.LikeEscape) ? 1
+                : EF.Functions.Like(p.NormalizedName, wordPrefix, NameSearch.LikeEscape) ? 2 : 3)
+            .ThenByDescending(p => p.IsVerified)
             .ThenByDescending(p => EF.Functions.TrigramsSimilarity(p.NormalizedName, term))
             .ThenBy(p => p.NormalizedName)
             .Take(take)
@@ -64,6 +66,7 @@ internal sealed class ProductCatalog(IAppDbContext db, ICurrentUser currentUser,
             Name = name,
             NormalizedName = normalized,
             CreatedById = currentUser.Id,
+            IsVerified = currentUser.IsAdmin,
             CreatedAt = time.GetUtcNow(),
         };
         ProductMapping.Apply(product, input);

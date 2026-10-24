@@ -77,6 +77,9 @@ public sealed class Product
     /// <summary>Custom piece names (jsonb); null means "szt.".</summary>
     public PluralForms? PieceForms { get; set; }
 
+    /// <summary>True for seeded and admin-curated products; user-added products rank below them in search (D-32).</summary>
+    public bool IsVerified { get; set; }
+
     /// <summary>Null for seeded products.</summary>
     public Guid? CreatedById { get; set; }
 

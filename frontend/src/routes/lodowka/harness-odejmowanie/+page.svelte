@@ -21,6 +21,7 @@
 		gramsPerPiece: null,
 		defaultPackageAmount: null,
 		pieceForms: null,
+		isVerified: true,
 		...over
 	});
 	const ingredient = (id: string, p: ProductRef, baseAmount: number | null): Ingredient => ({

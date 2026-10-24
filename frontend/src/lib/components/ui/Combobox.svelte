@@ -18,7 +18,9 @@
 	 * Search-as-you-type picker over a server list (products, tags). Calls `search` after the user
 	 * stops typing for `debounceMs`; an older request is aborted through its `AbortSignal`. When
 	 * `onCreate` is given, a footer item "Dodaj „…”" offers to create what was typed (hidden when an
-	 * option already has exactly that label).
+	 * option already has exactly that label). When `onCommit` is given, it is called with the typed text
+	 * when the field loses focus or Enter is pressed while nothing is picked; `clear()` and `focus()`
+	 * (via `bind:this`) let the caller reset the field afterwards.
 	 */
 	type Props = {
 		label: string;
@@ -28,6 +30,8 @@
 		onValueChange?: (value: Option | null) => void;
 		/** Called with the typed text when the footer item is chosen. */
 		onCreate?: (query: string) => void;
+		/** Called with the typed text on blur or Enter when no option is picked. */
+		onCommit?: (query: string) => void;
 		debounceMs?: number;
 		minChars?: number;
 		placeholder?: string;
@@ -45,6 +49,7 @@
 		value = $bindable(null),
 		onValueChange,
 		onCreate,
+		onCommit,
 		debounceMs = 250,
 		minChars = 1,
 		placeholder = t.common.ui.searchPlaceholder,
@@ -63,6 +68,7 @@
 	let query = $state('');
 	let results = $state.raw<Option[]>([]);
 	let loading = $state(false);
+	let inputEl = $state<HTMLInputElement | null>(null);
 	let searched = $state(false);
 
 	let timer: ReturnType<typeof setTimeout> | undefined;
@@ -123,6 +129,44 @@
 		timer = setTimeout(() => runSearch(q), debounceMs);
 	}
 
+	/** Empties the field and forgets the results. */
+	export function clear() {
+		clearTimeout(timer);
+		controller?.abort();
+		query = '';
+		if (inputEl) inputEl.value = '';
+		results = [];
+		loading = false;
+		searched = false;
+		if (value) {
+			value = null;
+			onValueChange?.(null);
+		}
+	}
+
+	export function focus() {
+		inputEl?.focus();
+	}
+
+	// Deferred, so that picking an option or the footer item (which also blurs the field) wins.
+	function commit() {
+		setTimeout(() => {
+			if (!onCommit || value) return;
+			const text = query.trim();
+			if (text.length > 0) onCommit(text);
+		}, 0);
+	}
+
+	function handleBlur(event: FocusEvent) {
+		const next = event.relatedTarget;
+		if (next instanceof Element && next.closest('[role="listbox"]')) return;
+		commit();
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') commit();
+	}
+
 	function handleValueChange(next: string) {
 		if (next === CREATE_VALUE) {
 			onCreate?.(trimmed);
@@ -155,7 +199,10 @@
 				/>
 				<Combobox.Input
 					{id}
+					bind:ref={inputEl}
 					oninput={handleInput}
+					onblur={handleBlur}
+					onkeydown={handleKeydown}
 					{placeholder}
 					autocomplete="off"
 					aria-describedby={describedBy}
