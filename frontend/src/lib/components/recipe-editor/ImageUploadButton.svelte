@@ -45,9 +45,7 @@
 		id={inputId}
 		type="file"
 		accept={IMAGE_TYPES.join(',')}
-		class="sr-only"
-		tabindex="-1"
-		aria-label={label}
+		class="hidden"
 		onchange={handleFile}
 	/>
 	<div>

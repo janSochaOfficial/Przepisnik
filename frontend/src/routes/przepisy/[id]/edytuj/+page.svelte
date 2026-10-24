@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import Eye from '@lucide/svelte/icons/eye';
 	import Trash from '@lucide/svelte/icons/trash';
 	import { ApiError, createApi, unwrap } from '$lib/api/client';
+	import ChangeVisibilityDialog from '$lib/components/catalog/ChangeVisibilityDialog.svelte';
 	import { resolveNames } from '$lib/components/catalog/names';
 	import DeleteRecipeDialog from '$lib/components/recipe-editor/DeleteRecipeDialog.svelte';
 	import {
@@ -30,6 +32,7 @@
 	let confirmVariants = $state(false);
 	let variantCounts = $state({ total: 0, foreign: 0 });
 	let deleting = $state(false);
+	let visibilityOpen = $state(false);
 
 	let recipe = $derived(data.recipe);
 	let isAuthor = $derived(recipe.author.id === data.me?.id);
@@ -148,6 +151,19 @@
 				}}
 			/>
 		{/if}
+	{/if}
+	{#if isAuthor && !recipe.isArchived}
+		<div class="mt-4">
+			<Button variant="secondary" icon={Eye} onclick={() => (visibilityOpen = true)}>
+				{t.recipes.changeVisibility.title}
+			</Button>
+		</div>
+		<ChangeVisibilityDialog
+			bind:open={visibilityOpen}
+			recipeId={recipe.id}
+			visibility={recipe.visibility}
+			onChanged={() => invalidate(`app:recipe:${recipe.id}`)}
+		/>
 	{/if}
 </Page>
 

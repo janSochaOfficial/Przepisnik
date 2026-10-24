@@ -58,7 +58,6 @@
 <ul class="flex flex-col gap-4">
 	{#each ingredients as ingredient, index (ingredient.key)}
 		<li
-			role="group"
 			aria-label={labels.row(numbers[index] || index + 1)}
 			class={[
 				'rounded-card border border-line bg-surface p-3',
