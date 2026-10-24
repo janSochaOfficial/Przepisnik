@@ -26,10 +26,7 @@
 		...fridges.map((f) => ({ value: f.id, label: f.name })),
 		{ value: NEW, label: labels.newFridge }
 	]);
-	let selected = $state('');
-	$effect(() => {
-		selected = value ?? '';
-	});
+	let selected = $derived(value ?? '');
 
 	let creating = $state(false);
 
