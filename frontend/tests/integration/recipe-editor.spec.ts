@@ -36,7 +36,7 @@ test.describe('creating a recipe', () => {
 		const first = await pickProduct(page, 1, 'mąka', /mąka pszenna/);
 		await first.getByLabel('Ilość').fill('200');
 		await first.getByLabel('Jednostka').click();
-		await expect(page.getByRole('option')).toHaveText(['g', 'kg']);
+		await expect(page.getByRole('option')).toHaveText(['g', 'kg', '+ Nowa jednostka…']);
 		await page.getByRole('option', { name: 'g', exact: true }).click();
 
 		// 2. onion: countable with sizes.
