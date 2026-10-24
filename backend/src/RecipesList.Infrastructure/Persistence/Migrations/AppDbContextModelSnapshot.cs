@@ -516,10 +516,6 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
-                    b.Property<int>("CookCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("cook_count");
-
                     b.Property<int?>("CookMinutes")
                         .HasColumnType("integer")
                         .HasColumnName("cook_minutes");
@@ -592,6 +588,22 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "NormalizedTitle" }, "ix_recipes_normalized_title_trgm"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("recipes", (string)null);
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Recipes.RecipeCookCount", b =>
+                {
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipe_id");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer")
+                        .HasColumnName("count");
+
+                    b.HasKey("RecipeId")
+                        .HasName("pk_recipe_cook_counts");
+
+                    b.ToTable("recipe_cook_counts", (string)null);
                 });
 
             modelBuilder.Entity("RecipesList.Core.Recipes.RecipeIngredient", b =>
@@ -927,10 +939,6 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
-                    b.Property<int>("CookCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("cook_count");
-
                     b.Property<int?>("CookMinutes")
                         .HasColumnType("integer")
                         .HasColumnName("cook_minutes");
@@ -1005,6 +1013,22 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_variants_recipe_id_author_id_name");
 
                     b.ToTable("variants", (string)null);
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Variants.VariantCookCount", b =>
+                {
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variant_id");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer")
+                        .HasColumnName("count");
+
+                    b.HasKey("VariantId")
+                        .HasName("pk_variant_cook_counts");
+
+                    b.ToTable("variant_cook_counts", (string)null);
                 });
 
             modelBuilder.Entity("RecipesList.Core.Catalog.Product", b =>
@@ -1183,6 +1207,16 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                     b.Navigation("CoverImage");
                 });
 
+            modelBuilder.Entity("RecipesList.Core.Recipes.RecipeCookCount", b =>
+                {
+                    b.HasOne("RecipesList.Core.Recipes.Recipe", null)
+                        .WithOne()
+                        .HasForeignKey("RecipesList.Core.Recipes.RecipeCookCount", "RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_recipe_cook_counts_recipes_recipe_id");
+                });
+
             modelBuilder.Entity("RecipesList.Core.Recipes.RecipeIngredient", b =>
                 {
                     b.HasOne("RecipesList.Core.Catalog.Product", "Product")
@@ -1346,6 +1380,16 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Variants.VariantCookCount", b =>
+                {
+                    b.HasOne("RecipesList.Core.Variants.Variant", null)
+                        .WithOne()
+                        .HasForeignKey("RecipesList.Core.Variants.VariantCookCount", "VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_variant_cook_counts_variants_variant_id");
                 });
 
             modelBuilder.Entity("RecipesList.Core.Fridges.Fridge", b =>
