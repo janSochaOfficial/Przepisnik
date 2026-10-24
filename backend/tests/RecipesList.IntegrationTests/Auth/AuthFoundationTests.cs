@@ -113,16 +113,6 @@ public sealed class AuthFoundationTests(ApiFactory factory) : IClassFixture<ApiF
     }
 
     [Fact]
-    public async Task StubEndpoint_BeforeItsFeatureIsImplemented_Returns501ServerError()
-    {
-        using var client = factory.CreateApiClient();
-        await client.LoginAsync("henryk");
-
-        await ContractAssert.IsProblemAsync(
-            await client.GetAsync("/api/v1/recipes/00000000-0000-0000-0000-000000000001/export"), HttpStatusCode.NotImplemented, "server.error");
-    }
-
-    [Fact]
     public async Task UnknownRoute_Returns404RequestNotFound()
     {
         using var client = factory.CreateApiClient();

@@ -379,7 +379,9 @@ type RecipeExport = {
 type ExportProduct = Omit<ProductWrite, never> & { key: string };
 type ExportBlock = { type: 'text'; text: string } | { type: 'image'; imageKey: string; caption?: string };
 ```
-Keys are opaque strings that are unique within the file (the exporter uses `i1, i2…`, `s1…`, `p1…`, `img1…`). Import matches products by normalized name and creates any that are missing, using the exported properties.
+Keys are opaque strings that are unique within the file (the exporter uses `i1, i2…`, `s1…`, `p1…`, `img1…`).
+In `ingredientOps` and `stepOps` every `…Id` field becomes `…Key` (`id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey`, `productId` → `productKey`, `imageId` → `imageKey`); `baseAmount` is not exported.
+Recipe and variant descriptions: import appends `Zaimportowano — oryginalnie: @<authorNickname>` to them, and export strips that footer again and reports the nickname from it as `authorNickname`. System tags (`szybkie`) are not exported. Import matches products by normalized name and creates any that are missing, using the exported properties.
 
 ## 9. Error codes
 
