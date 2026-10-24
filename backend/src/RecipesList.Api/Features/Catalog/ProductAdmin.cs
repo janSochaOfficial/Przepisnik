@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RecipesList.Api.Features.Units;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Infrastructure.Persistence;
@@ -82,6 +83,9 @@ internal sealed class ProductAdmin(AppDbContext db, ICurrentUser currentUser, Pr
 
         await MergePreferencesAsync(sourceId, targetId, ct);
         await RepointJsonbAsync(sourceId, targetId, ct);
+
+        // Units bound to the source move with it (PROJECT §5.6); clashing names get " (2)".
+        await UnitAdmin.MoveProductUnitsAsync(db, sourceId, targetId, ct);
 
         await db.Products.Where(p => p.Id == sourceId).ExecuteDeleteAsync(ct);
         await transaction.CommitAsync(ct);

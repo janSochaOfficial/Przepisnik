@@ -3,6 +3,7 @@ using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
+using RecipesList.Core.Units;
 using RecipesList.Core.Visibility;
 
 namespace RecipesList.Core.Variants;
@@ -31,7 +32,7 @@ public interface IVariantService
     /// <summary>Deletes the caller's variant and drops remembered picks that pointed at its options.</summary>
     Task DeleteAsync(Guid id, CancellationToken ct);
 
-    /// <summary>The matrix of a visible recipe over the variants visible to the caller (≤ 3 SQL statements).</summary>
+    /// <summary>The matrix of a visible recipe over the variants visible to the caller (≤ 3 SQL statements, plus one when an option uses a custom unit).</summary>
     Task<VariantMatrixResult> GetMatrixAsync(Guid recipeId, CancellationToken ct);
 }
 
@@ -89,7 +90,8 @@ public sealed class VariantService(
             .AsNoTracking()
             .SingleOrDefaultAsync(ct)
             ?? throw new NotFoundException(ErrorCodes.VariantNotFound);
-        return new VariantDetailModel(row.ToModel(), row.Variant);
+        var units = await db.LoadCustomUnitsAsync(CustomUnitLookup.QuantitiesOf(row.Variant.IngredientOps), ct);
+        return new VariantDetailModel(row.ToModel(), row.Variant) { Units = units };
     }
 
     /// <inheritdoc />
@@ -109,7 +111,8 @@ public sealed class VariantService(
         var resolved = engine.Resolve(recipe, variant);
         var productIds = resolved.Ingredients.Select(i => i.ProductId).Distinct().ToList();
         var products = await db.Products.AsNoTracking().Where(p => productIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, ct);
-        var utensilList = await db.Utensils.AsNoTracking().Where(u => resolved.UtensilIds.Contains(u.Id)).ToListAsync(ct);
+        var units = await db.LoadCustomUnitsAsync(resolved.Ingredients.Select(i => i.Quantity), ct);
+        var utensilList =await db.Utensils.AsNoTracking().Where(u => resolved.UtensilIds.Contains(u.Id)).ToListAsync(ct);
         var utensilsById = utensilList.ToDictionary(u => u.Id);
         var isFavorite = await db.RecipeFavorites.AnyAsync(f => f.UserId == userId && f.RecipeId == recipe.Id, ct);
         var cookCount = await db.RecipeCookCounts.Where(c => c.RecipeId == recipe.Id).Select(c => c.Count).FirstOrDefaultAsync(ct);
@@ -134,7 +137,10 @@ public sealed class VariantService(
             recipe.Author?.Nickname ?? "",
             tags,
             [.. resolved.UtensilIds.Where(utensilsById.ContainsKey).Select(u => utensilsById[u])],
-            products);
+            products)
+        {
+            Units = units,
+        };
     }
 
     /// <inheritdoc />
@@ -312,7 +318,10 @@ public sealed class VariantService(
         columns.AddRange(variants.Select(v => new MatrixColumnModel(
             v.Variant.Id, v.Variant.Name, v.Variant.AuthorId, v.AuthorNickname ?? "", v.CookCount, v.Variant.CreatedAt, v.IsFavorite)));
 
-        return new VariantMatrixResult(matrix, columns, products);
+        // Statement 4 (only when an option uses a custom unit): every such unit at once.
+        var units = await db.LoadCustomUnitsAsync(matrix.Slots.SelectMany(s => s.Options).Select(o => o.Ingredient?.Quantity), ct);
+
+        return new VariantMatrixResult(matrix, columns, products) { Units = units };
     }
 
     private async Task EnsureRecipeVisibleAsync(Guid recipeId, CancellationToken ct)
@@ -382,6 +391,7 @@ public sealed class VariantService(
         // Products and base amounts (PROJECT §4.2).
         var productIds = input.Ingredients.Select(i => i.ProductId).Distinct().ToList();
         var products = await db.Products.AsNoTracking().Where(p => productIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, ct);
+        var units = await db.LoadCustomUnitsAsync(input.Ingredients.Select(i => i.Quantity), ct);
         var ingredients = new List<IngredientDraft>(input.Ingredients.Count);
         for (var i = 0; i < input.Ingredients.Count; i++)
         {
@@ -402,14 +412,20 @@ public sealed class VariantService(
             decimal? baseAmount = null;
             if (row.Quantity is { } quantity)
             {
-                if (quantity.Value <= 0 || (quantity.Size is not null && (quantity.Unit != Unit.Piece || !product.HasSizes)))
+                if (!quantity.IsWellFormed || (quantity.Size is not null && !product.HasSizes))
                 {
                     errors[$"{path}.quantity"] = [ErrorCodes.QuantityInvalid];
                     code = code == ErrorCodes.ValidationFailed ? ErrorCodes.QuantityInvalid : code;
                     continue;
                 }
 
-                baseAmount = converter.ToBaseAmount(quantity, product);
+                if (quantity.Unit == Unit.Custom && units.UnitOf(quantity) is null)
+                {
+                    errors[$"{path}.quantity"] = [ErrorCodes.UnitNotFound];
+                    continue;
+                }
+
+                baseAmount = converter.ToBaseAmount(quantity, product, units.UnitOf(quantity));
                 if (baseAmount is null)
                 {
                     errors[$"{path}.quantity"] = [ErrorCodes.QuantityUnitIncompatible];

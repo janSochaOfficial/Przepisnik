@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Images;
+using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.Transfer;
+using RecipesList.Core.Units;
 using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
 
@@ -51,10 +53,24 @@ internal sealed partial class RecipeExporter(
 
         var products = await LoadProductsAsync(recipe, variants, ct);
         var utensilNames = await LoadUtensilNamesAsync(variants, ct);
+        var units = await db.LoadCustomUnitsAsync(
+            recipe.Ingredients.Select(i => i.Quantity).Concat(CustomUnitLookup.QuantitiesOf(variants.SelectMany(v => v.IngredientOps))),
+            ct);
+        var unitProducts = units.Values.Select(u => u.ProductId).OfType<Guid>().Where(id => !products.ContainsKey(id)).Distinct().ToList();
+        if (unitProducts.Count > 0)
+        {
+            foreach (var product in await db.Products.AsNoTracking().Where(p => unitProducts.Contains(p.Id)).ToListAsync(ct))
+            {
+                products[product.Id] = product;
+            }
+        }
 
         var keys = new Keys();
         var exportedRecipe = MapRecipe(recipe, keys, products);
         var exportedVariants = variants.Select(v => MapVariant(v, keys, products, utensilNames)).ToList();
+
+        // Units are keyed while quantities are mapped; their products are keyed here if nothing else used them.
+        var exportedUnits = keys.Units.Order.Select(id => MapUnit(units[id], keys)).ToList();
 
         var document = new RecipeExportDocument
         {
@@ -62,6 +78,7 @@ internal sealed partial class RecipeExporter(
             FormatVersion = ExportFormat.Version,
             ExportedAt = time.GetUtcNow(),
             Products = [.. keys.Products.Order.Select(id => MapProduct(products[id], keys.Products.For(id)))],
+            CustomUnits = exportedUnits.Count > 0 ? exportedUnits : null,
             Images = await ReadImagesAsync(keys.Images.Order, keys.Images, ct),
             Recipe = exportedRecipe,
             Variants = exportedVariants,
@@ -76,7 +93,7 @@ internal sealed partial class RecipeExporter(
         {
             Key = keys.Ingredients.For(i.Id),
             ProductKey = keys.Products.For(products[i.ProductId].Id),
-            Quantity = i.Quantity,
+            Quantity = MapQuantity(i.Quantity, keys),
             Note = i.Note,
             Optional = i.Optional,
         }).ToList();
@@ -135,13 +152,13 @@ internal sealed partial class RecipeExporter(
     private static ExportIngredientOp MapIngredientOp(IngredientOp op, Keys keys, Dictionary<Guid, Product> products) => op switch
     {
         ModifyIngredientOp m => new ExportModifyIngredientOp(
-            keys.Ingredients.For(m.TargetId), keys.Products.For(products[m.ProductId].Id), m.Quantity, m.Note, m.Optional),
+            keys.Ingredients.For(m.TargetId), keys.Products.For(products[m.ProductId].Id), MapQuantity(m.Quantity, keys), m.Note, m.Optional),
         RemoveIngredientOp r => new ExportRemoveIngredientOp(keys.Ingredients.For(r.TargetId)),
         AddIngredientOp a => new ExportAddIngredientOp(
             keys.Ingredients.For(a.Id),
             a.AfterId is { } after ? keys.Ingredients.For(after) : null,
             keys.Products.For(products[a.ProductId].Id),
-            a.Quantity,
+            MapQuantity(a.Quantity, keys),
             a.Note,
             a.Optional),
         _ => throw new InvalidOperationException("Unknown ingredient operation."),
@@ -154,6 +171,21 @@ internal sealed partial class RecipeExporter(
         AddStepOp a => new ExportAddStepOp(
             a.Section, keys.Steps.For(a.Id), a.AfterId is { } after ? keys.Steps.For(after) : null, Blocks(a.Blocks, keys)),
         _ => throw new InvalidOperationException("Unknown step operation."),
+    };
+
+    // Unit keys are assigned in the order quantities are met, like the other keys.
+    private static ExportQuantity? MapQuantity(Quantity? q, Keys keys) => q is null
+        ? null
+        : new ExportQuantity(q.Value, q.Unit, q.Size, q.CustomUnitId is { } id ? keys.Units.For(id) : null);
+
+    private static ExportCustomUnit MapUnit(CustomUnit u, Keys keys) => new()
+    {
+        Key = keys.Units.For(u.Id),
+        Name = u.Name,
+        Forms = u.Forms,
+        ProductKey = u.ProductId is { } productId ? keys.Products.For(productId) : null,
+        MeasureKind = u.MeasureKind,
+        Amount = u.Amount,
     };
 
     private static ExportProduct MapProduct(Product p, string key) => new()
@@ -236,6 +268,8 @@ internal sealed partial class RecipeExporter(
         public KeyMap Products { get; } = new("p");
 
         public KeyMap Images { get; } = new("img");
+
+        public KeyMap Units { get; } = new("u");
     }
 
     private sealed class KeyMap(string prefix)

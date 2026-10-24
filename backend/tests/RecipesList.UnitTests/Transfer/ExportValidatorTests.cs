@@ -154,7 +154,7 @@ public sealed class ExportValidatorTests
             AuthorNickname = "ania",
             Tags = [],
             Utensils = [],
-            Ingredients = [new ExportIngredient { Key = "i1", ProductKey = "p1", Quantity = new Quantity(200, Unit.G), Optional = false }],
+            Ingredients = [new ExportIngredient { Key = "i1", ProductKey = "p1", Quantity = new ExportQuantity(200, Unit.G), Optional = false }],
             PrepSteps = [new ExportStep { Key = "s1", Blocks = [new ExportTextBlock("Przygotuj.")] }],
             InstructionSteps = [new ExportStep { Key = "s2", Blocks = [new ExportTextBlock("Smaż.")] }],
         },

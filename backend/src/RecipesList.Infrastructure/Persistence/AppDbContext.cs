@@ -7,6 +7,7 @@ using RecipesList.Core.Images;
 using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.ShoppingLists;
+using RecipesList.Core.Units;
 using RecipesList.Core.Users;
 using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
@@ -84,6 +85,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Deduction> Deductions => Set<Deduction>();
 
     public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
+
+    public DbSet<CustomUnit> CustomUnits => Set<CustomUnit>();
 
     Task<int> IAppDbContext.SaveChangesAsync(CancellationToken ct) => SaveChangesAsync(ct);
 

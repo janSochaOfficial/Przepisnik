@@ -1,5 +1,4 @@
 using RecipesList.Core.Common;
-using RecipesList.Core.Quantities;
 
 namespace RecipesList.Core.Recipes;
 
@@ -55,7 +54,7 @@ public static class RecipeInputValidator
                 errors.Add($"ingredients[{i}].note", "too_long");
             }
 
-            if (ingredient.Quantity is { } q && (q.Value <= 0 || (q.Size is not null && q.Unit != Unit.Piece)))
+            if (ingredient.Quantity is { IsWellFormed: false })
             {
                 errors.Add($"ingredients[{i}].quantity", ErrorCodes.QuantityInvalid);
             }

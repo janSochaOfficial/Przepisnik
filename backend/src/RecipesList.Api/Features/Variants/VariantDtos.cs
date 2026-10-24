@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using RecipesList.Api.Features.Units;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Images;
 using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
+using RecipesList.Core.Units;
 using RecipesList.Core.Variants;
 using RecipesList.Core.Visibility;
 
@@ -12,12 +14,13 @@ namespace RecipesList.Api.Features.Variants;
 // Request and response shapes of API.md §5. Shared shapes (ProductRef, UserRef, …) are declared here under
 // variant-specific names until a common DTO module exists, so they cannot clash with other features' types.
 
-/// <summary>A quantity as the author entered it (API.md §0 <c>Quantity</c>).</summary>
-public sealed record VariantQuantityDto(decimal Value, Unit Unit, PieceSize? Size)
+/// <summary>
+/// A quantity as the author entered it, in a write (API.md §0 <c>Quantity</c>). The read-only <c>customUnit</c> is not
+/// a member, so a client that sends it back has it ignored. Responses use <see cref="QuantityDto"/>.
+/// </summary>
+public sealed record VariantQuantityDto(decimal Value, Unit Unit, PieceSize? Size, Guid? CustomUnitId = null)
 {
-    public static VariantQuantityDto? From(Quantity? q) => q is null ? null : new VariantQuantityDto(q.Value, q.Unit, q.Size);
-
-    public Quantity ToQuantity() => new(Value, Unit, Size);
+    public Quantity ToQuantity() => new(Value, Unit, Size, CustomUnitId);
 }
 
 /// <summary>An ingredient row of the edited copy (API.md §4 <c>IngredientWrite</c>).</summary>
@@ -153,23 +156,24 @@ public sealed record VariantSummaryPage(IReadOnlyList<VariantSummaryResponse> It
 [JsonDerivedType(typeof(AddIngredientOpDto), "add")]
 public abstract record IngredientOpDto
 {
-    public static IngredientOpDto From(IngredientOp op) => op switch
+    /// <summary>Maps an op; custom units of its quantity are looked up in <paramref name="units"/>.</summary>
+    public static IngredientOpDto From(IngredientOp op, IReadOnlyDictionary<Guid, CustomUnit> units) => op switch
     {
-        ModifyIngredientOp m => new ModifyIngredientOpDto(m.TargetId, m.ProductId, VariantQuantityDto.From(m.Quantity), m.Note, m.Optional),
+        ModifyIngredientOp m => new ModifyIngredientOpDto(m.TargetId, m.ProductId, QuantityDto.From(m.Quantity, units), m.Note, m.Optional),
         RemoveIngredientOp r => new RemoveIngredientOpDto(r.TargetId),
-        AddIngredientOp a => new AddIngredientOpDto(a.Id, a.AfterId, a.ProductId, VariantQuantityDto.From(a.Quantity), a.Note, a.Optional),
+        AddIngredientOp a => new AddIngredientOpDto(a.Id, a.AfterId, a.ProductId, QuantityDto.From(a.Quantity, units), a.Note, a.Optional),
         _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Unknown ingredient op."),
     };
 }
 
 /// <summary>Changes a base ingredient.</summary>
-public sealed record ModifyIngredientOpDto(Guid TargetId, Guid ProductId, VariantQuantityDto? Quantity, string? Note, bool Optional) : IngredientOpDto;
+public sealed record ModifyIngredientOpDto(Guid TargetId, Guid ProductId, QuantityDto? Quantity, string? Note, bool Optional) : IngredientOpDto;
 
 /// <summary>Removes a base ingredient.</summary>
 public sealed record RemoveIngredientOpDto(Guid TargetId) : IngredientOpDto;
 
 /// <summary>Adds an ingredient after <c>afterId</c> (null = at the start).</summary>
-public sealed record AddIngredientOpDto(Guid Id, Guid? AfterId, Guid ProductId, VariantQuantityDto? Quantity, string? Note, bool Optional) : IngredientOpDto;
+public sealed record AddIngredientOpDto(Guid Id, Guid? AfterId, Guid ProductId, QuantityDto? Quantity, string? Note, bool Optional) : IngredientOpDto;
 
 /// <summary>A step operation (API.md §5 <c>StepOp</c>).</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "op")]
@@ -227,7 +231,7 @@ public sealed record VariantDetailResponse(
             m.Id, m.RecipeId, m.RecipeTitle, m.Name, m.Description, new VariantUserRef(m.AuthorId, m.AuthorNickname), m.Visibility,
             m.IsFavorite, m.BaseAvailable, m.CookCount, m.ChangeCount, m.CreatedAt, m.UpdatedAt,
             v.Version,
-            [.. v.IngredientOps.Select(IngredientOpDto.From)],
+            [.. v.IngredientOps.Select(op => IngredientOpDto.From(op, model.Units))],
             [.. v.StepOps.Select(StepOpDto.From)],
             v.UtensilIdsAdded,
             v.UtensilIdsRemoved,
@@ -259,13 +263,13 @@ public sealed record VariantProductRef(
 }
 
 /// <summary>An ingredient of a resolved recipe or a matrix option (API.md §4 <c>Ingredient</c>).</summary>
-public sealed record VariantIngredientResponse(Guid Id, VariantProductRef Product, VariantQuantityDto? Quantity, decimal? BaseAmount, string? Note, bool Optional)
+public sealed record VariantIngredientResponse(Guid Id, VariantProductRef Product, QuantityDto? Quantity, decimal? BaseAmount, string? Note, bool Optional)
 {
-    public static VariantIngredientResponse From(ResolvedIngredient i, IReadOnlyDictionary<Guid, Product> products)
+    public static VariantIngredientResponse From(ResolvedIngredient i, IReadOnlyDictionary<Guid, Product> products, IReadOnlyDictionary<Guid, CustomUnit> units)
     {
         ArgumentNullException.ThrowIfNull(i);
         ArgumentNullException.ThrowIfNull(products);
-        return new(i.Id, VariantProductRef.From(products[i.ProductId]), VariantQuantityDto.From(i.Quantity), i.BaseAmount, i.Note, i.Optional);
+        return new(i.Id, VariantProductRef.From(products[i.ProductId]), QuantityDto.From(i.Quantity, units), i.BaseAmount, i.Note, i.Optional);
     }
 }
 
@@ -326,7 +330,7 @@ public sealed record ResolvedRecipeResponse(
             resolved.CookMinutes,
             [.. m.Tags.Select(t => new VariantTagRef(t.Id, t.Name, t.IsSystem))],
             [.. m.Utensils.Select(u => new VariantUtensilRef(u.Id, u.Name))],
-            [.. resolved.Ingredients.Select(i => VariantIngredientResponse.From(i, m.Products))],
+            [.. resolved.Ingredients.Select(i => VariantIngredientResponse.From(i, m.Products, m.Units))],
             [.. resolved.PrepSteps.Select(s => new VariantStepResponse(s.Id, s.Blocks))],
             [.. resolved.InstructionSteps.Select(s => new VariantStepResponse(s.Id, s.Blocks))],
             m.RecipeCookCount,
@@ -374,7 +378,7 @@ public sealed record VariantMatrixResponse(Guid RecipeId, IReadOnlyList<MatrixVa
                 s.AfterSlotKey,
                 [.. s.Options.Select(o => new SlotOptionResponse(
                     o.Key,
-                    o.Ingredient is null ? null : VariantIngredientResponse.From(o.Ingredient, products),
+                    o.Ingredient is null ? null : VariantIngredientResponse.From(o.Ingredient, products, result.Units),
                     [.. o.VariantIds.Select(Id)]))]))]);
     }
 

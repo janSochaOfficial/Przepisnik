@@ -5,6 +5,7 @@ using RecipesList.Core.Fridges;
 using RecipesList.Core.Images;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.ShoppingLists;
+using RecipesList.Core.Units;
 using RecipesList.Core.Users;
 using RecipesList.Core.Variants;
 
@@ -61,6 +62,8 @@ public interface IAppDbContext
     DbSet<Deduction> Deductions { get; }
 
     DbSet<ShoppingListItem> ShoppingListItems { get; }
+
+    DbSet<CustomUnit> CustomUnits { get; }
 
     /// <summary>
     /// Adds one cook to the recipe's and/or the variant's count with one atomic upsert each

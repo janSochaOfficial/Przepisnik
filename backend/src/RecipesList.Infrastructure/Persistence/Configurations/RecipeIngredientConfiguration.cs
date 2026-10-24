@@ -18,5 +18,11 @@ internal sealed class RecipeIngredientConfiguration : IEntityTypeConfiguration<R
             .WithMany()
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // A custom unit in use cannot be deleted (PROJECT §5.6).
+        b.HasOne(x => x.CustomUnit)
+            .WithMany()
+            .HasForeignKey(x => x.QuantityCustomUnitId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

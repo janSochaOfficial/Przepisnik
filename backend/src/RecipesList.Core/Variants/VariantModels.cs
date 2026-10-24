@@ -1,6 +1,7 @@
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
+using RecipesList.Core.Units;
 using RecipesList.Core.Visibility;
 
 namespace RecipesList.Core.Variants;
@@ -38,7 +39,11 @@ public sealed record VariantSummaryModel(
     DateTimeOffset UpdatedAt);
 
 /// <summary>A variant with its operations (API.md §5 <c>VariantDetail</c>).</summary>
-public sealed record VariantDetailModel(VariantSummaryModel Summary, Variant Variant);
+public sealed record VariantDetailModel(VariantSummaryModel Summary, Variant Variant)
+{
+    /// <summary>The custom units used by the variant's operations, by id (PROJECT §5.6).</summary>
+    public IReadOnlyDictionary<Guid, CustomUnit> Units { get; init; } = new Dictionary<Guid, CustomUnit>();
+}
 
 /// <summary>A variant applied to its base, with everything needed to render <c>ResolvedRecipe</c>.</summary>
 public sealed record ResolvedVariantModel(
@@ -50,7 +55,11 @@ public sealed record ResolvedVariantModel(
     string AuthorNickname,
     IReadOnlyList<Tag> Tags,
     IReadOnlyList<Utensil> Utensils,
-    IReadOnlyDictionary<Guid, Product> Products);
+    IReadOnlyDictionary<Guid, Product> Products)
+{
+    /// <summary>The custom units used by the resolved ingredients, by id (PROJECT §5.6).</summary>
+    public IReadOnlyDictionary<Guid, CustomUnit> Units { get; init; } = new Dictionary<Guid, CustomUnit>();
+}
 
 /// <summary>A column of the matrix with the data the API shows for it.</summary>
 public sealed record MatrixColumnModel(Guid? VariantId, string Name, Guid AuthorId, string AuthorNickname, int CookCount, DateTimeOffset CreatedAt, bool IsFavorite);
@@ -59,7 +68,11 @@ public sealed record MatrixColumnModel(Guid? VariantId, string Name, Guid Author
 public sealed record VariantMatrixResult(
     VariantMatrixModel Matrix,
     IReadOnlyList<MatrixColumnModel> Columns,
-    IReadOnlyDictionary<Guid, Product> Products);
+    IReadOnlyDictionary<Guid, Product> Products)
+{
+    /// <summary>The custom units used by the option ingredients, by id (PROJECT §5.6).</summary>
+    public IReadOnlyDictionary<Guid, CustomUnit> Units { get; init; } = new Dictionary<Guid, CustomUnit>();
+}
 
 /// <summary>A selection to store (API.md §5.2 <c>SelectionWrite</c>).</summary>
 public sealed record SelectionInput(IReadOnlyDictionary<string, SelectionPick> Picks, ScalingState? Scaling);
