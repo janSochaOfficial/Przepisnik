@@ -10,7 +10,9 @@ internal sealed class FridgeConfiguration : IEntityTypeConfiguration<Fridge>
     {
         b.HasKey(x => x.Id);
         b.Property(x => x.Name).HasMaxLength(80);
-        b.HasIndex(x => x.OwnerId);
+        // A user may own many fridges (PROJECT §8.1). Explicitly non-unique: EF's relationship discovery otherwise
+        // pairs Fridge.Owner with User.DefaultFridge as a one-to-one and leaves a unique index behind.
+        b.HasIndex(x => x.OwnerId).IsUnique(false);
 
         b.HasOne(x => x.Owner)
             .WithMany()
