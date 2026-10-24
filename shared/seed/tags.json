@@ -1,5 +1,144 @@
 {
   "tags": [
-    { "name": "szybkie", "isSystem": true }
+    {
+      "name": "szybkie",
+      "isSystem": true
+    },
+    {
+      "name": "obiad",
+      "isSystem": false
+    },
+    {
+      "name": "śniadanie",
+      "isSystem": false
+    },
+    {
+      "name": "kolacja",
+      "isSystem": false
+    },
+    {
+      "name": "deser",
+      "isSystem": false
+    },
+    {
+      "name": "zupa",
+      "isSystem": false
+    },
+    {
+      "name": "sałatka",
+      "isSystem": false
+    },
+    {
+      "name": "przekąska",
+      "isSystem": false
+    },
+    {
+      "name": "wege",
+      "isSystem": false
+    },
+    {
+      "name": "wegańskie",
+      "isSystem": false
+    },
+    {
+      "name": "bez glutenu",
+      "isSystem": false
+    },
+    {
+      "name": "bez laktozy",
+      "isSystem": false
+    },
+    {
+      "name": "na imprezę",
+      "isSystem": false
+    },
+    {
+      "name": "z piekarnika",
+      "isSystem": false
+    },
+    {
+      "name": "z patelni",
+      "isSystem": false
+    },
+    {
+      "name": "z grilla",
+      "isSystem": false
+    },
+    {
+      "name": "jednogarnkowe",
+      "isSystem": false
+    },
+    {
+      "name": "na słodko",
+      "isSystem": false
+    },
+    {
+      "name": "na słono",
+      "isSystem": false
+    },
+    {
+      "name": "polska",
+      "isSystem": false
+    },
+    {
+      "name": "włoska",
+      "isSystem": false
+    },
+    {
+      "name": "azjatycka",
+      "isSystem": false
+    },
+    {
+      "name": "meksykańska",
+      "isSystem": false
+    },
+    {
+      "name": "śródziemnomorska",
+      "isSystem": false
+    },
+    {
+      "name": "świąteczne",
+      "isSystem": false
+    },
+    {
+      "name": "dla dzieci",
+      "isSystem": false
+    },
+    {
+      "name": "fit",
+      "isSystem": false
+    },
+    {
+      "name": "na zimno",
+      "isSystem": false
+    },
+    {
+      "name": "pieczenie",
+      "isSystem": false
+    },
+    {
+      "name": "smażenie",
+      "isSystem": false
+    },
+    {
+      "name": "gotowanie",
+      "isSystem": false
+    },
+    {
+      "name": "z mikrofalówki",
+      "isSystem": false
+    },
+    {
+      "name": "do pracy",
+      "isSystem": false
+    },
+    {
+      "name": "ciasto",
+      "isSystem": false
+    },
+    {
+      "name": "napój",
+      "isSystem": false
+    }
   ]
 }
