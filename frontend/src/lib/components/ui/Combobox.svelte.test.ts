@@ -121,4 +121,33 @@ describe('Combobox', () => {
 		expect(await screen.findByText('Nic nie znaleziono.')).toBeInTheDocument();
 		expect(screen.queryByRole('option', { hidden: true })).not.toBeInTheDocument();
 	});
+
+	it('calls onCommit with the typed text when the field loses focus unpicked', async () => {
+		const onCommit = vi.fn();
+		const { user, input } = setup({ onCommit });
+
+		await user.type(input, 'kozieradka');
+		await user.tab();
+		await vi.advanceTimersByTimeAsync(10);
+
+		expect(onCommit).toHaveBeenCalledTimes(1);
+		expect(onCommit).toHaveBeenCalledWith('kozieradka');
+	});
+
+	it('does not call onCommit for an empty field, or after an option was picked', async () => {
+		const onCommit = vi.fn();
+		const { user, input } = setup({ onCommit });
+
+		await user.click(input);
+		await user.tab();
+		await vi.advanceTimersByTimeAsync(10);
+		expect(onCommit).not.toHaveBeenCalled();
+
+		await user.type(input, 'mas');
+		await vi.advanceTimersByTimeAsync(250);
+		await user.click(await findOption('masło'));
+		await user.tab();
+		await vi.advanceTimersByTimeAsync(10);
+		expect(onCommit).not.toHaveBeenCalled();
+	});
 });

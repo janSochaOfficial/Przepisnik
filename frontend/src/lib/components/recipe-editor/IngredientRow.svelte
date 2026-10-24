@@ -39,6 +39,7 @@
 <div class="flex flex-col gap-3">
 	<ProductPicker
 		bind:value={ingredient.product}
+		confirmNew
 		error={errors.product ?? null}
 		onValueChange={productChanged}
 	/>
