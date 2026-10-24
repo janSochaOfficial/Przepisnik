@@ -4,7 +4,7 @@ export function normalizeProductName(name: string): string {
 		.normalize('NFD')
 		.replace(/\p{M}/gu, '')
 		.toLocaleLowerCase('pl')
-		.replace(/ł/g, 'l')
+		.replace(/\u0142/g, 'l')
 		.trim()
 		.replace(/\s+/g, ' ');
 }
