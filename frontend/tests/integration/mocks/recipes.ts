@@ -1,6 +1,7 @@
 // Feature fixtures (owned by F4): recipes, favourites and variants for the catalog and the editor.
 // Typed with Schemas from ./types; export MockHandlers for mockApi().
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { flour, milk, onion, tagObiad } from './catalog';
 import type { MockHandlers } from './index';
 import type { Schemas } from './types';
@@ -125,9 +126,12 @@ export function paged<T>(items: T[]): {
 }
 
 /** A minimal export file, as `GET /recipes/{id}/export` would produce it. */
-/** The shared sample export (B6), the same file the backend import test uses. */
+/**
+ * The shared sample export (B6), the same file the backend import test uses. Resolved from the working
+ * directory (frontend/, for both Playwright and Vitest): under jsdom `import.meta.url` is not a file URL.
+ */
 export const sampleExport = JSON.parse(
-	readFileSync(new URL('../../../../shared/samples/export-v1.json', import.meta.url), 'utf8')
+	readFileSync(resolve(process.cwd(), '../shared/samples/export-v1.json'), 'utf8')
 ) as Schemas['RecipeExport'];
 
 /** Default list handlers: one recipe in every list. Tests spread this and override single routes. */
