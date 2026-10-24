@@ -3,6 +3,7 @@ import { units } from '$lib/i18n/pl/units';
 import { bestPieceCombination } from './pieces';
 import { pluralCategory } from './plural';
 import type {
+	CustomUnitRef,
 	Ingredient,
 	LiquidUnits,
 	PieceSize,
@@ -10,7 +11,7 @@ import type {
 	ProductRef,
 	Quantity
 } from './types';
-import { ML_PER, SIZE_FACTOR } from './units';
+import { convertKind, ML_PER, SIZE_FACTOR } from './units';
 
 /** `inventory` ⇒ PROJECT §5.4 "Inventory format" (always metric for liquids and spices). */
 export type FormatOptions = { liquidUnits: LiquidUnits; context?: 'recipe' | 'inventory' };
@@ -192,9 +193,34 @@ export function formatBaseAmount(base: number, p: ProductRef, o: FormatOptions):
 	return { text: r.text, approximate: Math.abs(r.shown - base) / base > APPROXIMATE_ABOVE + EPS };
 }
 
+/**
+ * A base amount (in `p`'s measure kind) shown in a custom unit (D-31): rounded to the nearest ¼,
+ * at least ¼, with the 5 % approximate rule. Null when the amount can't be converted to the unit.
+ */
+export function formatInCustomUnit(
+	base: number,
+	unit: Pick<CustomUnitRef, 'forms' | 'measureKind' | 'amount'>,
+	p: Pick<ProductRef, 'measureKind' | 'gramsPerMl' | 'gramsPerPiece'>
+): FormattedAmount | null {
+	const native = convertKind(base, p.measureKind, unit.measureKind, p);
+	if (native === null || !(unit.amount > 0)) return null;
+	const exact = native / unit.amount;
+	if (!(exact > 0)) return { text: withForms(0, unit.forms), approximate: false };
+	const shown = Math.max(0.25, roundTo(exact, 0.25));
+	return {
+		text: withForms(shown, unit.forms),
+		approximate: Math.abs(shown - exact) / exact > APPROXIMATE_ABOVE + EPS
+	};
+}
+
 /** The quantity exactly as the author entered it, with plural-inflected unit words. */
 export function formatQuantityAsEntered(q: Quantity, p: ProductRef): string {
 	switch (q.unit) {
+		case 'custom':
+			// The embedded unit is always sent with a custom quantity; without it only the number is known.
+			return q.customUnit
+				? withForms(q.value, q.customUnit.forms)
+				: formatQuantityNumber(q.value);
 		case 'g':
 		case 'kg':
 		case 'ml':
@@ -218,6 +244,11 @@ export function formatIngredientAmount(
 	if (i.quantity === null) return null;
 	if (factor === 1)
 		return { text: formatQuantityAsEntered(i.quantity, i.product), approximate: false };
+	// D-31: an amount entered in a custom unit stays in that unit when scaled.
+	if (i.quantity.unit === 'custom' && i.quantity.customUnit && i.baseAmount !== null) {
+		const inUnit = formatInCustomUnit(i.baseAmount * factor, i.quantity.customUnit, i.product);
+		if (inUnit) return inUnit;
+	}
 	if (i.baseAmount === null) {
 		// No canonical amount (unit not convertible): scale the entered value itself.
 		const scaled = { ...i.quantity, value: i.quantity.value * factor };
