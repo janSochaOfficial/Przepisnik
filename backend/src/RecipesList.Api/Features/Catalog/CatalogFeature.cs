@@ -28,8 +28,8 @@ internal static class CatalogFeature
 
     private static void MapProducts(IEndpointRouteBuilder api)
     {
-        api.MapGet("/products", async Task<Ok<CatalogProductDto[]>> (string? q, ProductCategory? category, int? limit, ProductCatalog catalog, CancellationToken ct) =>
-                TypedResults.Ok((await catalog.SearchAsync(q, category, limit, ct)).Select(CatalogProductDto.From).ToArray()))
+        api.MapGet("/products", async Task<Ok<CatalogProductDto[]>> (string? q, string? category, int? limit, ProductCatalog catalog, CancellationToken ct) =>
+                TypedResults.Ok((await catalog.SearchAsync(q, ParseCategory(category), limit, ct)).Select(CatalogProductDto.From).ToArray()))
             .WithName("SearchProducts")
             .WithSummary("Search the product catalog");
 
@@ -49,6 +49,12 @@ internal static class CatalogFeature
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status409Conflict);
     }
+
+    // Minimal-API enum binding is case-sensitive, but the contract's values are camelCase ("dryGoods").
+    private static ProductCategory? ParseCategory(string? value) =>
+        string.IsNullOrEmpty(value) ? null
+        : Enum.TryParse<ProductCategory>(value, ignoreCase: true, out var category) && Enum.IsDefined(category) ? category
+        : throw new BadHttpRequestException("Unknown product category.");
 
     private static void MapAdmin(IEndpointRouteBuilder api)
     {

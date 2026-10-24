@@ -1,8 +1,6 @@
 using System.Net;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Catalog;
-using RecipesList.Core.Common;
 using RecipesList.Core.Fridges;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.ShoppingLists;
