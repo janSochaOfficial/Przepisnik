@@ -40,3 +40,45 @@ PROJECT §3, §4 (especially §4.4–4.6), §5.2 · API §2, §3, §4, §5 (`GET
 - Public recipe → the edit page shows "Utwórz wariant" instead of the form.
 - Narrowing visibility with a 409 → the explanation is shown.
 - Component tests: block-editor split/insert/remove; unit select filtering.
+
+## Report
+
+### Summary
+All deliverables are in; `scripts/verify.sh --agent` is green on a branch rebased onto `main` (993721d).
+
+- **Catalog** `/przepisy` (`routes/przepisy/+page.svelte`, `catalog/catalog.svelte.ts`): tabs Wszystkie / Moje przepisy (Utworzone · Ulubione) / Moje warianty, state kept in the URL (`?tab=&sub=&q=&tags=`), debounced search, tag chips, "Pokaż więcej", skeletons, error block, empty states. `RecipeCard` and `VariantCard` (variant links use `?wariant=`; `baseAvailable: false` shows the note and only a delete action). Header actions: Importuj, Nowy przepis.
+- **Reusable catalog components** in `components/catalog/`: `FavoriteButton` (optimistic, `aria-pressed`), `VisibilitySelect` (3 options with icon + hint, optional `hint`, built-in "Publiczny" confirmation, `confirmPublic={false}` to opt out), `ChangeVisibilityDialog` (props `open`, `recipeId`, `visibility`, `onChanged`; explains 409 `recipe.visibility_locked`), `ProductPicker` + `NewProductDialog` (inline "Dodaj produkt"), `names.ts` (tag/utensil name to id resolution).
+- **Recipe editor** in `components/recipe-editor/`: `RecipeEditor` (`mode="recipe" | "variant"`), `IngredientList`/`IngredientRow`, `StepList` (block editor), `ImageUploadButton` (XHR upload with progress), `ImportDialog`, `DeleteRecipeDialog`, `transfer.ts` (`exportRecipe(id)`, `importRecipe(file)`), pure modules `draft.ts` (draft model, `toRecipeWrite`, `toVariantRecipeWrite`, `draftFromRecipe(r, {base})`, `validateDraft`, `mapServerErrors`, `compatibleUnits`), `blocks.ts`, `lists.ts`.
+- **Routes**: `/przepisy/nowy`, `/przepisy/[id]/edytuj` (+ `+page.ts`), with the PROJECT §4.5 rules: public/archived/not-author shows an explanation ("Utwórz wariant" for public), banner when `totalVariantCount > 0`, 409 `recipe.has_variants` → `ConfirmDialog` → retry with `deleteVariants: true`, cancel keeps the dirty form.
+- Unsaved-changes guard with `beforeNavigate` (in-app navigation asks via `ConfirmDialog`; closing the tab uses the browser prompt).
+- Tests: Vitest for `blocks`, `lists`, `draft`, `transfer/upload`, plus component tests (`StepList` split/insert/remove/variant mode, `IngredientRow` unit filtering). Playwright (`recipe-editor.spec.ts`, `recipe-catalog.spec.ts`, mobile and desktop, axe in light and dark on the catalog and the editor) covers every acceptance bullet. Mock fixtures in `tests/integration/mocks/{recipes,catalog}.ts`.
+
+For F5 (variant editor): `draftFromRecipe(resolvedRecipe, { base: true })` marks all rows as base rows; `<RecipeEditor mode="variant" bind:draft … />` locks base order, turns delete into "Usuń w wariancie" (row stays, `removed: true`, restorable), allows new rows anywhere ("Wstaw składnik poniżej") and hides title, description, cover and tags. Convert with `toVariantRecipeWrite(draft, utensilIds)` (it also returns `maps` for `mapServerErrors(error.errors, maps, 'variant')`). The page owns the request and passes `error`, `serverErrors`, `saving`, `submitLabel` and `guard`.
+
+### Deviations
+- **Inline new product** has no `pieceForms` fields (the other optional fields are shown per measure kind). Not needed for the acceptance flow; the API accepts a product without them.
+- **Search box and tag chips** are shown only for the views backed by `GET /recipes` (Wszystkie, Utworzone); `GET /favorites` and `GET /variants` have no such filters in the contract.
+- **Import** opens a dialog with a file field (`?import=1` opens the dialog), because browsers refuse to open a file picker without a user click.
+- **"JSON snapshot"** of the create body is asserted as an inline expected object typed with `satisfies Schemas['RecipeCreate']` (so contract drift fails the compile) instead of snapshot files, which would be per-platform and per-project.
+- The edit page also hosts **"Zmień widoczność"** and **"Usuń przepis"** (author only, not archived), so the dialogs have a place in F4 and are testable before F5's menu exists. F5 can reuse `ChangeVisibilityDialog` and `DeleteRecipeDialog` from its menu.
+- `shared/samples/export-v1.json` does not exist yet (B6), so the import test uses a local fixture (`sampleExport` in `mocks/recipes.ts`).
+- Two client-side texts are `fieldErrors` keys of my own (`productRequired`, `quantityRequired`, …) next to the API codes; server codes `quantity.unit_incompatible`, `quantity.invalid`, `image.not_owned` and the short codes `required`, `too_long`, `out_of_range` are mapped onto the right row (block-level errors collapse onto their step).
+- No dropdown-menu primitive was needed, so none was built.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- **F5:** open `ChangeVisibilityDialog` and `DeleteRecipeDialog` from the recipe menu, call `exportRecipe(id)` for "Eksportuj", and link "Utwórz wariant" to `/przepisy/[id]/warianty/nowy` (F4 already links there from the read-only edit page). Use `FavoriteButton` (`kind="variant"`) in the variant picker.
+- **F3:** the profile's "Importuj przepis" should link to `/przepisy?import=1`.
+
+### Follow-ups
+- After "Zmień widoczność" on the edit page the loaded recipe is refreshed (`invalidate`), but the form draft keeps what the user already typed (it is seeded once).
+- On create, tags and utensils are always sent through `POST /tags` / `POST /utensils` (the server returns the existing entry); a lookup by the loaded suggestions could save a few requests.
+- Drag and drop of ingredient rows (desktop) is implemented with native HTML5 drag events and is covered only by the pure `dropRow` unit tests, not by Playwright.
