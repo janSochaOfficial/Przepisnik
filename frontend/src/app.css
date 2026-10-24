@@ -91,11 +91,6 @@
 	--color-beet-wash: var(--rl-beet-wash);
 	--color-scrim: var(--rl-scrim);
 
-	/* Deprecated aliases for the T00 placeholder pages; new code must not use them. */
-	--color-text: var(--rl-ink);
-	--color-accent: var(--rl-cobalt);
-	--color-border: var(--rl-line);
-
 	--shadow-raised: var(--rl-shadow-raised);
 	--shadow-overlay: var(--rl-shadow-overlay);
 }
