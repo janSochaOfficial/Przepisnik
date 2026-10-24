@@ -1,3 +1,4 @@
+using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Common;
 using RecipesList.Core.Fridges;
@@ -38,7 +39,26 @@ public sealed class UserAccounts(IAppDbContext db, IFridgeService fridges, TimeP
             return user;
         }
 
-        user = new User
+        var created = await TryCreateAsync(login, ct);
+        if (created is not null)
+        {
+            return created;
+        }
+
+        // A concurrent first login of the same subject won the unique index: sign in as that user instead.
+        var existing = await db.Users.SingleOrDefaultAsync(u => u.GoogleSubject == login.Subject, ct)
+            ?? throw new InvalidOperationException("The user vanished after a unique-index clash on first login.");
+        await RefreshAsync(existing, login, ct);
+        return existing;
+    }
+
+    /// <summary>
+    /// Creates the user with "Moja lodówka" as the default fridge in one transaction, so a failure leaves nothing
+    /// half-made; returns null when another login of the same subject created the user first.
+    /// </summary>
+    private async Task<User?> TryCreateAsync(ExternalLogin login, CancellationToken ct)
+    {
+        var user = new User
         {
             GoogleSubject = login.Subject,
             Email = login.Email,
@@ -46,6 +66,8 @@ public sealed class UserAccounts(IAppDbContext db, IFridgeService fridges, TimeP
             IsAdmin = login.IsAdmin,
             CreatedAt = clock.GetUtcNow(),
         };
+
+        using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
         db.Users.Add(user);
         try
         {
@@ -53,21 +75,14 @@ public sealed class UserAccounts(IAppDbContext db, IFridgeService fridges, TimeP
         }
         catch (DbUpdateException)
         {
-            // A concurrent first login of the same subject won the unique index: sign in as that user instead.
             db.Users.Entry(user).State = EntityState.Detached;
-            var existing = await db.Users.SingleOrDefaultAsync(u => u.GoogleSubject == login.Subject, ct);
-            if (existing is null)
-            {
-                throw;
-            }
-
-            await RefreshAsync(existing, login, ct);
-            return existing;
+            return null;
         }
 
         // users.default_fridge_id and fridges.owner_id reference each other, so the user is saved first. The fridge
         // service then makes "Moja lodówka" the default, because a new user has none (B5's rule).
         await fridges.CreateOwnedAsync(user.Id, UserDefaults.DefaultFridgeName, ct);
+        scope.Complete();
         return user;
     }
 
