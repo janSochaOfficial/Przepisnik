@@ -169,7 +169,7 @@ export interface paths {
 		};
 		/**
 		 * Search the product catalog
-		 * @description Trigram + prefix search on the normalized name.
+		 * @description Trigram + prefix search on the normalized name. With `q`, an exact match comes first, then prefix, word-prefix and similar matches; within each, verified products before user-added ones, then similarity and name. Without `q`, verified first, then name.
 		 */
 		get: operations['SearchProducts'];
 		put?: never;
@@ -1014,6 +1014,8 @@ export interface components {
 			/** @description Base units. */
 			defaultPackageAmount: number | null;
 			pieceForms: components['schemas']['PluralForms'] | null;
+			/** @description Read-only. Seeded or admin-curated products are verified; user-added ones are not and rank below verified ones in search. */
+			isVerified: boolean;
 		};
 		/** @description As entered by the author; `size` only for unit `piece` and products with sizes. */
 		Quantity: {
