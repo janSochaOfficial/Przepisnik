@@ -1,0 +1,62 @@
+# Catalog: products, tags, utensils (API.md §2). Sign in first with dev-login (Development only).
+# For admin calls sign in with an email listed in Admin__Emails__0. Task B2 uses database recipes_b2.
+@baseUrl = http://localhost:5102/api/v1
+@productId = 00000000-0000-0000-0000-000000000000
+@targetId = 00000000-0000-0000-0000-000000000000
+
+### Sign in (dev-login)
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "anna@test.local", "nickname": "anna" }
+
+### Search products (prefix first, then trigram similarity)
+GET {{baseUrl}}/products?q=smiet&limit=10
+
+### Products by category
+GET {{baseUrl}}/products?category=dairy
+
+### Get a product
+GET {{baseUrl}}/products/{{productId}}
+
+### Add a product (409 product.duplicate carries existingId)
+POST {{baseUrl}}/products
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "Czosnek niedźwiedzi", "category": "vegetables", "measureKind": "count", "displayClass": "piece", "hasSizes": true, "allowHalf": true, "gramsPerPiece": 40 }
+
+### Edit a product (admin)
+PUT {{baseUrl}}/admin/products/{{productId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "Cebula", "category": "vegetables", "measureKind": "count", "displayClass": "piece", "hasSizes": true, "allowHalf": true }
+
+### Merge a product into another (admin)
+POST {{baseUrl}}/admin/products/{{productId}}/merge
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "targetId": "{{targetId}}" }
+
+### Tags
+GET {{baseUrl}}/tags?q=sniad
+
+### Create a tag (200 with the existing tag on a normalized match; "szybkie" is reserved)
+POST {{baseUrl}}/tags
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "na imprezę" }
+
+### Utensils
+GET {{baseUrl}}/utensils?q=blen
+
+### Create a utensil
+POST {{baseUrl}}/utensils
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "name": "Blender" }
