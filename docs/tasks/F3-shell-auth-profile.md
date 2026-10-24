@@ -30,3 +30,35 @@ The root `+layout.ts` guard from T00.
 - Invite accepted while logged out → login → back to the invite → joined.
 - 401 from any API call → redirect to `/logowanie?next=…`.
 - Component tests for the nickname field validation.
+
+## Report
+
+### Summary
+- `Session` class (`lib/state/session.svelte.ts`, context via `provideSession`/`useSession`, created in the root layout): `me`, `settings`, `liquidUnits`, `refresh()`, `logout()`, `updateSettings()` (optimistic with rollback, sends both fields so `defaultFridgeId: null` clears), `setNickname()`. Mutations also `invalidate('app:me')`, so call sites reading `page.data.me` (`liquidUnitsOf`) stay current.
+- `/logowanie`: F0 components; GIS script loaded on this page only (`routes/logowanie/google.ts`); dev-login form when `devLoginEnabled` and no client id. After login: `/witaj?next=…` without nickname, else `next`.
+- `/witaj`: `NicknameField` (client rules mirrored from `NicknameRules`, debounced `nickname-available`, own name counts as free, server 409 shown inline); then `next`.
+- `/profil`: nickname edit, liquid-units chips with live example via `formatBaseAmount` (190 ml ↔ ¾ szklanki), default fridge select (with "Brak"), link to `/przepisy?import=1`, log out.
+- `/zaproszenie/[token]`: F6 join flow kept; expired/revoked now an `EmptyState`; login round-trip works through the layout guard (tested, including a brand-new user passing onboarding).
+- Legacy colour aliases removed from `app.css`; only the old login page used them. Toaster takes `tabBar` (false on `/logowanie`, `/witaj`). Unused `PagePlaceholder.svelte` deleted.
+- Tests: vitest (nickname rules, `NicknameField`, `safeNext`, example), Playwright `auth-profile.spec.ts` on both viewports incl. axe in light/dark.
+
+### Deviations
+- No `next` is added when the layout guard sends a signed-in user without a nickname to `/witaj` (keeps the existing smoke test); `next` is carried only on the login to onboarding path.
+- No redirect away from `/witaj` for users who already have a nickname (avoids a race with the post-save navigation).
+- `NicknameField` is client-only validated for length in UTF-16 units, as the backend regex does.
+- Autofixer still prints advisory suggestions for the debounced fetch in an `$effect` and for `bind:this` on the GIS button container (both required); no issues.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- F6: the invite page strings for the expired state live in `t.auth.invite`; the rest remain in `t.fridge.join`.
+
+### Follow-ups
+- Google sign-in could not be exercised against the real GIS script (no client id); only the dev-login path is tested.
