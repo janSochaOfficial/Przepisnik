@@ -34,3 +34,44 @@ PROJECT §4.4–4.6, §5.3, §6 (all of it) · API §4, §5 · IMPLEMENTATION_PL
 - Toggling ♥ on a variant updates the mocked matrix's `isFavorite` and re-ranks (a favourite variant becomes the auto choice when there are no pins or memory).
 - The author of a public recipe sees "Utwórz wariant" instead of "Edytuj".
 - Mobile: the sheet is reachable with one thumb and passes the axe check.
+
+## Report
+
+### Summary
+All deliverables are in; `scripts/verify.sh --agent` is green on a branch rebased onto `main`.
+
+- **`SelectionState`** (`src/lib/state/selection.svelte.ts`): loads recipe, matrix, my-selection and preferences (via the route `+page.ts`); `$derived` `matchVariants`, rows (slot order honours B4's `afterSlotKey`), factor, effective scaled ingredients and the steps source; fetches/caches `GET /variants/{id}/resolved`; debounced (1 s) `PUT my-selection` with `flush()` on leaving the page; `?wariant=` pins every slot when nothing is saved.
+- **Recipe view** `/przepisy/[id]` (`routes/przepisy/[id]/+page.{ts,svelte}`, `components/recipe-view/`): header (visibility icon, author, times, recipe ♥, active variant name with its own ♥ or "Własna kombinacja", tags, utensils), ingredient rows with `BottomSheet` (Warianty: ranked options, supporting variant names with a ♥ marker, "+ Utwórz nowy wariant z bieżącego wyboru"; Przelicz: "Mam" + unit/size + Przywróć), scaling banner, "Wyczyść wybór", steps with lazy thumbnails that grow on tap, menu (Edytuj / Utwórz wariant or Nowy wariant / Zmień widoczność / Eksportuj / Usuń) reusing F4's `ChangeVisibilityDialog`, `DeleteRecipeDialog` and `exportRecipe`.
+- **`CookContext`** (`recipe-view/cook-context.ts`, created with Svelte's `createContext`, getters so it is reactive): `{ recipeId, variantId, ingredients: (Ingredient & { scaledBaseAmount })[] }`. `CookActions.svelte` holds the sticky bar with two disabled placeholder buttons; F6 replaces them.
+- **Variant editor**: `/przepisy/[id]/warianty/nowy` (seed from navigation state `page.state.variantDraft`, otherwise the base recipe) and `/warianty/[id]/edytuj` (draft rebuilt from base + resolved variant), both through `VariantForm.svelte` (name, description, `VisibilitySelect` with the narrower-base hint, F4's `RecipeEditor mode="variant"`, `toVariantRecipeWrite`); delete variant with `ConfirmDialog`.
+- Tests: Vitest for slot order/rows, variant drafts and `SelectionState` (debounce, scaling, pins, favourite); Playwright `recipe-view.spec.ts` (mobile + desktop, axe on the view and the open sheet) covering every acceptance bullet. Mock fixtures in `tests/integration/mocks/variants.ts`.
+
+### Deviations
+- **Custom mix:** every `RankedOption.compatible` is false there, so the sheet does **not** dim anything in a custom mix (dimming everything would be noise); options stay ordered by `supportCount`, and the header shows "Własna kombinacja" plus a one-line hint. The steps come from the variant F2 picked.
+- **Draft for "create variant from selection"** is built by my own `draftFromSelection` (`recipe-view/variant-draft.ts`), not F2's `draftFromMatch`: that returns only ids (`VariantWrite['recipe']`) and cannot seed the editor, which needs full products and "removed in this variant" markers. It follows the same rules (base ids kept for base slots, none for added ones).
+- **Removed base ingredients** (pick "none" on a base slot) stay in the list, struck through ("pominięty w tym wyborze"), so the user can restore them; added slots with "none" are not shown. They are excluded from `CookContext`.
+- **Archived recipes (D-27):** besides hiding Edytuj / Zmień widoczność, "Nowy wariant" and the sheet's "Utwórz nowy wariant…" are hidden too, and `/warianty/nowy` shows an explanation (conservative; PROJECT does not say whether variants of archived recipes are allowed).
+- **Concurrency conflict** in the variant editor: on 409 `concurrency.conflict` the page refetches the variant's `version`, keeps the draft, shows a toast (`t.variants.editor.conflict`) and the user saves again. The recipe view itself has no versioned save (my-selection).
+- **`?wariant=`** is ignored when a selection is already saved; the pins from it are not persisted until the user interacts.
+- **Menu** is a `BottomSheet` with button rows (no dropdown primitive was built).
+- Mock matrix is hand-built in the shape of the F2 matching vectors (variants A/B/C) with real UUIDs and complete products instead of being generated from `F2.json` (its products are partial `{id,name}`).
+- `src/app.d.ts` got an additive `App.PageState.variantDraft` (SvelteKit navigation state) — the only edit outside my paths.
+- Auto/"Twój wybór" markers: user pins show "Twój wybór" with a pin icon; unpinned rows that differ from the base show "Auto"; the rest have no marker.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- **F6:** replace the two placeholder buttons in `components/recipe-view/CookActions.svelte` and read the ingredients from `getCookContext()` (`recipe-view/cook-context.ts`). The page calls `setCookContext` for you.
+- **B4/coordinator:** none. (`Slot.afterSlotKey` is consumed as shipped.)
+
+### Follow-ups
+- F2's `MatchResult.ingredients` still orders added slots after base rows; the view uses its own `orderSlots`. F2 could adopt `afterSlotKey` and the view could drop the duplicate.
+- Option rows in the sheet show amounts scaled by the current factor; an unscaled "as entered" view of options could be considered.
+- The ♥ on a supporting variant inside the sheet is display-only; toggling happens in the header for the active variant.
