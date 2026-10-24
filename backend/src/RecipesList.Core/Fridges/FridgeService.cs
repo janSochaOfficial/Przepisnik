@@ -18,6 +18,12 @@ public interface IFridgeService
     /// <summary>Creates a fridge owned by the caller.</summary>
     Task<FridgeSummaryModel> CreateAsync(string name, CancellationToken ct);
 
+    /// <summary>
+    /// Creates a fridge owned by <paramref name="ownerId"/>, who adopts it as the default when they have none, and returns
+    /// its id. For callers without a session yet (the first sign-in, B1); everything else uses <see cref="CreateAsync"/>.
+    /// </summary>
+    Task<Guid> CreateOwnedAsync(Guid ownerId, string name, CancellationToken ct);
+
     /// <summary>Renames a fridge (owner).</summary>
     Task<FridgeSummaryModel> RenameAsync(Guid fridgeId, string name, CancellationToken ct);
 
@@ -79,14 +85,20 @@ public sealed class FridgeService(IAppDbContext db, ICurrentUser currentUser, Fr
     /// <inheritdoc />
     public async Task<FridgeSummaryModel> CreateAsync(string name, CancellationToken ct)
     {
-        var me = currentUser.Id;
+        var fridgeId = await CreateOwnedAsync(currentUser.Id, name, ct);
+        return await GetSummaryAsync(fridgeId, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid> CreateOwnedAsync(Guid ownerId, string name, CancellationToken ct)
+    {
         var now = time.GetUtcNow();
-        var fridge = new Fridge { Name = ValidName(name), OwnerId = me, CreatedAt = now };
-        fridge.Members.Add(new FridgeMember { FridgeId = fridge.Id, UserId = me, Role = FridgeRole.Owner, JoinedAt = now });
+        var fridge = new Fridge { Name = ValidName(name), OwnerId = ownerId, CreatedAt = now };
+        fridge.Members.Add(new FridgeMember { FridgeId = fridge.Id, UserId = ownerId, Role = FridgeRole.Owner, JoinedAt = now });
         db.Fridges.Add(fridge);
         await db.SaveChangesAsync(ct);
-        await AdoptAsDefaultIfNoneAsync(me, fridge.Id, ct);
-        return await GetSummaryAsync(fridge.Id, ct);
+        await AdoptAsDefaultIfNoneAsync(ownerId, fridge.Id, ct);
+        return fridge.Id;
     }
 
     /// <inheritdoc />
