@@ -17,7 +17,8 @@ type MeasureKind = 'mass' | 'volume' | 'count';
 type DisplayClass = 'weight' | 'liquid' | 'spice' | 'piece';
 type ProductCategory = 'vegetables' | 'fruits' | 'meat' | 'fish' | 'dairy' | 'bakery' | 'dryGoods'
   | 'spices' | 'oilsVinegars' | 'sauces' | 'canned' | 'frozen' | 'drinks' | 'sweets' | 'other';
-type Unit = 'g' | 'kg' | 'ml' | 'l' | 'glass' | 'tbsp' | 'tsp' | 'drop' | 'pinch' | 'piece';
+type BuiltInUnit = 'g' | 'kg' | 'ml' | 'l' | 'glass' | 'tbsp' | 'tsp' | 'drop' | 'pinch' | 'piece';
+type Unit = BuiltInUnit | 'custom';   // 'custom' = a unit of the custom-unit catalog (§2.1, PROJECT §5.6)
 type PieceSize = 'small' | 'medium' | 'large';
 type LiquidUnits = 'kitchen' | 'metric';
 type StepSection = 'prep' | 'instructions';
@@ -36,7 +37,18 @@ type ProductRef = {               // embedded wherever a product is referenced
   isVerified: boolean;            // read-only: seeded or admin-curated; user-added products are false (D-32)
 };
 
-type Quantity = { value: number; unit: Unit; size?: PieceSize };  // as entered by the author; size only for unit 'piece' + hasSizes
+type Quantity = {                 // as entered by the author
+  value: number; unit: Unit;
+  size?: PieceSize;               // only for unit 'piece' + hasSizes; not allowed with 'custom'
+  customUnitId?: Uuid;            // required iff unit = 'custom'
+  customUnit?: CustomUnitRef;     // read-only: embedded in every response that carries a custom quantity; ignored on write
+};
+type CustomUnitRef = {            // a custom unit (§2.1): "1 <name> = amount base units of measureKind"
+  id: Uuid; name: string; forms: PluralForms;
+  productId?: Uuid;               // null = a unit for every product
+  measureKind: MeasureKind;
+  amount: number;                 // base units of measureKind in one unit (g, ml or medium pieces)
+};
 
 type ContentBlock =
   | { type: 'text'; text: string }                         // plain text, \n preserved, ≤ 5000 chars
@@ -98,6 +110,27 @@ type ProductWrite = {
 };
 ```
 Validation: `displayClass` must fit `measureKind` (`weight`→`mass`; `liquid`/`spice`→`volume`; `piece`→`count`); `hasSizes` and `allowHalf` only for `count` → otherwise 400 `product.invalid_combination`.
+
+### 2.1 Custom units (PROJECT §5.6, D-30)
+
+| Method | Path | Body / query | Response | Errors |
+|---|---|---|---|---|
+| GET | `/units` | `productId?`, `q?`, `limit` (≤ 50, default 50) | `200 CustomUnitRef[]`: the units for every product, plus the ones for `productId` when given; product units first, then by name | |
+| POST | `/units` | `CustomUnitWrite` | `201 CustomUnitRef`, or `200` with the existing unit (same normalized name and same scope) | 404 `product.not_found`, 400 `unit.invalid` (`equals` can't be converted for that product), 400 `validation.failed` |
+| PUT | `/admin/units/{id}` | `CustomUnitWrite` (the scope, `productId`, can't change) | `200 CustomUnitRef` | 403 `admin.required`, 404 `unit.not_found`, 400 `unit.in_use` (the amount changes and an ingredient, a variant op or a shopping-list item uses the unit), 400 `validation.failed` |
+
+```ts
+type CustomUnitWrite = {
+  name: string;                   // 1–40 chars, trimmed
+  forms: PluralForms;             // each 1–40 chars, trimmed
+  productId?: Uuid;               // null = a unit for every product
+  equals: { value: number; unit: BuiltInUnit; size?: PieceSize };   // "1 <unit> = equals"; value > 0
+};
+```
+- **Stored amount.** For a product unit: the base amount of `equals` for that product (PROJECT §5.2), so it is in the product's measure kind. For a unit for every product: the native amount of `equals` in its own kind (`g`/`kg` → `mass`, volume units → `volume`, `piece` → `count`; sizes are ignored).
+- **Converting** `{ value, unit: 'custom', customUnitId }` for a product: the native amount `value × amount` in the unit's `measureKind`, then the normal density / piece-weight conversion to the product's kind (§5.2). A product unit used with another product, or an impossible conversion → 400 `quantity.unit_incompatible`. An unknown `customUnitId` → 400 `validation.failed` (`…quantity.customUnitId: unit.not_found`).
+- `PUT /admin/units/{id}` with `productId` different from the stored scope → 400 `validation.failed` (`productId: immutable`). A name that clashes with another unit of the same scope → 400 `validation.failed` (`name: duplicate`).
+- When an admin merges products (§2), units bound to the source move to the target; on a name clash in the target's scope the moved unit is renamed with " (2)", " (3)", ….
 
 ## 3. Images
 
@@ -365,11 +398,12 @@ Merge rule: posting a product that already has an **unchecked** item adds the am
 type RecipeExport = {
   format: 'recipes-list/recipe'; formatVersion: 1; exportedAt: DateTime;
   products: ExportProduct[];                       // every product referenced anywhere below
+  customUnits?: ExportCustomUnit[];                // every custom unit referenced below (absent in files without any)
   images: Record<string /*localImageKey*/, { contentType: 'image/webp'; dataBase64: string }>;
   recipe: {
     key: string; title: string; description?: string; coverImageKey?: string; authorNickname: string;
     prepMinutes?: number; cookMinutes?: number; tags: string[]; utensils: string[];
-    ingredients: { key: string; productKey: string; quantity?: Quantity; note?: string; optional: boolean }[];
+    ingredients: { key: string; productKey: string; quantity?: ExportQuantity; note?: string; optional: boolean }[];
     prepSteps: { key: string; blocks: ExportBlock[] }[];
     instructionSteps: { key: string; blocks: ExportBlock[] }[];
   };
@@ -380,10 +414,17 @@ type RecipeExport = {
   }[];
 };
 type ExportProduct = Omit<ProductWrite, never> & { key: string };
+type ExportQuantity = { value: number; unit: Unit; size?: PieceSize; customUnitKey?: string };  // customUnitKey iff unit = 'custom'
+type ExportCustomUnit = {
+  key: string; name: string; forms: PluralForms;
+  productKey?: string;            // null = a unit for every product
+  measureKind: MeasureKind; amount: number;
+};
 type ExportBlock = { type: 'text'; text: string } | { type: 'image'; imageKey: string; caption?: string };
 ```
 Keys are opaque strings that are unique within the file (the exporter uses `i1, i2…`, `s1…`, `p1…`, `img1…`).
-In `ingredientOps` and `stepOps` every `…Id` field becomes `…Key` (`id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey`, `productId` → `productKey`, `imageId` → `imageKey`); `baseAmount` is not exported.
+In `ingredientOps` and `stepOps` every `…Id` field becomes `…Key` (`id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey`, `productId` → `productKey`, `imageId` → `imageKey`, and `customUnitId` → `customUnitKey` inside a quantity, which is an `ExportQuantity`); `baseAmount` is not exported.
+**Custom units** (PROJECT §5.6): `formatVersion` stays 1 (files without custom units have no `customUnits`). Import reuses an existing unit with the same normalized name, the same scope (the imported product, or every product), the same measure kind and an amount within 1 %; otherwise it creates the unit, adding " (2)", " (3)" to the name on a clash in that scope.
 Recipe and variant descriptions: import appends `Zaimportowano — oryginalnie: @<authorNickname>` to them, and export strips that footer again and reports the nickname from it as `authorNickname`. System tags (`szybkie`) are not exported. Import matches products by normalized name and creates any that are missing, using the exported properties.
 
 ## 9. Error codes
@@ -392,6 +433,7 @@ Recipe and variant descriptions: import appends `Zaimportowano — oryginalnie: 
 `product.not_found` · `product.duplicate` · `product.invalid_combination` · `product.merge_incompatible` · `tag.reserved` ·
 `image.invalid_type` · `image.too_large` · `image.not_found` · `image.not_owned` ·
 `recipe.not_found` · `recipe.not_author` · `recipe.public_locked` · `recipe.has_variants` · `recipe.visibility_locked` · `recipe.archived` · `quantity.unit_incompatible` · `quantity.invalid` ·
+`unit.not_found` · `unit.invalid` · `unit.in_use` ·
 `variant.not_found` · `variant.not_author` · `variant.no_changes` · `variant.name_taken` · `selection.unknown_slot` ·
 `fridge.not_found` · `fridge.owner_required` · `fridge.owner_cannot_leave` · `invite.not_found` ·
 `fridge_item.not_found` · `deduction.empty` · `deduction.not_found` · `deduction.items_changed` · `deduction.already_undone` ·
