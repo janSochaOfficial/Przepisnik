@@ -199,6 +199,40 @@ test.describe('the deduction dialog', () => {
 		).toBeVisible();
 	});
 
+	for (const [answer, includesOptional] of [
+		['Tylko wymagane', false],
+		['Dodaj też opcjonalne', true]
+	] as const) {
+		test(`asks about missing optional ingredients: "${answer}"`, async ({ page }) => {
+			const api = await mockApi(page, { ...withItems(), ...shoppingHandlers() });
+			await page.goto(`${harness}?optional=1`);
+			await page.getByRole('button', { name: 'Dodaj brakujące do listy zakupów' }).click();
+			const ask = page.getByRole('alertdialog');
+			await expect(ask).toContainText('Brakuje też składników opcjonalnych: rodzynki.');
+			await ask.getByRole('button', { name: answer }).click();
+			await expect(
+				page.getByText(`Dodano do listy zakupów: ${includesOptional ? 3 : 2}.`)
+			).toBeVisible();
+			const call = api.calls.find(
+				(c) => c.key === `POST /fridges/${fridgeId}/shopping-list/items`
+			)!;
+			const ids = (call.json as { items: { productId: string }[] }).items.map((i) => i.productId);
+			expect(ids.includes('00000000-0000-7000-8000-00000000c005')).toBe(includesOptional);
+		});
+	}
+
+	test('closing the optional question adds nothing', async ({ page }) => {
+		const api = await mockApi(page, { ...withItems(), ...shoppingHandlers() });
+		await page.goto(`${harness}?optional=1`);
+		await page.getByRole('button', { name: 'Dodaj brakujące do listy zakupów' }).click();
+		await expect(page.getByRole('alertdialog')).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(page.getByRole('alertdialog')).toBeHidden();
+		expect(api.calls.some((c) => c.key.startsWith('POST') && c.key.includes('shopping'))).toBe(
+			false
+		);
+	});
+
 	test('adds missing and short amounts to the shopping list', async ({ page }) => {
 		const api = await mockApi(page, {
 			...withItems(),

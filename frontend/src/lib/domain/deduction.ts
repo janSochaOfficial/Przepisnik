@@ -3,7 +3,12 @@
 import type { FridgeItem, Ingredient, ProductRef } from './types';
 
 /** An ingredient reduced to what the plan needs: "do smaku" and unconvertible rows have `amount: null`. */
-export type NeededIngredient = { product: ProductRef; amount: number | null };
+export type NeededIngredient = {
+	product: ProductRef;
+	amount: number | null;
+	/** Optional ingredient (PROJECT §9, D-33); absent means required. */
+	optional?: boolean;
+};
 
 export type DeductionStatus = 'ok' | 'short' | 'missing';
 
@@ -16,6 +21,8 @@ export type DeductionRow = {
 	status: DeductionStatus;
 	/** Whether the row's switch starts on: anything that is at least partly in the fridge. */
 	defaultOn: boolean;
+	/** True when every line of this product in the recipe is optional. */
+	optional: boolean;
 };
 
 export type DeductionRequest = {
@@ -31,7 +38,8 @@ const EPS = 1e-6;
 export function neededFromIngredients(ingredients: Ingredient[], factor = 1): NeededIngredient[] {
 	return ingredients.map((i) => ({
 		product: i.product,
-		amount: i.baseAmount === null ? null : i.baseAmount * factor
+		amount: i.baseAmount === null ? null : i.baseAmount * factor,
+		optional: i.optional
 	}));
 }
 
@@ -43,12 +51,14 @@ export function planDeduction(
 	ingredients: NeededIngredient[],
 	fridgeItems: Pick<FridgeItem, 'product' | 'remainingAmount'>[]
 ): DeductionRow[] {
-	const needed = new Map<string, { product: ProductRef; amount: number }>();
-	for (const { product, amount } of ingredients) {
+	const needed = new Map<string, { product: ProductRef; amount: number; optional: boolean }>();
+	for (const { product, amount, optional = false } of ingredients) {
 		if (amount === null || !(amount > 0)) continue;
 		const row = needed.get(product.id);
-		if (row) row.amount += amount;
-		else needed.set(product.id, { product, amount });
+		if (row) {
+			row.amount += amount;
+			row.optional &&= optional;
+		} else needed.set(product.id, { product, amount, optional });
 	}
 
 	const available = new Map<string, number>();
@@ -56,7 +66,7 @@ export function planDeduction(
 		available.set(item.product.id, (available.get(item.product.id) ?? 0) + item.remainingAmount);
 	}
 
-	return [...needed.values()].map(({ product, amount }) => {
+	return [...needed.values()].map(({ product, amount, optional }) => {
 		const have = available.get(product.id) ?? 0;
 		const status: DeductionStatus = have <= EPS ? 'missing' : have + EPS < amount ? 'short' : 'ok';
 		return {
@@ -64,7 +74,8 @@ export function planDeduction(
 			needed: amount,
 			available: status === 'missing' ? 0 : have,
 			status,
-			defaultOn: status !== 'missing'
+			defaultOn: status !== 'missing',
+			optional
 		};
 	});
 }
@@ -102,9 +113,19 @@ export function toDeductionRequest(
 }
 
 /** What to buy: the whole need of missing rows and the shortfall of short rows. */
-export function toShoppingLines(rows: DeductionRow[]): { productId: string; amount: number }[] {
+export function toShoppingLines(
+	rows: DeductionRow[],
+	options: { includeOptional?: boolean } = {}
+): { productId: string; amount: number }[] {
+	const includeOptional = options.includeOptional ?? true;
 	return rows.flatMap((r) => {
 		const amount = r.status === 'missing' ? r.needed : r.needed - r.available;
-		return r.status === 'ok' || !(amount > EPS) ? [] : [{ productId: r.product.id, amount }];
+		if (r.status === 'ok' || !(amount > EPS) || (r.optional && !includeOptional)) return [];
+		return [{ productId: r.product.id, amount }];
 	});
+}
+
+/** The optional rows that {@link toShoppingLines} would add, which the user is asked about first. */
+export function missingOptionalRows(rows: DeductionRow[]): DeductionRow[] {
+	return rows.filter((r) => r.optional && toShoppingLines([r]).length > 0);
 }

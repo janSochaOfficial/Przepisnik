@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	allAvailable,
 	defaultSelection,
+	missingOptionalRows,
 	neededFromIngredients,
 	planDeduction,
 	toDeductionRequest,
@@ -35,7 +36,14 @@ describe('planDeduction', () => {
 			[have(cream, 100), have(cream, 250), have(flour, 999)]
 		);
 		expect(rows).toEqual([
-			{ product: cream, needed: 300, available: 350, status: 'ok', defaultOn: true }
+			{
+				product: cream,
+				needed: 300,
+				available: 350,
+				status: 'ok',
+				defaultOn: true,
+				optional: false
+			}
 		]);
 	});
 
@@ -96,8 +104,8 @@ describe('neededFromIngredients', () => {
 				optional: false
 			}) as Ingredient;
 		expect(neededFromIngredients([ingredient(100), ingredient(null)], 1.5)).toEqual([
-			{ product: flour, amount: 150 },
-			{ product: flour, amount: null }
+			{ product: flour, amount: 150, optional: false },
+			{ product: flour, amount: null, optional: false }
 		]);
 	});
 });
@@ -139,5 +147,28 @@ describe('selections and requests', () => {
 			{ productId: 'cream', amount: 210 },
 			{ productId: 'flour', amount: 200 }
 		]);
+	});
+
+	it('flags optional rows and leaves them out on request', () => {
+		const planned = planDeduction(
+			[
+				{ product: product('milk'), amount: 500 },
+				{ product: product('raisins'), amount: 50, optional: true },
+				{ product: product('salt'), amount: 5, optional: true },
+				{ product: product('salt'), amount: 5 }
+			],
+			[]
+		);
+		expect(planned.map((r) => [r.product.id, r.optional])).toEqual([
+			['milk', false],
+			['raisins', true],
+			['salt', false]
+		]);
+		expect(toShoppingLines(planned, { includeOptional: false }).map((l) => l.productId)).toEqual([
+			'milk',
+			'salt'
+		]);
+		expect(toShoppingLines(planned)).toHaveLength(3);
+		expect(missingOptionalRows(planned).map((r) => r.product.id)).toEqual(['raisins']);
 	});
 });
