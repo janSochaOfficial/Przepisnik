@@ -1,0 +1,30 @@
+# Favourites (API.md §4, §5, §5.3). Sign in first with dev-login (Development only); the cookie is kept between requests.
+@baseUrl = http://localhost:5107/api/v1
+@recipeId = 00000000-0000-0000-0000-000000000000
+@variantId = 00000000-0000-0000-0000-000000000000
+
+### Sign in (dev-login)
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "email": "bartek@test.local", "nickname": "bartek" }
+
+### Favourite a recipe (idempotent; 404 when not visible)
+PUT {{baseUrl}}/recipes/{{recipeId}}/favorite
+X-Requested-With: fetch
+
+### Unfavourite a recipe (idempotent)
+DELETE {{baseUrl}}/recipes/{{recipeId}}/favorite
+X-Requested-With: fetch
+
+### Favourite a variant (idempotent; 404 when not visible)
+PUT {{baseUrl}}/variants/{{variantId}}/favorite
+X-Requested-With: fetch
+
+### Unfavourite a variant (idempotent)
+DELETE {{baseUrl}}/variants/{{variantId}}/favorite
+X-Requested-With: fetch
+
+### Ulubione: recipes and variants merged, newest favourite first, only currently visible items
+GET {{baseUrl}}/favorites?page=1&pageSize=20
