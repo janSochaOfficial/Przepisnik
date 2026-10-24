@@ -350,3 +350,4 @@ Servings-based scaling · expiry dates and "use soon" highlighting · direct Goo
 | D-25 | Public recipes can't be edited directly. Editing a private or fridge-only recipe that has variants deletes all of them after a confirmation prompt | user |
 | D-26 | Favourites (♥) for recipes and variants, shown in Moje przepisy → Ulubione, private to the user, and a ranking signal in auto-match | user + assumption (ranking) |
 | D-27 | An archived recipe is read-only for everyone, its author included: no direct edit (even one that would delete the variants keeping it archived) and no visibility change | user |
+| D-28 | Cooking a recipe (a fridge deduction) never conflicts with editing it: cook counts are stored apart from the versioned recipe and variant rows | user |

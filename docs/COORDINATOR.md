@@ -20,7 +20,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 | B2 | 2 | todo | | |
 | B3 | 3 | merged | task/B3-recipes-images | merged 2026-10-24 (+ coordinator: 400 for invalid image `size` documented). User decided D-27: archived recipes are read-only (PUT and PUT /visibility → 409 `recipe.archived`, `canEdit` false); fixed on main. Follow-ups: B4 `DropStalePicksAsync` could take a set of ids (B3 uses TransactionScope + two saves); recipe/variant DTO duplication (`RecipeProductRefDto`/`VariantProductRef`, `UserRefDto`/`VariantUserRef`) |
 | B4 | 4 | merged | task/B4-variants | merged 2026-10-24. Contract: optional `Slot.afterSlotKey` (vector schema updated on main). Follow-up: concurrent duplicate variant name gives 500 not 409 |
-| B5 | 5 | merged | task/B5-fridges | merged 2026-10-24 + coordinator migration `B5_FridgeOwnerNotUnique` (T00 model had a unique `ix_fridges_owner_id`). Full verify green. Open: cook counts live on the versioned recipe/variant row, so a cook during an edit gives the author 409 `concurrency.conflict` (ask user: move counts out, or reload on 409). Follow-ups: concurrent duplicate invite `accept` / undo re-insert → 500 not 409; deductions never pruned |
+| B5 | 5 | merged | task/B5-fridges | merged 2026-10-24 + coordinator migration `B5_FridgeOwnerNotUnique` (T00 model had a unique `ix_fridges_owner_id`). Full verify green. Cook counts on the versioned rows gave the author 409 on a concurrent cook: user chose D-28 → task B8. Follow-ups: concurrent duplicate invite `accept` / undo re-insert → 500 not 409; deductions never pruned |
 | S1 | 8 | todo | | |
 | F0 | 10 | merged | task/F0-design-system | merged 2026-10-24. Direction "Bolesławiec", see frontend/DESIGN.md; showcase at /ui (dev or VITE_UI_SHOWCASE=1) |
 | F1 | 11 | merged | task/F1-quantities-lib | merged 2026-10-24. Coordinator: delete T00's duplicate `frontend/src/lib/domain/stubs.test.ts` |
@@ -31,6 +31,7 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 | F4 | 14 | merged | task/F4-recipe-catalog-editor | merged 2026-10-24, full verify green (427 vitest, 74 playwright). Edit page hosts "Zmień widoczność" / "Usuń przepis" until F5 has a menu. Inline new-product form lacks `pieceForms`. No dropdown primitive built |
 | F5 | 15 | running | | needs F0, F1, F2 (merged). Decide how to show a custom mix: every `RankedOption.compatible` is false there; `supportCount` counts all variants. Added slots follow base rows unless B4 ships `afterSlotKey` F4 requests: open `ChangeVisibilityDialog` and `DeleteRecipeDialog` from the recipe menu, call `exportRecipe(id)` (`components/recipe-editor/transfer.ts`); variant editor = `draftFromRecipe(resolved, { base: true })` → `<RecipeEditor mode="variant">` → `toVariantRecipeWrite`. B5: cooking bumps the recipe/variant version, so reload on 409 `concurrency.conflict`. |
 | F6 | 16 | running | | needs F0, F1 (merged). Use F1 `context: 'inventory'` for fridge, shopping list and deduction dialog; show `~` when `approximate` B5 notes: `complete` can leave checked entries without an amount or default package on the list; offer the undo toast only for the deduction `id` returned; 400 `deduction.empty` when nothing selected is in the fridge. |
+| B8 | 9 | todo | | follow-up for D-28 (user, 2026-10-24): cook counts out of the versioned recipe/variant rows. Needs B3, B4, B5 (merged). Coordinator writes the migration with a data copy |
 | T90 | 0 | todo | | needs all. F3–F6 start every screen with `<Page>` (DESIGN.md §10–12); `PagePlaceholder` has no `Page` wrapper (replace or wrap). No dropdown-menu primitive yet. Wire `verify.sh --e2e` (T00 left a placeholder); document `dotnet run --no-build` for a second API from the same checkout T00 harness: add `ApiClient.PatchJsonAsync` (B5 has a local helper in `FridgeTestBase`). `shared/samples/export-v1.json` is missing (F4 import test uses a local fixture). |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
@@ -80,6 +81,8 @@ Then:
 4. Tell the still-running agents that `main` moved only if the merge touched files they depend on (SendMessage: "main now contains <ID>; rebase before finishing").
 
 ## 5. Escalate to the user
+> **User instruction (2026-10-24): do not escalate for the rest of this session.** Decide yourself, ranking PROJECT.md first, then TECHNICAL.md, then the task files; record new functional decisions in PROJECT.md's decision log as `assumption` and note them on the board. Still never push, deploy, or touch non-local data.
+
 Ask the user, and don't decide alone, when:
 - a requested change contradicts PROJECT.md (a functional decision);
 - two tasks' contract changes truly conflict;

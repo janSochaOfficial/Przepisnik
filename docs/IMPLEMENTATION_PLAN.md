@@ -90,9 +90,9 @@ Agents run at the same time on one machine, so nothing may rely on fixed ports o
   `API_PORT` (API, default 5080), `WEB_PORT` (Vite dev, default 5173), `PREVIEW_PORT` (the Playwright `webServer` using `vite preview`, default 4173). The Vite proxy targets `http://localhost:${API_PORT}`.
 - Each task has a **slot** `n`, and its agent exports `API_PORT=5100+n`, `WEB_PORT=5200+n` and `PREVIEW_PORT=5300+n` (one `.env.local` in the worktree, git-ignored):
 
-| Slot | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Task | T00 / T90 | B1 | B2 | B3 | B4 | B5 | B6 | B7 | S1 | F0 | F1 | F2 | F3 | F4 | F5 | F6 |
+| Slot | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Task | T00 / T90 | B1 | B2 | B3 | B4 | B5 | B6 | B7 | S1 | B8 | F0 | F1 | F2 | F3 | F4 | F5 | F6 |
 
 - Backend integration tests use **Testcontainers** (random ports, a fresh database), so they need nothing extra.
 - If an agent needs a running API (e.g. to try something manually), it uses its own database `recipes_<taskid>` on the shared dev Postgres (`ConnectionStrings__Default=…;Database=recipes_b4`), created with `EnsureCreated`. **Never** use the default `recipes` database from a task.
