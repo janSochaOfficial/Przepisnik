@@ -18,7 +18,7 @@
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"test:integration": "playwright test",
-		"test:e2e": "node -e \"console.error('The E2E suite (tests/e2e) is added by T90.'); process.exit(1)\"",
+		"test:e2e": "playwright test -c playwright.e2e.config.ts",
 		"gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/lib/api/schema.d.ts && prettier --write src/lib/api/schema.d.ts",
 		"lint:api": "redocly lint ../docs/api/openapi.yaml --config ../docs/api/redocly.yaml",
 		"validate:shared": "node scripts/validate-shared.mjs",
