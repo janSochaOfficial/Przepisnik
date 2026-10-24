@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { signedIn } from './mocks/auth';
-import { catalogHandlers } from './mocks/catalog';
+import { catalogHandlers, uploadedImage } from './mocks/catalog';
 import { mockApi, problem, type MockHandlers } from './mocks/index';
 import { ania, recipeId, recipesHandlers } from './mocks/recipes';
 import {
@@ -157,6 +157,20 @@ test.describe('auto-match', () => {
 		await page.getByRole('button', { name: 'Wyczyść wybór' }).click();
 		// Without pins the base would win on cook count, but the ♥ ranks higher.
 		await expect(page.getByText('Wersja wege', { exact: true })).toBeVisible();
+	});
+});
+
+test.describe('header', () => {
+	test('shows the cover photo when the recipe has one', async ({ page }) => {
+		await mockApi(page, {
+			...base,
+			'GET /recipes/:id': { body: baseRecipe({ coverImage: uploadedImage }) }
+		});
+		await page.goto(url);
+		await expect(page.getByRole('img', { name: 'Zdjęcie przepisu' })).toHaveAttribute(
+			'src',
+			uploadedImage.url
+		);
 	});
 });
 

@@ -171,6 +171,15 @@
 	{/snippet}
 
 	<header class="flex flex-col gap-3">
+		{#if recipe.coverImage}
+			<img
+				src={recipe.coverImage.url}
+				alt={labels.view.coverAlt}
+				width={recipe.coverImage.width}
+				height={recipe.coverImage.height}
+				class="max-h-96 w-full rounded-card border border-line object-cover"
+			/>
+		{/if}
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
 			<span class="inline-flex items-center gap-1">
 				<VisibilityIcon size={16} aria-hidden="true" />

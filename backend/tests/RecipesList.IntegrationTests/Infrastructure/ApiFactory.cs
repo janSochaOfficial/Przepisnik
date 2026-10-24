@@ -70,12 +70,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     /// <summary>A client with its own cookie jar; the session cookie is <c>Secure</c>, so the base address is https.</summary>
     public ApiClient CreateApiClient() =>
-        new(CreateClient(new WebApplicationFactoryClientOptions
-        {
-            BaseAddress = new Uri("https://localhost"),
-            AllowAutoRedirect = false,
-            HandleCookies = true,
-        }));
+        ApiClients.Create(this);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

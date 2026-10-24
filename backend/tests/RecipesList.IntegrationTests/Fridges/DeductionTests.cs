@@ -122,6 +122,31 @@ public sealed class DeductionTests(ApiFactory factory) : FridgeTestBase(factory)
     }
 
     [Fact]
+    public async Task Undo_SameDeductionConcurrently_OneSucceedsTheOthersGet409()
+    {
+        using var anna = await LoginAsync("anna");
+        var fridgeId = await DefaultFridgeAsync(anna);
+        await AddItemAsync(anna, fridgeId, Milk, 1000m, 10m);
+        await AddItemAsync(anna, fridgeId, Cream, 1000m, 50m);
+        var deduction = await DeductAsync(anna, fridgeId, null, null, (Milk, 100m), (Cream, 100m));
+
+        // Undo re-inserts the emptied milk package under its old id, so simultaneous undos race to the primary key.
+        var responses = await Task.WhenAll(Enumerable.Range(0, 8)
+            .Select(_ => anna.PostJsonAsync($"/api/v1/fridges/{fridgeId}/deductions/{Id(deduction)}/undo", null)));
+
+        responses.Count(r => r.StatusCode == HttpStatusCode.OK).ShouldBe(1);
+        foreach (var lost in responses.Where(r => r.StatusCode != HttpStatusCode.OK))
+        {
+            var problem = await ApiClient.ReadJsonAsync(lost);
+            lost.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem.ToString());
+            problem.GetProperty("code").GetString().ShouldBeOneOf("deduction.already_undone", "deduction.items_changed");
+        }
+
+        var items = await ItemsAsync(anna, fridgeId);
+        items.GetArrayLength().ShouldBe(2);
+    }
+
+    [Fact]
     public async Task Deduct_WithRecipeAndVariant_IncrementsCookCountsAndUndoKeepsThem()
     {
         using var anna = await LoginAsync("anna");

@@ -1,0 +1,17 @@
+# Build context of deploy/compose.yaml is the repository root; keep it small and free of local state.
+.git
+.claude
+**/bin
+**/obj
+**/node_modules
+**/TestResults
+frontend/build
+frontend/.svelte-kit
+frontend/coverage
+frontend/test-results
+frontend/playwright-report
+frontend/blob-report
+data
+**/.env
+**/.env.local
+docs/tasks/F0-screenshots

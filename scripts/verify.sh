@@ -3,13 +3,15 @@
 #
 #   scripts/verify.sh            full mode (coordinator, CI): every step, all backend tests
 #   scripts/verify.sh --agent    agent mode: skips the MigrationsAreInSync test (Category=Migrations)
-#   scripts/verify.sh --e2e      full mode plus E2E against the compose stack (added by T90)
+#   scripts/verify.sh --e2e      full mode plus the E2E smoke suite against the compose stack
+#                                (deploy/compose.yaml + compose.e2e.yaml as project recipes-list-e2e, always
+#                                torn down with its volumes; E2E_HTTP_PORT picks the host port, default 8080)
 #
 # Stops at the first failing step and names it. Works from any directory and any worktree.
 set -euo pipefail
 
 usage() {
-	sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
+	sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 MODE=full
@@ -35,9 +37,13 @@ FRONTEND="$ROOT/frontend"
 
 CURRENT_STEP=""
 START_TIME=$SECONDS
+CLEANUP=""
 
 on_exit() {
 	local status=$?
+	if [[ -n "$CLEANUP" ]]; then
+		eval "$CLEANUP" || true
+	fi
 	if [[ $status -ne 0 && -n "$CURRENT_STEP" ]]; then
 		printf '\n\033[1;31mFAILED at step: %s\033[0m (exit %d)\n' "$CURRENT_STEP" "$status" >&2
 	fi
@@ -49,16 +55,12 @@ step() {
 	printf '\n\033[1;34m==> %s\033[0m\n' "$CURRENT_STEP"
 }
 
-if [[ "$MODE" == "e2e" ]]; then
-	step "E2E prerequisites"
-	echo "The E2E suite and the compose stack are added by T90; --e2e is not available yet." >&2
-	exit 1
-fi
-
 echo "verify.sh: $MODE mode in $ROOT"
 
 step "Tooling present (dotnet, node, npm, git)"
-for tool in dotnet node npm git; do
+TOOLS=(dotnet node npm git)
+if [[ "$MODE" == "e2e" ]]; then TOOLS+=(docker); fi
+for tool in "${TOOLS[@]}"; do
 	command -v "$tool" >/dev/null || {
 		echo "missing tool: $tool" >&2
 		exit 1
@@ -101,6 +103,9 @@ git -C "$ROOT" diff --exit-code -- frontend/src/lib/api/schema.d.ts || {
 step "Shared: seed and test-vector JSON validation"
 (cd "$FRONTEND" && npm run --silent validate:shared)
 
+step "Shared: seed rules (node shared/seed/validate.mjs)"
+node "$ROOT/shared/seed/validate.mjs"
+
 step "Frontend: npm run check"
 (cd "$FRONTEND" && npm run --silent check)
 
@@ -112,6 +117,28 @@ step "Frontend: npm test"
 
 step "Frontend: npm run test:integration (Playwright, mocked API)"
 (cd "$FRONTEND" && npm run --silent test:integration)
+
+if [[ "$MODE" == "e2e" ]]; then
+	E2E_HTTP_PORT="${E2E_HTTP_PORT:-8080}"
+	compose_e2e() {
+		HTTP_PORT="$E2E_HTTP_PORT" docker compose -p recipes-list-e2e \
+			-f "$ROOT/deploy/compose.yaml" -f "$ROOT/deploy/compose.e2e.yaml" "$@"
+	}
+
+	step "E2E: host port $E2E_HTTP_PORT is free"
+	if (exec 3<>"/dev/tcp/127.0.0.1/$E2E_HTTP_PORT") 2>/dev/null; then
+		echo "Something already listens on port $E2E_HTTP_PORT: stop it or set E2E_HTTP_PORT." >&2
+		exit 1
+	fi
+
+	step "E2E: docker compose up --build --wait (db, api, web)"
+	# From here on the stack is always removed again, volumes included, whatever happens.
+	CLEANUP='echo "verify.sh: removing the E2E stack"; compose_e2e down -v --remove-orphans >/dev/null 2>&1'
+	compose_e2e up -d --build --wait
+
+	step "E2E: npm run test:e2e (Playwright against http://localhost:$E2E_HTTP_PORT)"
+	(cd "$FRONTEND" && E2E_BASE_URL="http://localhost:$E2E_HTTP_PORT" npm run --silent test:e2e)
+fi
 
 CURRENT_STEP=""
 printf '\n\033[1;32mverify.sh: all steps passed (%s mode, %ds)\033[0m\n' "$MODE" "$((SECONDS - START_TIME))"

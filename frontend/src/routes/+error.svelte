@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { Page } from '$lib/components/shell';
 	import { errorMessage, t } from '$lib/i18n';
 
 	let message = $derived(
@@ -7,5 +8,6 @@
 	);
 </script>
 
-<h1 class="text-xl font-semibold">{t.common.errorTitle}</h1>
-<p class="text-muted mt-2">{message}</p>
+<Page title={t.common.errorTitle}>
+	<p class="text-muted">{message}</p>
+</Page>

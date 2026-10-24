@@ -75,7 +75,7 @@ public sealed class FridgeAccessTests(ApiFactory factory) : FridgeTestBase(facto
         "GET" => client.GetAsync(path),
         "DELETE" => client.DeleteAsync(path),
         "PUT" => client.PutJsonAsync(path, body),
-        "PATCH" => PatchJsonAsync(client, path, body!),
+        "PATCH" => client.PatchJsonAsync(path, body!),
         _ => client.PostJsonAsync(path, body),
     };
 }

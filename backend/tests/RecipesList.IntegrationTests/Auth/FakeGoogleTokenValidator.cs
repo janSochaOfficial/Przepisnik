@@ -44,12 +44,7 @@ public static class GoogleAuthTestHost
     /// <summary>A client with its own cookie jar that already sends the CSRF header.</summary>
     public static ApiClient CreateApiClient(this WebApplicationFactory<Program> factory)
     {
-        var client = new ApiClient(factory.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            BaseAddress = new Uri("https://localhost"),
-            AllowAutoRedirect = false,
-            HandleCookies = true,
-        }));
+        var client = ApiClients.Create(factory);
         client.EnableCsrfHeader();
         return client;
     }

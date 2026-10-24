@@ -102,11 +102,11 @@ public sealed class ShoppingListTests(ApiFactory factory) : FridgeTestBase(facto
         updated.GetProperty("checked").GetBoolean().ShouldBeFalse();
 
         await ContractAssert.IsProblemAsync(
-            await PatchJsonAsync(anna, ItemPath(fridgeId, milk), new { version = Version(milk), @checked = true, amount = (decimal?)null, text = (string?)null }),
+            await anna.PatchJsonAsync(ItemPath(fridgeId, milk), new { version = Version(milk), @checked = true, amount = (decimal?)null, text = (string?)null }),
             HttpStatusCode.Conflict,
             "concurrency.conflict");
         await ContractAssert.IsProblemAsync(
-            await PatchJsonAsync(anna, ItemPath(fridgeId, milk), new { version = Version(updated), @checked = (bool?)null, amount = (decimal?)null, text = "Mleko" }),
+            await anna.PatchJsonAsync(ItemPath(fridgeId, milk), new { version = Version(updated), @checked = (bool?)null, amount = (decimal?)null, text = "Mleko" }),
             HttpStatusCode.BadRequest,
             "shopping_item.invalid");
     }
@@ -192,7 +192,7 @@ public sealed class ShoppingListTests(ApiFactory factory) : FridgeTestBase(facto
         await IsJsonArrayAsync(await client.GetAsync($"/api/v1/fridges/{fridgeId}/shopping-list"), "ShoppingListItem");
 
     private static async Task<JsonElement> PatchAsync(ApiClient client, Guid fridgeId, JsonElement entry, object body) =>
-        await ContractAssert.IsJsonAsync(await PatchJsonAsync(client, ItemPath(fridgeId, entry), body), HttpStatusCode.OK, "ShoppingListItem");
+        await ContractAssert.IsJsonAsync(await client.PatchJsonAsync(ItemPath(fridgeId, entry), body), HttpStatusCode.OK, "ShoppingListItem");
 
     private static string ItemPath(Guid fridgeId, JsonElement entry) => $"/api/v1/fridges/{fridgeId}/shopping-list/items/{entry.GetProperty("id").GetGuid()}";
 

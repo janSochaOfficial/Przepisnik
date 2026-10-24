@@ -1,0 +1,10 @@
+# E2E override (frontend/tests/e2e): dev-login on, generous auth rate limit. Never use it for a real deployment.
+#   docker compose -p recipes-list-e2e -f deploy/compose.yaml -f deploy/compose.e2e.yaml up -d --build --wait
+# scripts/verify.sh --e2e runs the whole cycle (up, tests, down -v).
+services:
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Testing
+      RateLimiting__AuthPerMinute: "1000"
+      RateLimiting__ImagesPerMinute: "1000"
+      RateLimiting__ImportPerMinute: "1000"

@@ -97,6 +97,24 @@ public sealed class VariantEndpointsTests(ApiFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task Create_SameNameConcurrently_OneWinsTheOthersGet409NameTaken()
+    {
+        var recipe = await AddRecipeAsync(VisibilityLevel.Public);
+        var copy = VariantScenario.CopyOf(recipe);
+        copy.CookMinutes = 5;
+        var body = VariantScenario.Write("Wyścig", copy);
+
+        // The name check runs before the insert, so simultaneous requests race to the unique index.
+        var responses = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => _bartek.PostJsonAsync($"/api/v1/recipes/{recipe.Id}/variants", body)));
+
+        responses.Count(r => r.StatusCode == HttpStatusCode.Created).ShouldBe(1);
+        foreach (var lost in responses.Where(r => r.StatusCode != HttpStatusCode.Created))
+        {
+            await ContractAssert.IsProblemAsync(lost, HttpStatusCode.Conflict, "variant.name_taken");
+        }
+    }
+
+    [Fact]
     public async Task Create_UnitTheProductCannotUse_Returns400UnitIncompatible()
     {
         var recipe = await AddRecipeAsync(VisibilityLevel.Public);
