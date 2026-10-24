@@ -30,6 +30,7 @@ export const variants = {
 		showImage: 'Powiększ zdjęcie',
 		closeImage: 'Zamknij zdjęcie',
 		imageAlt: 'Zdjęcie w kroku',
+		coverAlt: 'Zdjęcie przepisu',
 		visibilityIcon: 'Widoczność przepisu'
 	},
 
