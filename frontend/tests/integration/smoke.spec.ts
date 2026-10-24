@@ -45,3 +45,12 @@ test('a user without a nickname is sent to onboarding', async ({ page }) => {
 	await expect(page).toHaveURL(/\/witaj$/);
 	await expect(page.getByRole('heading', { level: 1, name: 'Witaj!' })).toBeVisible();
 });
+
+test('an unknown address shows the error page with the usual page header', async ({ page }) => {
+	await mockApi(page, signedIn);
+
+	await page.goto('/nie-ma-takiej-strony');
+
+	await expect(page.getByRole('heading', { level: 1, name: 'Coś poszło nie tak' })).toBeVisible();
+	await expect(page.getByRole('navigation', { name: 'Nawigacja główna' })).toBeVisible();
+});
