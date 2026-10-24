@@ -351,3 +351,4 @@ Servings-based scaling · expiry dates and "use soon" highlighting · direct Goo
 | D-26 | Favourites (♥) for recipes and variants, shown in Moje przepisy → Ulubione, private to the user, and a ranking signal in auto-match | user + assumption (ranking) |
 | D-27 | An archived recipe is read-only for everyone, its author included: no direct edit (even one that would delete the variants keeping it archived) and no visibility change | user |
 | D-28 | Cooking a recipe (a fridge deduction) never conflicts with editing it: cook counts are stored apart from the versioned recipe and variant rows | user |
+| D-29 | Nickname uniqueness ignores diacritics as well as case (`Łucja` and `Lucja` are the same nickname), using the shared name normalization | assumption (coordinator, to prevent look-alike nicknames) |
