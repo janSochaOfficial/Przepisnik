@@ -155,6 +155,15 @@ test.describe('the login page', () => {
 		expect(api.calls.find((c) => c.key === 'POST /auth/google')?.json).toEqual({
 			idToken: 'google-id-token'
 		});
+		// The button uses the browser's FedCM dialog where available: the GIS popup hangs on
+		// /gsi/transform when third-party cookies are blocked.
+		const config = await page.evaluate(
+			() => (window as unknown as { __gisConfig: Record<string, unknown> }).__gisConfig
+		);
+		expect(config).toMatchObject({
+			client_id: googleConfig.googleClientId,
+			use_fedcm_for_button: true
+		});
 	});
 
 	test('keeps the dev-login form below Google sign-in in development (D-36)', async ({ page }) => {

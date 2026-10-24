@@ -8,6 +8,7 @@ type Gis = {
 				client_id: string;
 				callback: (response: { credential: string }) => void;
 				ux_mode?: 'popup';
+				use_fedcm_for_button?: boolean;
 			}): void;
 			renderButton(element: HTMLElement, options: Record<string, unknown>): void;
 		};
@@ -52,7 +53,10 @@ export async function renderGoogleButton(
 	const google = await loadGoogleScript();
 	google.accounts.id.initialize({
 		client_id: clientId,
-		callback: (response) => onCredential(response.credential)
+		callback: (response) => onCredential(response.credential),
+		// The browser's FedCM dialog where supported. The GIS popup is opened from a third-party iframe and hangs
+		// on /gsi/transform when third-party cookies are blocked; browsers without FedCM still get the popup.
+		use_fedcm_for_button: true
 	});
 	google.accounts.id.renderButton(element, {
 		type: 'standard',
