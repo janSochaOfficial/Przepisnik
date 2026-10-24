@@ -67,6 +67,25 @@ public sealed class FridgeEndpointsTests(ApiFactory factory) : FridgeTestBase(fa
     }
 
     [Fact]
+    public async Task AcceptInvite_SameUserConcurrently_AllSucceedWithOneMembership()
+    {
+        using var anna = await LoginAsync("anna");
+        using var bartek = await LoginAsync("bartek");
+        var fridgeId = await DefaultFridgeAsync(anna);
+        var token = (await ApiClient.ReadJsonAsync(await anna.PostJsonAsync($"/api/v1/fridges/{fridgeId}/invites", null))).GetProperty("token").GetString();
+
+        var responses = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => bartek.PostJsonAsync($"/api/v1/invites/{token}/accept", null)));
+
+        foreach (var response in responses)
+        {
+            await ContractAssert.IsJsonAsync(response, HttpStatusCode.OK, "FridgeSummary");
+        }
+
+        await using var db = Factory.CreateDbContext();
+        (await db.FridgeMembers.CountAsync(m => m.FridgeId == fridgeId && m.UserId == bartek.UserId, TestContext.Current.CancellationToken)).ShouldBe(1);
+    }
+
+    [Fact]
     public async Task InviteFlow_TwoUsers_JoinsAndIsIdempotent()
     {
         using var anna = await LoginAsync("anna");

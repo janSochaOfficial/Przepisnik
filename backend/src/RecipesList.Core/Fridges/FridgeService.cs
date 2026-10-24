@@ -206,8 +206,24 @@ public sealed class FridgeService(IAppDbContext db, ICurrentUser currentUser, Fr
         var isMember = await db.FridgeMembers.AnyAsync(m => m.FridgeId == fridgeId && m.UserId == me, ct);
         if (!isMember)
         {
-            db.FridgeMembers.Add(new FridgeMember { FridgeId = fridgeId, UserId = me, Role = FridgeRole.Member, JoinedAt = now });
-            await db.SaveChangesAsync(ct);
+            var member = new FridgeMember { FridgeId = fridgeId, UserId = me, Role = FridgeRole.Member, JoinedAt = now };
+            db.FridgeMembers.Add(member);
+            try
+            {
+                await db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException)
+            {
+                // A simultaneous accept by the same user won the primary key: accepting stays idempotent.
+                db.FridgeMembers.Entry(member).State = EntityState.Detached;
+                if (!await db.FridgeMembers.AnyAsync(m => m.FridgeId == fridgeId && m.UserId == me, ct))
+                {
+                    throw;
+                }
+
+                return await GetSummaryAsync(fridgeId, ct);
+            }
+
             await AdoptAsDefaultIfNoneAsync(me, fridgeId, ct);
         }
 
