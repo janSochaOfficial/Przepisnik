@@ -39,14 +39,18 @@ public sealed class DeductionService(
         await access.RequireMemberAsync(fridgeId, ct);
         Validate(input);
 
-        var recipe = input.RecipeId is { } recipeId
-            ? await visibility.VisibleRecipes(me).SingleOrDefaultAsync(r => r.Id == recipeId, ct)
-                ?? throw new NotFoundException(ErrorCodes.RecipeNotFound)
-            : null;
-        var variant = input.VariantId is { } variantId
-            ? await visibility.VisibleVariants(me).SingleOrDefaultAsync(v => v.Id == variantId && v.RecipeId == input.RecipeId, ct)
-                ?? throw new NotFoundException(ErrorCodes.VariantNotFound)
-            : null;
+        // Existence checks only: the recipe and variant rows are never loaded or saved here (D-28).
+        if (input.RecipeId is { } recipeId
+            && !await visibility.VisibleRecipes(me).AnyAsync(r => r.Id == recipeId, ct))
+        {
+            throw new NotFoundException(ErrorCodes.RecipeNotFound);
+        }
+
+        if (input.VariantId is { } variantId
+            && !await visibility.VisibleVariants(me).AnyAsync(v => v.Id == variantId && v.RecipeId == input.RecipeId, ct))
+        {
+            throw new NotFoundException(ErrorCodes.VariantNotFound);
+        }
 
         var productIds = input.Lines.Select(l => l.ProductId).ToList();
         var items = await db.FridgeItems
@@ -86,26 +90,19 @@ public sealed class DeductionService(
             planned.Add((line, result, before));
         }
 
-        if (recipe is not null)
-        {
-            recipe.CookCount++;
-        }
-
-        if (variant is not null)
-        {
-            variant.CookCount++;
-        }
-
         // Two saves in one local transaction: the deduction records the items' xmin, which exists only after the first.
         using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
         await db.SaveChangesAsync(ct);
+
+        // Atomic upserts in the same transaction; the recipe's and variant's xmin is untouched.
+        await db.IncrementCookCountsAsync(input.RecipeId, input.VariantId, ct);
 
         var deduction = new Deduction
         {
             FridgeId = fridgeId,
             UserId = me,
-            RecipeId = recipe?.Id,
-            VariantId = variant?.Id,
+            RecipeId = input.RecipeId,
+            VariantId = input.VariantId,
             CreatedAt = now,
             Lines = [.. planned.Select(p => new DeductionLine(
                 p.Line.ProductId,

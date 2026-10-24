@@ -35,9 +35,6 @@ public sealed class Recipe
     /// <summary>Set instead of deleting when other users have variants (PROJECT §4.4, D-17).</summary>
     public bool IsArchived { get; set; }
 
-    /// <summary>How many times it was deducted from a fridge.</summary>
-    public int CookCount { get; set; }
-
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

@@ -39,8 +39,6 @@ public sealed class Variant
     /// <summary>Override of the base cook time; null inherits.</summary>
     public int? CookMinutes { get; set; }
 
-    public int CookCount { get; set; }
-
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

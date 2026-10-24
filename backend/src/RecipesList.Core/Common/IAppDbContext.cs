@@ -38,6 +38,10 @@ public interface IAppDbContext
 
     DbSet<Variant> Variants { get; }
 
+    DbSet<RecipeCookCount> RecipeCookCounts { get; }
+
+    DbSet<VariantCookCount> VariantCookCounts { get; }
+
     DbSet<RecipeFavorite> RecipeFavorites { get; }
 
     DbSet<VariantFavorite> VariantFavorites { get; }
@@ -57,6 +61,13 @@ public interface IAppDbContext
     DbSet<Deduction> Deductions { get; }
 
     DbSet<ShoppingListItem> ShoppingListItems { get; }
+
+    /// <summary>
+    /// Adds one cook to the recipe's and/or the variant's count with one atomic upsert each
+    /// (<c>INSERT ... ON CONFLICT DO UPDATE SET count = count + 1</c>), joining the current transaction. The
+    /// versioned recipe and variant rows are not touched (D-28).
+    /// </summary>
+    Task IncrementCookCountsAsync(Guid? recipeId, Guid? variantId, CancellationToken ct);
 
     Task<int> SaveChangesAsync(CancellationToken ct);
 }

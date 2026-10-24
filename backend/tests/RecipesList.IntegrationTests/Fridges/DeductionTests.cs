@@ -262,8 +262,8 @@ public sealed class DeductionTests(ApiFactory factory) : FridgeTestBase(factory)
     {
         await using var db = Factory.CreateDbContext();
         var ct = TestContext.Current.CancellationToken;
-        var recipe = await db.Recipes.Where(r => r.Id == recipeId).Select(r => r.CookCount).SingleAsync(ct);
-        var variant = await db.Variants.Where(v => v.Id == variantId).Select(v => v.CookCount).SingleAsync(ct);
+        var recipe = await db.RecipeCookCounts.Where(c => c.RecipeId == recipeId).Select(c => c.Count).SingleOrDefaultAsync(ct);
+        var variant = await db.VariantCookCounts.Where(c => c.VariantId == variantId).Select(c => c.Count).SingleOrDefaultAsync(ct);
         return (recipe, variant);
     }
 

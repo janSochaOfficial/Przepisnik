@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Recipes;
 using RecipesList.Core.Visibility;
 using RecipesList.IntegrationTests.Infrastructure;
@@ -29,24 +30,32 @@ public sealed class CookCountTests(ApiFactory factory) : IClassFixture<ApiFactor
     }
 
     [Fact]
-    public async Task Cook_ThenSaveWithTheVersionReadBefore_Returns200ForRecipeAndVariant()
+    public async Task Cook_ThenSaveTheRecipeWithTheVersionReadBefore_Returns200()
+    {
+        var recipe = await ArrangeRecipeAsync();
+        var before = await GetAsync($"/api/v1/recipes/{recipe.Id}");
+        await CookAsync(recipe.Id, null);
+
+        var response = await _ania.PutJsonAsync($"/api/v1/recipes/{recipe.Id}", RecipeUpdate(before));
+
+        var after = await ContractAssert.IsJsonAsync(response, HttpStatusCode.OK, "RecipeDetail");
+        after.GetProperty("cookCount").GetInt32().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Cook_ThenSaveTheVariantWithTheVersionReadBefore_Returns200()
     {
         var (recipe, variantId) = await ArrangeAsync();
-        var recipeBefore = await GetAsync($"/api/v1/recipes/{recipe.Id}");
-        var variantBefore = await GetAsync($"/api/v1/variants/{variantId}");
+        var before = await GetAsync($"/api/v1/variants/{variantId}");
         await CookAsync(recipe.Id, variantId);
-
-        var recipeResponse = await _ania.PutJsonAsync($"/api/v1/recipes/{recipe.Id}", RecipeUpdate(recipeBefore));
-        var recipeAfter = await ContractAssert.IsJsonAsync(recipeResponse, HttpStatusCode.OK, "RecipeDetail");
         var copy = VariantScenario.CopyOf(recipe);
         copy.Ingredients.RemoveAt(1);
-        var variantResponse = await _ania.PutJsonAsync(
-            $"/api/v1/variants/{variantId}",
-            VariantScenario.Write("Bez soli", copy, "private", variantBefore.GetProperty("version").GetUInt32()));
-        var variantAfter = await ContractAssert.IsJsonAsync(variantResponse, HttpStatusCode.OK, "VariantDetail");
 
-        recipeAfter.GetProperty("cookCount").GetInt32().ShouldBe(1);
-        variantAfter.GetProperty("cookCount").GetInt32().ShouldBe(1);
+        var response = await _ania.PutJsonAsync(
+            $"/api/v1/variants/{variantId}", VariantScenario.Write("Bez soli", copy, "private", before.GetProperty("version").GetUInt32()));
+
+        var after = await ContractAssert.IsJsonAsync(response, HttpStatusCode.OK, "VariantDetail");
+        after.GetProperty("cookCount").GetInt32().ShouldBe(1);
     }
 
     [Fact]
@@ -92,7 +101,28 @@ public sealed class CookCountTests(ApiFactory factory) : IClassFixture<ApiFactor
         (await GetAsync($"/api/v1/variants/{variantId}")).GetProperty("cookCount").GetInt32().ShouldBe(0);
     }
 
-    private async Task<(Recipe Recipe, Guid VariantId)> ArrangeAsync()
+    [Fact]
+    public async Task DeletingTheVariantOrTheRecipe_RemovesTheCountRows()
+    {
+        var (recipe, variantId) = await ArrangeAsync();
+        await CookAsync(recipe.Id, variantId);
+        var ct = TestContext.Current.CancellationToken;
+
+        (await _ania.DeleteAsync($"/api/v1/variants/{variantId}")).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        await using (var db = factory.CreateDbContext())
+        {
+            (await db.VariantCookCounts.CountAsync(ct)).ShouldBe(0);
+            (await db.RecipeCookCounts.CountAsync(ct)).ShouldBe(1);
+        }
+
+        (await _ania.DeleteAsync($"/api/v1/recipes/{recipe.Id}")).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        await using (var db = factory.CreateDbContext())
+        {
+            (await db.RecipeCookCounts.CountAsync(ct)).ShouldBe(0);
+        }
+    }
+
+    private async Task<Recipe> ArrangeRecipeAsync()
     {
         Recipe recipe;
         await using (var db = factory.CreateDbContext())
@@ -104,7 +134,12 @@ public sealed class CookCountTests(ApiFactory factory) : IClassFixture<ApiFactor
         var item = await _ania.PostJsonAsync(
             $"/api/v1/fridges/{fridgeId}/items", new { productId = _s.Chicken.Id, packageAmount = 1000m, remainingPercent = 100m, note = (string?)null });
         item.StatusCode.ShouldBe(HttpStatusCode.Created);
+        return recipe;
+    }
 
+    private async Task<(Recipe Recipe, Guid VariantId)> ArrangeAsync()
+    {
+        var recipe = await ArrangeRecipeAsync();
         var copy = VariantScenario.CopyOf(recipe);
         copy.Ingredients.RemoveAt(2);
         var created = await _ania.PostJsonAsync($"/api/v1/recipes/{recipe.Id}/variants", VariantScenario.Write("Krócej", copy, "private"));

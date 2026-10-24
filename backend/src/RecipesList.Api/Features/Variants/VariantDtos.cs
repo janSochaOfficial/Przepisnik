@@ -328,7 +328,7 @@ public sealed record ResolvedRecipeResponse(
             [.. resolved.Ingredients.Select(i => VariantIngredientResponse.From(i, m.Products))],
             [.. resolved.PrepSteps.Select(s => new VariantStepResponse(s.Id, s.Blocks))],
             [.. resolved.InstructionSteps.Select(s => new VariantStepResponse(s.Id, s.Blocks))],
-            recipe.CookCount,
+            m.RecipeCookCount,
             recipe.CreatedAt,
             recipe.UpdatedAt,
             m.Variant.Id,
