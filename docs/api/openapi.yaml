@@ -2708,11 +2708,11 @@ components:
           type: array
           items: { type: string }
         ingredientOps:
-          description: Same shapes as `IngredientOp`, with ids → keys and `productId` → `productKey`.
+          description: Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey` (the server-computed `baseAmount` is not exported).
           type: array
           items: {}
         stepOps:
-          description: Same shapes as `StepOp`, with ids → keys and `imageId` → `imageKey`.
+          description: Same shapes as `StepOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `imageId` → `imageKey` in blocks.
           type: array
           items: {}
       additionalProperties: false

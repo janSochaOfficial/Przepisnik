@@ -1,0 +1,64 @@
+{
+  "format": "recipes-list/recipe",
+  "formatVersion": 1,
+  "exportedAt": "2026-10-24T10:00:00Z",
+  "products": [
+    { "key": "p1", "name": "Mąka pszenna", "category": "dryGoods", "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "gramsPerMl": 0.55, "gramsPerPiece": null, "defaultPackageAmount": 1000, "pieceForms": null },
+    { "key": "p2", "name": "Mleko", "category": "dairy", "measureKind": "volume", "displayClass": "liquid", "hasSizes": false, "allowHalf": false, "gramsPerMl": 1.03, "gramsPerPiece": null, "defaultPackageAmount": 1000, "pieceForms": null },
+    { "key": "p3", "name": "Jajko", "category": "dairy", "measureKind": "count", "displayClass": "piece", "hasSizes": true, "allowHalf": false, "gramsPerMl": null, "gramsPerPiece": 60, "defaultPackageAmount": 10, "pieceForms": null },
+    { "key": "p4", "name": "Masło", "category": "dairy", "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "gramsPerMl": 0.91, "gramsPerPiece": null, "defaultPackageAmount": 200, "pieceForms": null },
+    { "key": "p5", "name": "Cukier", "category": "dryGoods", "measureKind": "mass", "displayClass": "weight", "hasSizes": false, "allowHalf": false, "gramsPerMl": 0.85, "gramsPerPiece": null, "defaultPackageAmount": 1000, "pieceForms": null }
+  ],
+  "images": {
+    "img1": { "contentType": "image/webp", "dataBase64": "UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==" },
+    "img2": { "contentType": "image/webp", "dataBase64": "UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==" }
+  },
+  "recipe": {
+    "key": "r1",
+    "title": "Naleśniki",
+    "description": "Cienkie naleśniki na każdą okazję.",
+    "coverImageKey": "img1",
+    "authorNickname": "ania",
+    "prepMinutes": 10,
+    "cookMinutes": 20,
+    "tags": ["deser", "wege"],
+    "utensils": ["patelnia", "trzepaczka"],
+    "ingredients": [
+      { "key": "i1", "productKey": "p1", "quantity": { "value": 250, "unit": "g" }, "note": null, "optional": false },
+      { "key": "i2", "productKey": "p2", "quantity": { "value": 500, "unit": "ml" }, "note": null, "optional": false },
+      { "key": "i3", "productKey": "p3", "quantity": { "value": 2, "unit": "piece", "size": "medium" }, "note": null, "optional": false },
+      { "key": "i4", "productKey": "p4", "quantity": { "value": 30, "unit": "g" }, "note": "roztopione", "optional": false }
+    ],
+    "prepSteps": [
+      {
+        "key": "s1",
+        "blocks": [
+          { "type": "text", "text": "Wymieszaj mąkę, mleko i jajka na gładkie ciasto." },
+          { "type": "image", "imageKey": "img2", "caption": "Ciasto powinno być rzadkie" }
+        ]
+      }
+    ],
+    "instructionSteps": [
+      { "key": "s2", "blocks": [{ "type": "text", "text": "Rozgrzej patelnię i posmaruj ją masłem." }] },
+      { "key": "s3", "blocks": [{ "type": "text", "text": "Smaż po 1-2 minuty z każdej strony." }] }
+    ]
+  },
+  "variants": [
+    {
+      "name": "Na słodko",
+      "description": "Z odrobiną cukru w cieście.",
+      "authorNickname": "bartek",
+      "prepMinutes": null,
+      "cookMinutes": null,
+      "utensilsAdded": [],
+      "utensilsRemoved": ["trzepaczka"],
+      "ingredientOps": [
+        { "op": "add", "key": "i5", "afterKey": "i1", "productKey": "p5", "quantity": { "value": 20, "unit": "g" }, "note": null, "optional": false },
+        { "op": "remove", "targetKey": "i4" }
+      ],
+      "stepOps": [
+        { "op": "replace", "section": "instructions", "targetKey": "s3", "blocks": [{ "type": "text", "text": "Smaż na złoto i posyp cukrem." }] }
+      ]
+    }
+  ]
+}
