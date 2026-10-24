@@ -7,9 +7,10 @@
 
 	/**
 	 * Renders the toast queue. Mounted once by the root layout; tests may pass their own `queue`.
-	 * Sits above the bottom tab bar on phones and in the bottom-right corner on desktop.
+	 * Sits above the bottom tab bar on phones and in the bottom-right corner on desktop. Pages
+	 * without the tab bar (sign-in, onboarding) pass `tabBar={false}`.
 	 */
-	let { queue = defaultQueue }: { queue?: ToastQueue } = $props();
+	let { queue = defaultQueue, tabBar = true }: { queue?: ToastQueue; tabBar?: boolean } = $props();
 </script>
 
 <section
@@ -18,7 +19,12 @@
 	onpointerleave={() => queue.resumeAll()}
 	onfocusin={() => queue.pauseAll()}
 	onfocusout={() => queue.resumeAll()}
-	class="pointer-events-none fixed inset-x-0 bottom-[calc(var(--rl-tabbar-h)+var(--rl-safe-bottom)+var(--rl-actionbar-h,0px)+0.75rem)] z-60 flex flex-col items-center gap-2 px-4 lg:right-6 lg:bottom-[calc(var(--rl-actionbar-h,0px)+1.5rem)] lg:left-auto lg:items-end lg:px-0"
+	class={[
+		'pointer-events-none fixed inset-x-0 z-60 flex flex-col items-center gap-2 px-4 lg:right-6 lg:bottom-[calc(var(--rl-actionbar-h,0px)+1.5rem)] lg:left-auto lg:items-end lg:px-0',
+		tabBar
+			? 'bottom-[calc(var(--rl-tabbar-h)+var(--rl-safe-bottom)+var(--rl-actionbar-h,0px)+0.75rem)]'
+			: 'bottom-[calc(var(--rl-safe-bottom)+var(--rl-actionbar-h,0px)+0.75rem)]'
+	]}
 >
 	<!-- Live regions must exist before content is added, so both are always rendered. -->
 	<div
