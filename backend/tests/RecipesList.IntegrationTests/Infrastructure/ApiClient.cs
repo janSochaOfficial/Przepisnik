@@ -55,6 +55,9 @@ public sealed class ApiClient(HttpClient http) : IDisposable
     public Task<HttpResponseMessage> PutJsonAsync(string path, object? body) =>
         Http.PutAsync(path, JsonContent(body), TestContext.Current.CancellationToken);
 
+    public Task<HttpResponseMessage> PatchJsonAsync(string path, object? body) =>
+        Http.PatchAsync(path, JsonContent(body), TestContext.Current.CancellationToken);
+
     public Task<HttpResponseMessage> DeleteAsync(string path) => Http.DeleteAsync(path, TestContext.Current.CancellationToken);
 
     /// <summary>Parses the response body as JSON.</summary>

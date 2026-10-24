@@ -319,12 +319,7 @@ public sealed class TransferTests : IClassFixture<ApiFactory>, IAsyncLifetime, I
     public async Task Import_IsRateLimitedPerUser()
     {
         using var limited = _factory.WithWebHostBuilder(b => b.UseSetting("RateLimiting:ImportPerMinute", "1"));
-        using var client = new ApiClient(limited.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            BaseAddress = new Uri("https://localhost"),
-            AllowAutoRedirect = false,
-            HandleCookies = true,
-        }));
+        using var client = ApiClients.Create(limited);
         await client.LoginAsync("dorota");
 
         var first = await client.PostJsonAsync("/api/v1/recipes/import", new { });
@@ -541,12 +536,7 @@ public sealed class TransferTests : IClassFixture<ApiFactory>, IAsyncLifetime, I
     }
 
     private ApiClient NewClient() =>
-        new(_web.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            BaseAddress = new Uri("https://localhost"),
-            AllowAutoRedirect = false,
-            HandleCookies = true,
-        }));
+        ApiClients.Create(_web);
 
     private static string FindRepositoryRoot()
     {

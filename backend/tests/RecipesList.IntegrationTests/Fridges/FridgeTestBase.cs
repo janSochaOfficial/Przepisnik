@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
@@ -72,12 +71,6 @@ public abstract class FridgeTestBase(ApiFactory factory) : IClassFixture<ApiFact
     {
         return await IsJsonArrayAsync(await client.GetAsync($"/api/v1/fridges/{fridgeId}/items"), "FridgeItem");
     }
-
-    protected static Task<HttpResponseMessage> PatchJsonAsync(ApiClient client, string path, object body) =>
-        client.Http.PatchAsync(
-            path,
-            new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions.Web), Encoding.UTF8, "application/json"),
-            TestContext.Current.CancellationToken);
 
     /// <summary>Asserts a 200 JSON array whose every element matches <paramref name="schemaName"/>.</summary>
     protected static async Task<JsonElement> IsJsonArrayAsync(HttpResponseMessage response, string schemaName)

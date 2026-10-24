@@ -153,12 +153,7 @@ public sealed class ImagesEndpointTests : IClassFixture<ApiFactory>, IAsyncLifet
     }
 
     private ApiClient NewClient() =>
-        new(_web.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            BaseAddress = new Uri("https://localhost"),
-            AllowAutoRedirect = false,
-            HandleCookies = true,
-        }));
+        ApiClients.Create(_web);
 
     private async Task<System.Text.Json.JsonElement> UploadOkAsync(byte[] bytes)
     {
