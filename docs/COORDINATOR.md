@@ -26,7 +26,7 @@ Lane A: U1 → U2. Lane B: P1 → S2 → I1 (I1 also needs U1). G1 (Google sign-
 | S2 | 3 | merged | task/S2-optional-missing | merged 2026-10-24. Full verify green except 5 mobile Playwright timeouts at load ~15 (U1 building); those 2 specs rerun green with 2 workers. Accepted: own `OptionalPrompt.svelte` (AlertDialog; `ConfirmDialog` can't tell Escape from its cancel button); deduction switches still don't filter add-missing (as before); harness `?optional=1` fixture |
 | I1 | 4 | todo | task/I1-import-as-variant | started, then stopped at the session limit before its first commit; restart from scratch (branch is empty, delete it first) |
 | U2 | 5 | todo | task/U2-shopping-units | started, then stopped at the session limit; worktree `.claude/worktrees/agent-acc3815f31f528f4f` keeps a `wip:` commit (entity + config + UnitAdmin in-use check, unverified); resume from it |
-| G1 | 0 | running | (coordinator, on main) | D-36 login page + docs done (595fd2e); admin email set in `.env.local` and `deploy/.env` (git-ignored); waiting for the OAuth client ID to test real sign-in |
+| G1 | 0 | merged | (coordinator, on main) | Google sign-in confirmed by the user 2026-10-25 on `npm run dev` (Chrome). D-36 login page + docs (595fd2e); FedCM for the button (82175be) fixed the popup hanging on /gsi/transform. Client ID and admin email in git-ignored `.env.local` / `deploy/.env`; the Docker stack (:8080) is not tried yet |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
