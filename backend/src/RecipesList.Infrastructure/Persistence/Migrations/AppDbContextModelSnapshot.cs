@@ -72,6 +72,12 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("has_sizes");
 
+                    b.Property<bool>("IsVerified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_verified");
+
                     b.Property<string>("MeasureKind")
                         .IsRequired()
                         .HasMaxLength(32)

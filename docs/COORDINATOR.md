@@ -21,12 +21,12 @@ Lane A: U1 → U2. Lane B: P1 → S2 → I1 (I1 also needs U1). G1 (Google sign-
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| U1 | 1 | todo | task/U1-custom-units | opus/medium |
-| P1 | 2 | todo | task/P1-product-prompt-ranking | sonnet/medium |
-| S2 | 3 | todo | task/S2-optional-missing | sonnet/low |
+| U1 | 1 | running | task/U1-custom-units | opus/medium |
+| P1 | 2 | merged | task/P1-product-prompt-ranking | merged 2026-10-24 + coordinator migration `P1_ProductIsVerified` (seeded/admin products verified). Full verify green (298 unit, 335 integration, 507 vitest, 183 playwright). Accepted: `isVerified` added to the Recipe/Variant/Fridge product DTOs; prompt only in the recipe editor's `IngredientRow`; cancelling the new-product form keeps the text, so the prompt can repeat |
+| S2 | 3 | running | task/S2-optional-missing | sonnet/low |
 | I1 | 4 | todo | task/I1-import-as-variant | opus/medium |
 | U2 | 5 | todo | task/U2-shopping-units | sonnet/medium |
-| G1 | 0 | todo | (coordinator, on main) | waiting for the OAuth client ID |
+| G1 | 0 | running | (coordinator, on main) | D-36 login page + docs done (595fd2e); waiting for the OAuth client ID to test real sign-in |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
