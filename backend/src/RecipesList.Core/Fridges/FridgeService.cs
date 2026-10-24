@@ -231,10 +231,11 @@ public sealed class FridgeService(IAppDbContext db, ICurrentUser currentUser, Fr
         await ResetDefaultFridgeAsync([userId], fridgeId, ct);
     }
 
-    private IQueryable<FridgeSummaryModel> Summaries(Guid me)
+    private IQueryable<FridgeSummaryModel> Summaries(Guid me, Guid? fridgeId = null)
     {
         var items = db.FridgeItems;
-        return db.Fridges
+        var fridges = fridgeId is { } id ? db.Fridges.Where(f => f.Id == id) : db.Fridges;
+        return fridges
             .Where(f => f.Members.Any(m => m.UserId == me))
             .OrderBy(f => f.CreatedAt)
             .ThenBy(f => f.Id)
@@ -248,7 +249,7 @@ public sealed class FridgeService(IAppDbContext db, ICurrentUser currentUser, Fr
     }
 
     private async Task<FridgeSummaryModel> GetSummaryAsync(Guid fridgeId, CancellationToken ct) =>
-        await Summaries(currentUser.Id).SingleOrDefaultAsync(f => f.Id == fridgeId, ct)
+        await Summaries(currentUser.Id, fridgeId).SingleOrDefaultAsync(ct)
             ?? throw new NotFoundException(ErrorCodes.FridgeNotFound);
 
     /// <summary>Points users whose default was <paramref name="fridgeId"/> at another fridge of theirs, or at none.</summary>
