@@ -1,18 +1,20 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RecipesList.Api.Auth;
+using RecipesList.Api.Features.Users;
 using RecipesList.Api.Hosting;
+using RecipesList.Api.Middleware;
 using RecipesList.Core.Common;
 using RecipesList.Core.Users;
+using RecipesList.Infrastructure.Auth;
 
 namespace RecipesList.Api.Features.Auth;
 
 /// <summary>
-/// Auth and current user (API.md §1). T00 implements dev-login, <c>/auth/config</c>, <c>/auth/logout</c> and a minimal
-/// <c>GET /me</c> so that the app works end to end; B1 implements the rest.
+/// Auth and current user (API.md §1): Google sign-in, dev-login, logout and the public config. The current-user
+/// endpoints (<c>/me*</c>, <c>/users/nickname-available</c>) live in <see cref="UsersEndpoints"/> and are mapped from here.
 /// </summary>
 internal static class AuthFeature
 {
@@ -23,7 +25,11 @@ internal static class AuthFeature
             options.GoogleClientId = configuration["Auth:Google:ClientId"];
             options.AdminEmails = configuration.GetSection("Admin:Emails").Get<string[]>() ?? [];
         });
+        services.AddOptions<GoogleAuthOptions>().Configure<IOptions<AuthOptions>>((google, auth) =>
+            google.ClientId = auth.Value.GoogleClientId);
+        services.AddSingleton<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IUserAccounts, UserAccounts>();
+        services.AddUsers();
         return services;
     }
 
@@ -31,9 +37,14 @@ internal static class AuthFeature
     {
         var env = api.ServiceProvider.GetRequiredService<IHostEnvironment>();
 
-        api.MapStub("POST", "/auth/google", "AuthGoogle", "Sign in with a Google ID token")
+        api.MapPost("/auth/google", GoogleLoginAsync)
+            .WithName("AuthGoogle")
+            .WithSummary("Sign in with a Google ID token")
             .AllowAnonymous()
-            .RequireRateLimiting(RateLimitPolicies.Auth);
+            .RequireRateLimiting(RateLimitPolicies.Auth)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests);
 
         if (IsDevLoginEnabled(env))
         {
@@ -41,30 +52,28 @@ internal static class AuthFeature
                 .WithName("AuthDevLogin")
                 .WithSummary("Sign in without Google (Development and Testing only)")
                 .AllowAnonymous()
-                .RequireRateLimiting(RateLimitPolicies.Auth);
+                .RequireRateLimiting(RateLimitPolicies.Auth)
+                .ProducesValidationProblem()
+                .ProducesProblem(StatusCodes.Status409Conflict)
+                .ProducesProblem(StatusCodes.Status429TooManyRequests);
         }
 
         api.MapGet("/auth/config", GetConfig)
             .WithName("GetAuthConfig")
             .WithSummary("Public sign-in configuration")
             .AllowAnonymous()
-            .RequireRateLimiting(RateLimitPolicies.Auth);
+            .RequireRateLimiting(RateLimitPolicies.Auth)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests);
 
         api.MapPost("/auth/logout", LogoutAsync)
             .WithName("AuthLogout")
             .WithSummary("End the session")
             .AllowWithoutNickname()
-            .RequireRateLimiting(RateLimitPolicies.Auth);
+            .RequireRateLimiting(RateLimitPolicies.Auth)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests);
 
-        api.MapGet("/me", GetMeAsync)
-            .WithName("GetMe")
-            .WithSummary("The signed-in user")
-            .AllowWithoutNickname();
-
-        api.MapStub("PUT", "/me/nickname", "SetNickname", "Set or change the nickname").AllowWithoutNickname();
-        api.MapStub("GET", "/users/nickname-available", "IsNicknameAvailable", "Check whether a nickname is free").AllowWithoutNickname();
-        api.MapStub("PUT", "/me/settings", "UpdateSettings", "Update the per-user settings").AllowWithoutNickname();
-        api.MapStub("GET", "/me/product-preferences", "GetProductPreferences", "The user's product swap preferences").AllowWithoutNickname();
+        api.MapUsers();
         return api;
     }
 
@@ -74,6 +83,32 @@ internal static class AuthFeature
     {
         var clientId = string.IsNullOrWhiteSpace(options.Value.GoogleClientId) ? null : options.Value.GoogleClientId;
         return TypedResults.Ok(new AuthConfigResponse(clientId, IsDevLoginEnabled(env)));
+    }
+
+    private static async Task<Results<Ok<MeResponse>, ProblemHttpResult>> GoogleLoginAsync(
+        GoogleLoginRequest request,
+        IGoogleTokenValidator validator,
+        IUserAccounts accounts,
+        IOptions<AuthOptions> options,
+        HttpContext http,
+        CancellationToken ct)
+    {
+        var identity = await validator.ValidateAsync(request.IdToken, ct);
+        if (identity is null)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized",
+                detail: "The Google ID token is invalid, expired or issued for another client.",
+                extensions: new Dictionary<string, object?> { [ProblemCodes.CodeExtension] = ErrorCodes.AuthInvalidToken });
+        }
+
+        // Admin rights follow the configured emails, but only for an email Google has verified.
+        var isAdmin = identity.EmailVerified && options.Value.IsAdmin(identity.Email);
+        var user = await accounts.SignInAsync(new ExternalLogin(identity.Subject, identity.Email, identity.PictureUrl, isAdmin), ct);
+
+        await AppClaims.SignInAsync(http, user);
+        return TypedResults.Ok(MeResponse.From(user));
     }
 
     private static async Task<Ok<MeResponse>> DevLoginAsync(
@@ -102,12 +137,5 @@ internal static class AuthFeature
         ct.ThrowIfCancellationRequested();
         await http.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return TypedResults.NoContent();
-    }
-
-    private static async Task<Ok<MeResponse>> GetMeAsync(ICurrentUser currentUser, IAppDbContext db, CancellationToken ct)
-    {
-        var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == currentUser.Id, ct)
-            ?? throw new UnauthenticatedException("The session refers to a user that no longer exists.");
-        return TypedResults.Ok(MeResponse.From(user));
     }
 }
