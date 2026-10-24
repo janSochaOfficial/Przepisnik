@@ -21,11 +21,11 @@ Lane A: U1 → U2. Lane B: P1 → S2 → I1 (I1 also needs U1). G1 (Google sign-
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| U1 | 1 | running | task/U1-custom-units | opus/medium |
+| U1 | 1 | merged | task/U1-custom-units | merged 2026-10-24 + coordinator migration `U1_CustomUnits`. Agent gate green (337 unit, 362 integration, 556 vitest, 195 playwright); full verify on main was interrupted (session limit), rerun it. Accepted: ×0.6 shows `1 ¼ puszki` without `~` (4.2 % < 5 %, D-31); unknown `customUnitId` → 400 `validation.failed` / `unit.not_found`; Program.cs wired `AddUnits`/`MapUnits` |
 | P1 | 2 | merged | task/P1-product-prompt-ranking | merged 2026-10-24 + coordinator migration `P1_ProductIsVerified` (seeded/admin products verified). Full verify green (298 unit, 335 integration, 507 vitest, 183 playwright). Accepted: `isVerified` added to the Recipe/Variant/Fridge product DTOs; prompt only in the recipe editor's `IngredientRow`; cancelling the new-product form keeps the text, so the prompt can repeat |
 | S2 | 3 | merged | task/S2-optional-missing | merged 2026-10-24. Full verify green except 5 mobile Playwright timeouts at load ~15 (U1 building); those 2 specs rerun green with 2 workers. Accepted: own `OptionalPrompt.svelte` (AlertDialog; `ConfirmDialog` can't tell Escape from its cancel button); deduction switches still don't filter add-missing (as before); harness `?optional=1` fixture |
-| I1 | 4 | todo | task/I1-import-as-variant | opus/medium |
-| U2 | 5 | todo | task/U2-shopping-units | sonnet/medium |
+| I1 | 4 | todo | task/I1-import-as-variant | started, then stopped at the session limit before its first commit; restart from scratch (branch is empty, delete it first) |
+| U2 | 5 | todo | task/U2-shopping-units | started, then stopped at the session limit; worktree `.claude/worktrees/agent-acc3815f31f528f4f` keeps a `wip:` commit (entity + config + UnitAdmin in-use check, unverified); resume from it |
 | G1 | 0 | running | (coordinator, on main) | D-36 login page + docs done (595fd2e); admin email set in `.env.local` and `deploy/.env` (git-ignored); waiting for the OAuth client ID to test real sign-in |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
