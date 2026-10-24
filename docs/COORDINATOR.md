@@ -17,11 +17,11 @@ Rules that agents follow are in [IMPLEMENTATION_PLAN.md §4](IMPLEMENTATION_PLAN
 |---|---|---|---|---|
 | T00 | 0 | merged | task/T00-foundation | merged 2026-10-24, full verify green (97 backend, 28 vitest, 6 playwright). Tests run on VSTest (MTP cannot run `dotnet test backend`); agent filter `--filter "Category!=Migrations"` |
 | B1 | 1 | merged | task/B1-auth-users | merged 2026-10-24, full verify green (260 unit, 249 integration). Accepted: additive `IFridgeService.CreateOwnedAsync` in B5's file; `isAdmin` only for a Google-verified email; blank/too-long nickname → 400 `nickname.invalid`; diacritic-insensitive uniqueness (recorded as D-29); `defaultFridgeId: null` clears the default; own nickname reported available. Follow-ups: first login saves user, fridge and default in three steps without one transaction; a losing concurrent first login can briefly return `defaultFridgeId: null` |
-| B2 | 2 | todo | | |
+| B2 | 2 | running | task/B2-catalog | |
 | B3 | 3 | merged | task/B3-recipes-images | merged 2026-10-24 (+ coordinator: 400 for invalid image `size` documented). User decided D-27: archived recipes are read-only (PUT and PUT /visibility → 409 `recipe.archived`, `canEdit` false); fixed on main. Follow-ups: B4 `DropStalePicksAsync` could take a set of ids (B3 uses TransactionScope + two saves); recipe/variant DTO duplication (`RecipeProductRefDto`/`VariantProductRef`, `UserRefDto`/`VariantUserRef`) |
 | B4 | 4 | merged | task/B4-variants | merged 2026-10-24. Contract: optional `Slot.afterSlotKey` (vector schema updated on main). Follow-up: concurrent duplicate variant name gives 500 not 409 |
 | B5 | 5 | merged | task/B5-fridges | merged 2026-10-24 + coordinator migration `B5_FridgeOwnerNotUnique` (T00 model had a unique `ix_fridges_owner_id`). Full verify green. Cook counts on the versioned rows gave the author 409 on a concurrent cook: user chose D-28 → task B8. Follow-ups: concurrent duplicate invite `accept` / undo re-insert → 500 not 409; deductions never pruned |
-| S1 | 8 | todo | | |
+| S1 | 8 | running | task/S1-seed-data | |
 | F0 | 10 | merged | task/F0-design-system | merged 2026-10-24. Direction "Bolesławiec", see frontend/DESIGN.md; showcase at /ui (dev or VITE_UI_SHOWCASE=1) |
 | F1 | 11 | merged | task/F1-quantities-lib | merged 2026-10-24. Coordinator: delete T00's duplicate `frontend/src/lib/domain/stubs.test.ts` |
 | F2 | 12 | merged | task/F2-matching-lib | merged 2026-10-24. Requests relayed to B4: optional `Slot.afterSlotKey`; unknown step ids in a draft = new steps |
