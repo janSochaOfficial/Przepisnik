@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { addMissingToShoppingList } from '$lib/components/deduction/addMissing';
 	import DeductionDialog from '$lib/components/deduction/DeductionDialog.svelte';
 	import { defaultFridgeIdOf, liquidUnitsOf } from '$lib/components/fridge/amount';
@@ -34,7 +35,7 @@
 	});
 
 	// Sample recipe: smietanka (short in the fixtures), maka (missing), jajka (enough), sol (do smaku).
-	const ingredients: Ingredient[] = [
+	const base: Ingredient[] = [
 		ingredient('i1', product('00000000-0000-7000-8000-00000000c001', 'smietanka'), 330),
 		ingredient(
 			'i2',
@@ -54,6 +55,24 @@
 		),
 		ingredient('i4', product('00000000-0000-7000-8000-00000000c004', 'sol'), null)
 	];
+
+	// `?optional=1` adds a missing optional ingredient (rodzynki) for the add-missing question.
+	const ingredients: Ingredient[] = page.url.searchParams.has('optional')
+		? [
+				...base,
+				{
+					...ingredient(
+						'i5',
+						product('00000000-0000-7000-8000-00000000c005', 'rodzynki', {
+							measureKind: 'mass',
+							displayClass: 'weight'
+						}),
+						50
+					),
+					optional: true
+				}
+			]
+		: base;
 
 	let open = $state(false);
 </script>

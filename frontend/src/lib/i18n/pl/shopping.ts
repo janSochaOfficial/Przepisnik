@@ -44,5 +44,12 @@ export const shopping = {
 	/** Added by the recipe view ("Dodaj brakujące do listy zakupów"). */
 	addedMissing: (n: number) => `Dodano do listy zakupów: ${n}.`,
 	nothingMissing: 'Niczego nie brakuje.',
+	optionalPrompt: {
+		title: 'Brakuje też składników opcjonalnych',
+		description: (names: string) =>
+			`Brakuje też składników opcjonalnych: ${names}. Dodać je do listy zakupów?`,
+		includeOptional: 'Dodaj też opcjonalne',
+		requiredOnly: 'Tylko wymagane'
+	},
 	addMissingFailed: 'Nie udało się dodać do listy zakupów.'
 } as const;

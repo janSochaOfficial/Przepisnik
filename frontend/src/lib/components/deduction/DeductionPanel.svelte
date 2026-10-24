@@ -181,9 +181,7 @@
 		busy = 'list';
 		actionError = null;
 		try {
-			const added = await addRowsToShoppingList(fridgeId, rows);
-			if (added === 0) toast.show(t.shopping.nothingMissing);
-			else toast.success(t.shopping.addedMissing(added));
+			await addRowsToShoppingList(fridgeId, rows);
 		} catch (e) {
 			actionError = e instanceof ApiError ? e : new ApiError(0, 'server.error');
 		} finally {
