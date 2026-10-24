@@ -28,7 +28,7 @@ public sealed record MeResponse(Guid Id, string Email, string? Nickname, string?
 public sealed record NicknameRequest
 {
     /// <summary>3–30 letters (Polish letters included), digits, <c>_</c> or <c>-</c>; trimmed.</summary>
-    [Required]
+    [Required(AllowEmptyStrings = true)]
     public required string Nickname { get; init; }
 }
 
