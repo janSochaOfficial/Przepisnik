@@ -35,6 +35,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 		});
 
 		test('open overlays have no accessibility violations', async ({ page }) => {
+			// Several full axe scans: ~4 s alone, but over 30 s when the whole suite runs in parallel.
+			test.slow();
 			await openShowcase(page);
 
 			await page.getByRole('button', { name: 'Wybierz opcję' }).click();
