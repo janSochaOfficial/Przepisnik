@@ -23,10 +23,10 @@ Lane A: U1 → U2. Lane B: P1 → S2 → I1 (I1 also needs U1). G1 (Google sign-
 |---|---|---|---|---|
 | U1 | 1 | running | task/U1-custom-units | opus/medium |
 | P1 | 2 | merged | task/P1-product-prompt-ranking | merged 2026-10-24 + coordinator migration `P1_ProductIsVerified` (seeded/admin products verified). Full verify green (298 unit, 335 integration, 507 vitest, 183 playwright). Accepted: `isVerified` added to the Recipe/Variant/Fridge product DTOs; prompt only in the recipe editor's `IngredientRow`; cancelling the new-product form keeps the text, so the prompt can repeat |
-| S2 | 3 | running | task/S2-optional-missing | sonnet/low |
+| S2 | 3 | merged | task/S2-optional-missing | merged 2026-10-24. Full verify green except 5 mobile Playwright timeouts at load ~15 (U1 building); those 2 specs rerun green with 2 workers. Accepted: own `OptionalPrompt.svelte` (AlertDialog; `ConfirmDialog` can't tell Escape from its cancel button); deduction switches still don't filter add-missing (as before); harness `?optional=1` fixture |
 | I1 | 4 | todo | task/I1-import-as-variant | opus/medium |
 | U2 | 5 | todo | task/U2-shopping-units | sonnet/medium |
-| G1 | 0 | running | (coordinator, on main) | D-36 login page + docs done (595fd2e); waiting for the OAuth client ID to test real sign-in |
+| G1 | 0 | running | (coordinator, on main) | D-36 login page + docs done (595fd2e); admin email set in `.env.local` and `deploy/.env` (git-ignored); waiting for the OAuth client ID to test real sign-in |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
