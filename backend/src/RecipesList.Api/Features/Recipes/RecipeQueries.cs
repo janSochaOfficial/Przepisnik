@@ -59,12 +59,23 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             : recipes.OrderByDescending(r => r.CreatedAt).ThenByDescending(r => r.Id);
 
         var total = await recipes.CountAsync(ct);
+        var items = await SummarizeAsync(
+            ordered.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize), ct);
+
+        return new PagedDto<RecipeSummaryDto>(items, query.Page, query.PageSize, total);
+    }
+
+    /// <summary>
+    /// Projects (already filtered, ordered and paged) recipes to <see cref="RecipeSummaryDto"/> for the caller in one
+    /// statement. Shared with the favourites list.
+    /// </summary>
+    public async Task<List<RecipeSummaryDto>> SummarizeAsync(IQueryable<Recipe> recipes, CancellationToken ct)
+    {
+        var me = currentUser.Id;
         var variants = visibility.VisibleVariants(me);
         var favorites = db.RecipeFavorites;
 
-        var rows = await ordered
-            .Skip((query.Page - 1) * query.PageSize)
-            .Take(query.PageSize)
+        var rows = await recipes
             .Select(r => new
             {
                 r.Id,
@@ -86,7 +97,7 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             .AsNoTracking()
             .ToListAsync(ct);
 
-        var items = rows.Select(r => new RecipeSummaryDto(
+        return rows.Select(r => new RecipeSummaryDto(
             r.Id,
             r.Title,
             new UserRefDto(r.AuthorId, r.Nickname ?? ""),
@@ -99,8 +110,6 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             r.VariantCount,
             r.CreatedAt,
             r.UpdatedAt)).ToList();
-
-        return new PagedDto<RecipeSummaryDto>(items, query.Page, query.PageSize, total);
     }
 
     /// <summary>The recipe as the caller may see it, or null (not found or not visible). Archived ones are included.</summary>

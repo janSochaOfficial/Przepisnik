@@ -27,3 +27,33 @@ PROJECT §4.4, §4.6, §6.1 · API §4 (favourite endpoints), §5 (variant favou
 - Recipe narrowed to private by its author → it disappears from another user's favourites; widened again → it reappears.
 - Paging is correct across the two kinds, and the list endpoint runs in a constant number of queries.
 - Favouriting something invisible → 404.
+
+## Report
+
+### Summary
+- `PUT`/`DELETE /recipes/{id}/favorite` and `/variants/{id}/favorite`: idempotent, 204; `PUT` returns 404 (`recipe.not_found` / `variant.not_found`) when the item is not visible (`VisibilityRules`). `DELETE` is always 204.
+- `GET /favorites`: `FavoriteService.ListAsync` (Core) pages a `UNION ALL` of the two favourite tables in SQL (ordered by `created_at` desc, then id), filtered to currently visible items. The endpoint then loads variant summaries (`VariantQueries.ToSummaryRows` + `VariantSummaryResponse.From`) and recipe summaries (B3's projection) for the page: 2 key statements + 1 variants + 1 recipes, constant for any page size.
+- Recipe entries omit `variant` (the contract has `additionalProperties: false`).
+- `isFavorite` was already wired by B3/B4; the tests confirm it in recipe list/detail, variant list and matrix.
+- Tests: `backend/tests/RecipesList.IntegrationTests/Favorites/FavoritesTests.cs` (listing order, idempotence, 404, narrow/widen, paging across kinds, "edit deletes variants" cascade, recipe delete cascade, statement count). `backend/http/favorites.http` added.
+- `AuthFoundationTests.StubEndpoint_...Returns501`: repointed from `GET /favorites` to `GET /recipes/{id}/export` (Transfer stub). The onboarding-403 test still uses `/favorites` (real now, still gated).
+
+### Deviations
+- Touched B3 code minimally: `RecipeQueries.ListAsync` projection extracted into the public `RecipeQueries.SummarizeAsync(IQueryable<Recipe>)` (behaviour unchanged) so the favourites list reuses it.
+- A favourite is listed only if the item is visible AND (for variant entries) the base recipe is visible, since the entry carries the base `RecipeSummary`. Archived recipes are excluded from recipe entries (as in `GET /recipes`). A variant favourited by its author whose base became invisible is therefore hidden (not deleted).
+- Invalid `page`/`pageSize` return 400 `validation.failed` with `out_of_range` field codes, like `GET /recipes`.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- B2/Transfer owner: once `GET /recipes/{id}/export` stops being a stub, the 501 test in `AuthFoundationTests` needs another stub (or should be dropped).
+
+### Follow-ups
+- Frontend can use `FavoriteItem.kind` to render "wariant X · przepis Y" from `variant` + `recipe`.
