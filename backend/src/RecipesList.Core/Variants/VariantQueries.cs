@@ -4,7 +4,7 @@ using RecipesList.Core.Recipes;
 namespace RecipesList.Core.Variants;
 
 /// <summary>A variant with the per-caller data of a <c>VariantSummary</c>, projected in one SQL query.</summary>
-public sealed record VariantSummaryRow(Variant Variant, string RecipeTitle, string? AuthorNickname, bool IsFavorite, bool BaseAvailable)
+public sealed record VariantSummaryRow(Variant Variant, string RecipeTitle, string? AuthorNickname, bool IsFavorite, bool BaseAvailable, int CookCount)
 {
     /// <summary>The summary; <c>changeCount</c> is computed here because the ops are jsonb.</summary>
     public VariantSummaryModel ToModel() => new(
@@ -18,7 +18,7 @@ public sealed record VariantSummaryRow(Variant Variant, string RecipeTitle, stri
         Variant.Visibility,
         IsFavorite,
         BaseAvailable,
-        Variant.CookCount,
+        CookCount,
         ChangeCount(Variant),
         Variant.CreatedAt,
         Variant.UpdatedAt);
@@ -47,11 +47,13 @@ public static class VariantQueries
     {
         ArgumentNullException.ThrowIfNull(db);
         var favorites = db.VariantFavorites;
+        var cookCounts = db.VariantCookCounts;
         return variants.Select(v => new VariantSummaryRow(
             v,
             v.Recipe!.Title,
             v.Author!.Nickname,
             favorites.Any(f => f.UserId == userId && f.VariantId == v.Id),
-            visibleRecipes.Any(r => r.Id == v.RecipeId)));
+            visibleRecipes.Any(r => r.Id == v.RecipeId),
+            cookCounts.Where(c => c.VariantId == v.Id).Select(c => c.Count).FirstOrDefault()));
     }
 }

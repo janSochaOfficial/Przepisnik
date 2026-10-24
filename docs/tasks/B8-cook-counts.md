@@ -26,3 +26,32 @@ For this task only: the cook-count entities and their configurations, `CookCount
 - `cookCount` still goes up by one per deduction in every endpoint that returns it, and is not decremented on undo (B5).
 - Ranking by cook count in the matrix still works (a test where cook count is the deciding tie-breaker).
 - Deleting a recipe or variant removes its count row (cascade).
+
+## Report
+
+### Summary
+Cook counts now live in `recipe_cook_counts` / `variant_cook_counts`; `Recipe.CookCount` and `Variant.CookCount` are removed. A deduction upserts the counts (`INSERT ... ON CONFLICT DO UPDATE SET count = count + 1`) through the new `IAppDbContext.IncrementCookCountsAsync`, inside the existing `TransactionScope`. `DeductionService` no longer loads the `Recipe` / `Variant` entities (existence checks only), so their `xmin` is untouched and a save with a pre-cook version returns 200. Reads: variant summaries/detail/list use a correlated subquery (`COALESCE` via `FirstOrDefault`), the matrix folds both counts into its two existing statements (budget unchanged), recipe detail and the resolved variant each add one small query. Tests in `backend/tests/RecipesList.IntegrationTests/CookCounts/` (red commit first): PUT recipe and PUT variant after a cook return 200, neither version changes, counts show in recipe detail, variant detail, variant lists, resolved and matrix, zero when never cooked, cascade on variant and recipe delete. Existing deduction test and the unit-test vector loader were adapted.
+
+### Deviations
+- The recipe PUT and the variant PUT are tested in two tests: a recipe that has variants always answers 409 `recipe.has_variants` on PUT unless `deleteVariants` is set (B3 behaviour), so one recipe cannot carry both cases.
+- "Ranking by cook count in the matrix": the backend has no ranking code (auto-match is client-side, `VariantMatrixEngine` has no cook-count input); the backend only supplies `cookCount` per matrix column, which is tested. No backend tie-breaker test was possible.
+- The upsert is on `IAppDbContext` (`IncrementCookCountsAsync`, implemented in `AppDbContext` with `ExecuteSqlInterpolatedAsync`) because Core does not reference EF Relational.
+
+### Model changes
+(No migration written; `MigrationsAreInSync` is expected to fail until the coordinator adds it.)
+- New table `recipe_cook_counts`: `recipe_id uuid` PK (`pk_recipe_cook_counts`), FK `fk_recipe_cook_counts_recipes_recipe_id` to `recipes(id)` ON DELETE CASCADE; `count integer NOT NULL`.
+- New table `variant_cook_counts`: `variant_id uuid` PK (`pk_variant_cook_counts`), FK to `variants(id)` ON DELETE CASCADE; `count integer NOT NULL`.
+- Drop `recipes.cook_count` and `variants.cook_count`. Data copy before the drop: `INSERT INTO recipe_cook_counts (recipe_id, count) SELECT id, cook_count FROM recipes WHERE cook_count > 0;` and likewise `INSERT INTO variant_cook_counts (variant_id, count) SELECT id, cook_count FROM variants WHERE cook_count > 0;`. Verify the generated names with `dotnet ef migrations add`.
+
+### Contract changes
+None. `cookCount` stays where it is.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+None.
+
+### Follow-ups
+- The coordinator writes the migration with the data copy above.
+- If a backend-side ranking is ever added, it can read the counts from the matrix columns.

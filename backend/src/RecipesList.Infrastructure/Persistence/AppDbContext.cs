@@ -38,6 +38,33 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Variant> Variants => Set<Variant>();
 
+    public async Task IncrementCookCountsAsync(Guid? recipeId, Guid? variantId, CancellationToken ct)
+    {
+        if (recipeId is { } recipe)
+        {
+            await Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                INSERT INTO recipe_cook_counts (recipe_id, count) VALUES ({recipe}, 1)
+                ON CONFLICT (recipe_id) DO UPDATE SET count = recipe_cook_counts.count + 1
+                """,
+                ct);
+        }
+
+        if (variantId is { } variant)
+        {
+            await Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                INSERT INTO variant_cook_counts (variant_id, count) VALUES ({variant}, 1)
+                ON CONFLICT (variant_id) DO UPDATE SET count = variant_cook_counts.count + 1
+                """,
+                ct);
+        }
+    }
+
+    public DbSet<RecipeCookCount> RecipeCookCounts => Set<RecipeCookCount>();
+
+    public DbSet<VariantCookCount> VariantCookCounts => Set<VariantCookCount>();
+
     public DbSet<RecipeFavorite> RecipeFavorites => Set<RecipeFavorite>();
 
     public DbSet<VariantFavorite> VariantFavorites => Set<VariantFavorite>();

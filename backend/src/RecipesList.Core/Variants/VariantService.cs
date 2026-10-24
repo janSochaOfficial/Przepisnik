@@ -112,6 +112,7 @@ public sealed class VariantService(
         var utensilList = await db.Utensils.AsNoTracking().Where(u => resolved.UtensilIds.Contains(u.Id)).ToListAsync(ct);
         var utensilsById = utensilList.ToDictionary(u => u.Id);
         var isFavorite = await db.RecipeFavorites.AnyAsync(f => f.UserId == userId && f.RecipeId == recipe.Id, ct);
+        var cookCount = await db.RecipeCookCounts.Where(c => c.RecipeId == recipe.Id).Select(c => c.Count).FirstOrDefaultAsync(ct);
 
         var tags = recipe.Tags.Select(t => t.Tag).OfType<Tag>().Where(t => !t.IsSystem).OrderBy(t => t.Name, StringComparer.Ordinal).ToList();
         if (resolved.IsQuick)
@@ -129,6 +130,7 @@ public sealed class VariantService(
             variant,
             resolved,
             isFavorite,
+            cookCount,
             recipe.Author?.Nickname ?? "",
             tags,
             [.. resolved.UtensilIds.Where(utensilsById.ContainsKey).Select(u => utensilsById[u])],
@@ -228,6 +230,8 @@ public sealed class VariantService(
         var userId = currentUser.Id;
         var recipeFavorites = db.RecipeFavorites;
         var variantFavorites = db.VariantFavorites;
+        var recipeCookCounts = db.RecipeCookCounts;
+        var variantCookCounts = db.VariantCookCounts;
 
         // Statement 1: the recipe, its author, the caller's ♥ and the ingredients with their products.
         var head = await visibility.VisibleRecipes(userId)
@@ -237,6 +241,7 @@ public sealed class VariantService(
                 Recipe = r,
                 AuthorNickname = r.Author!.Nickname,
                 IsFavorite = recipeFavorites.Any(f => f.UserId == userId && f.RecipeId == r.Id),
+                CookCount = recipeCookCounts.Where(c => c.RecipeId == r.Id).Select(c => c.Count).FirstOrDefault(),
                 Ingredients = r.Ingredients.Select(i => new { Row = i, Product = i.Product! }).ToList(),
             })
             .AsNoTracking()
@@ -255,6 +260,7 @@ public sealed class VariantService(
                 Variant = v,
                 AuthorNickname = v.Author!.Nickname,
                 IsFavorite = variantFavorites.Any(f => f.UserId == userId && f.VariantId == v.Id),
+                CookCount = variantCookCounts.Where(c => c.VariantId == v.Id).Select(c => c.Count).FirstOrDefault(),
             })
             .AsNoTracking()
             .ToListAsync(ct);
@@ -279,10 +285,10 @@ public sealed class VariantService(
 
         var columns = new List<MatrixColumnModel>(variants.Count + 1)
         {
-            new(null, recipe.Title, recipe.AuthorId, head.AuthorNickname ?? "", recipe.CookCount, recipe.CreatedAt, head.IsFavorite),
+            new(null, recipe.Title, recipe.AuthorId, head.AuthorNickname ?? "", head.CookCount, recipe.CreatedAt, head.IsFavorite),
         };
         columns.AddRange(variants.Select(v => new MatrixColumnModel(
-            v.Variant.Id, v.Variant.Name, v.Variant.AuthorId, v.AuthorNickname ?? "", v.Variant.CookCount, v.Variant.CreatedAt, v.IsFavorite)));
+            v.Variant.Id, v.Variant.Name, v.Variant.AuthorId, v.AuthorNickname ?? "", v.CookCount, v.Variant.CreatedAt, v.IsFavorite)));
 
         return new VariantMatrixResult(matrix, columns, products);
     }

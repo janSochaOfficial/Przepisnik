@@ -46,6 +46,7 @@ public sealed record ResolvedVariantModel(
     Variant Variant,
     ResolvedRecipeModel Resolved,
     bool RecipeIsFavorite,
+    int RecipeCookCount,
     string AuthorNickname,
     IReadOnlyList<Tag> Tags,
     IReadOnlyList<Utensil> Utensils,
