@@ -55,6 +55,13 @@ internal static class VariantsFeature
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
+        api.MapPut("/variants/{id:guid}/visibility", SetVariantVisibilityAsync)
+            .WithName("SetVariantVisibility")
+            .WithSummary("Change a variant's visibility")
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         api.MapDelete("/variants/{id:guid}", DeleteVariantAsync)
             .WithName("DeleteVariant")
             .WithSummary("Delete a variant")
@@ -141,6 +148,13 @@ internal static class VariantsFeature
         IVariantService service,
         CancellationToken ct) =>
         TypedResults.Ok(VariantDetailResponse.From(await service.UpdateAsync(id, request.ToInput(), request.Version, ct)));
+
+    private static async Task<Ok<VariantDetailResponse>> SetVariantVisibilityAsync(
+        Guid id,
+        VariantVisibilityRequest request,
+        IVariantService service,
+        CancellationToken ct) =>
+        TypedResults.Ok(VariantDetailResponse.From(await service.SetVisibilityAsync(id, request.Visibility, ct)));
 
     private static async Task<NoContent> DeleteVariantAsync(Guid id, IVariantService service, CancellationToken ct)
     {

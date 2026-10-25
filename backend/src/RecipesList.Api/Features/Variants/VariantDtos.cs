@@ -453,3 +453,6 @@ public sealed record SelectionResponse(IReadOnlyDictionary<string, PickDto> Pick
             s.UpdatedAt);
     }
 }
+
+/// <summary>Body of <c>PUT /variants/{id}/visibility</c>.</summary>
+internal sealed record VariantVisibilityRequest([property: JsonRequired] VisibilityLevel Visibility);

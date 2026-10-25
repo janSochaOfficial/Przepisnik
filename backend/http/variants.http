@@ -97,6 +97,13 @@ X-Requested-With: fetch
 
 { "picks": { "cream": { "optionKey": "none", "source": "user" } }, "scaling": null }
 
+### Change a variant's visibility (author only, never locked)
+PUT {{baseUrl}}/variants/{{variantId}}/visibility
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "visibility": "public" }
+
 ### Delete a variant (drops remembered picks of its options)
 DELETE {{baseUrl}}/variants/{{variantId}}
 X-Requested-With: fetch
