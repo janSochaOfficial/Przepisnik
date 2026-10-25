@@ -2,6 +2,7 @@ import { auth } from './auth';
 import { common } from './common';
 import { errors } from './errors';
 import { fridge } from './fridge';
+import { importFormat } from './import-format';
 import { profile } from './profile';
 import { recipes } from './recipes';
 import { shopping } from './shopping';
@@ -15,6 +16,7 @@ export const t = {
 	units,
 	customUnits,
 	recipes,
+	importFormat,
 	variants,
 	fridge,
 	shopping,

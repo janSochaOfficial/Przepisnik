@@ -270,6 +270,7 @@ export const recipes = {
 		addAsVariant: 'Dodaj jako wariant',
 		matchAuthor: (nickname: string) => `@${nickname}`,
 		importAsNew: 'Importuj jako nowy przepis',
+		formatHelp: 'Format pliku',
 		importedAsVariants: 'Dodano warianty z pliku.',
 		importedAsVariantsSkipped: (skipped: number) =>
 			`Dodano warianty z pliku (pominięto istniejące: ${skipped}).`,

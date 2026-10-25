@@ -167,6 +167,14 @@
 					/>
 				{/snippet}
 			</Field>
+			<a
+				href={resolve('/przepisy/import/format')}
+				target="_blank"
+				rel="noopener"
+				class="inline-flex min-h-11 items-center self-start font-semibold text-cobalt underline underline-offset-4"
+			>
+				{t.recipes.transfer.formatHelp}
+			</a>
 		</form>
 	{/if}
 	{#snippet footer()}
