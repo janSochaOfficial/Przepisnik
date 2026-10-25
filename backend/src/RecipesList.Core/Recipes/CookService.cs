@@ -19,6 +19,9 @@ public interface ICookService
     /// <summary>The rule shared by deductions and "Ugotowane!": a user's cooks of one recipe count at most once per this long.</summary>
     static readonly TimeSpan Window = TimeSpan.FromHours(12);
 
+    /// <summary>The isolation level every transaction that counts a cook runs at; an outer scope must use it too.</summary>
+    static readonly TransactionOptions ScopeOptions = new() { IsolationLevel = IsolationLevel.ReadCommitted };
+
     /// <summary>
     /// Decides in one atomic statement whether this cook counts (so simultaneous requests cannot both count) and, when it
     /// does, adds it: the recipe's total, plus the variant's count or the base's count when there is no variant. Joins the
@@ -42,7 +45,9 @@ public sealed class CookService(IAppDbContext db, ICurrentUser currentUser, Visi
         // PostgreSQL keeps microseconds; truncate so the value returned now equals the one read back later.
         var utcNow = time.GetUtcNow();
         var now = new DateTimeOffset(utcNow.UtcTicks - (utcNow.UtcTicks % 10), TimeSpan.Zero);
-        using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
+        // Read committed, not TransactionScope's default serializable: there a concurrent ON CONFLICT DO UPDATE fails with
+        // a serialization error (500) instead of re-checking the WHERE against the committed row.
+        using var scope = new TransactionScope(TransactionScopeOption.Required, ICookService.ScopeOptions, TransactionScopeAsyncFlowOption.Enabled);
         var counted = await db.TryClaimCookAsync(userId, recipeId, now, now - ICookService.Window, ct);
         if (counted)
         {

@@ -96,7 +96,8 @@ public sealed class DeductionService(
         }
 
         // Two saves in one local transaction: the deduction records the items' xmin, which exists only after the first.
-        using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
+        // The cook count joins it, so it runs at the cook's isolation level.
+        using var scope = new TransactionScope(TransactionScopeOption.Required, ICookService.ScopeOptions, TransactionScopeAsyncFlowOption.Enabled);
         await db.SaveChangesAsync(ct);
 
         // One atomic statement decides whether the cook counts (12-hour rule), in the same transaction; the recipe's and
