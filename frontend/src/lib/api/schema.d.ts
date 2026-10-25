@@ -1632,7 +1632,9 @@ export interface components {
 			/** @description Exactly one of `product` and `text` is set. */
 			product: components['schemas']['ProductRef'] | null;
 			text: string | null;
-			/** @description Base units, only with a product. */
+			/** @description The amount as the user chose it (a custom unit embeds `customUnit`); null means no chosen unit. */
+			quantity: components['schemas']['Quantity'] | null;
+			/** @description Base units, only with a product; derived from `quantity` when that is set. Null means no amount. */
 			amount: number | null;
 			checked: boolean;
 			addedBy: components['schemas']['UserRef'];
@@ -1642,6 +1644,8 @@ export interface components {
 			productId?: components['schemas']['Uuid'] | null;
 			text?: string | null;
 			amount?: number | null;
+			/** @description Exclusive with `amount`; only with a product. */
+			quantity?: components['schemas']['Quantity'] | null;
 		};
 		ShoppingListItemsWrite: {
 			items: components['schemas']['ShoppingListItemWrite'][];
@@ -1649,7 +1653,12 @@ export interface components {
 		ShoppingListItemPatch: {
 			version: components['schemas']['Version'];
 			checked?: boolean | null;
+			/** @description Sets the unit and the amount. Exclusive with `amount` and `clearAmount`. */
+			quantity?: components['schemas']['Quantity'] | null;
+			/** @description Sets a base amount and drops the chosen unit. */
 			amount?: number | null;
+			/** @description True removes the amount and the unit. */
+			clearAmount?: boolean | null;
 			text?: string | null;
 		};
 		CompleteShoppingListRequest: {

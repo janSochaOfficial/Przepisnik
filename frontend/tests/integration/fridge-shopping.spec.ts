@@ -301,6 +301,63 @@ test.describe('the shopping list', () => {
 		});
 	});
 
+	test('changes the unit of an item, converting the value, and saves the quantity', async ({
+		page
+	}) => {
+		const api = await mockApi(page, handlers());
+		await page.goto('/lista-zakupow');
+		await page.getByRole('button', { name: 'Zmień pozycję: mleko' }).click();
+		const dialog = page.getByRole('dialog', { name: 'mleko' });
+		await expect(dialog.getByLabel('Ilość')).toHaveValue('1500');
+		await expect(dialog.getByLabel('Jednostka')).toHaveText('ml');
+		await dialog.getByLabel('Jednostka').click();
+		await page.getByRole('option', { name: 'l', exact: true }).click();
+		await expect(dialog.getByLabel('Ilość')).toHaveValue('1,5');
+		await dialog.getByLabel('Jednostka').click();
+		await page.getByRole('option', { name: 'szklanka' }).click();
+		await expect(dialog.getByLabel('Ilość')).toHaveValue('6');
+		await dialog.getByRole('button', { name: 'Zapisz' }).click();
+		await expect(page.getByText('6 szklanek')).toBeVisible();
+		expect(api.calls.find((c) => c.key.startsWith('PATCH'))!.json).toEqual({
+			version: 1,
+			quantity: { value: 6, unit: 'glass' }
+		});
+	});
+
+	test('removes the amount of an item', async ({ page }) => {
+		const api = await mockApi(page, handlers());
+		await page.goto('/lista-zakupow');
+		await page.getByRole('button', { name: 'Zmień pozycję: mleko' }).click();
+		await page
+			.getByRole('dialog', { name: 'mleko' })
+			.getByRole('button', { name: 'Usuń ilość' })
+			.click();
+		await expect(page.getByRole('dialog')).toBeHidden();
+		await expect(page.getByText('1,5 l')).toHaveCount(0);
+		expect(api.calls.find((c) => c.key.startsWith('PATCH'))!.json).toEqual({
+			version: 1,
+			clearAmount: true
+		});
+	});
+
+	test('adds a product with a quantity in a chosen unit', async ({ page }) => {
+		const api = await mockApi(page, handlers());
+		await page.goto('/lista-zakupow');
+		await page.getByRole('button', { name: 'Dodaj pozycję' }).click();
+		const dialog = page.getByRole('dialog', { name: 'Dodaj do listy zakupów' });
+		await dialog.getByLabel('Produkt').fill('mlek');
+		await page.getByRole('option', { name: /mleko/ }).click();
+		await dialog.getByLabel('Ilość').fill('1,5');
+		await dialog.getByLabel('Jednostka').click();
+		await page.getByRole('option', { name: 'l', exact: true }).click();
+		await dialog.getByRole('button', { name: 'Dodaj pozycję' }).click();
+		await expect(dialog).toBeHidden();
+		const post = api.calls.find((c) => c.key.endsWith('/shopping-list/items') && c.json)!;
+		expect(post.json).toMatchObject({
+			items: [{ quantity: { value: 1.5, unit: 'l' } }]
+		});
+	});
+
 	test('has no axe violations (360 px)', async ({ page }) => {
 		await page.setViewportSize({ width: 360, height: 740 });
 		await page.emulateMedia({ reducedMotion: 'reduce' });
