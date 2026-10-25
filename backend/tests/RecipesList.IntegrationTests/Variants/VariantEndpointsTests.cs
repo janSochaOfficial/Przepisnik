@@ -371,6 +371,35 @@ public sealed class VariantEndpointsTests(ApiFactory factory) : IClassFixture<Ap
         await ContractAssert.IsProblemAsync(await _bartek.GetAsync($"/api/v1/variants/{id}"), HttpStatusCode.NotFound, "variant.not_found");
     }
 
+    [Fact]
+    public async Task SetVisibility_ByAuthor_Returns200WithNewVisibilityAndVersion()
+    {
+        var recipe = await AddRecipeAsync(VisibilityLevel.Public);
+        var created = await CreateAsync(_bartek, recipe, "Widoczność", "public");
+        var id = created.GetProperty("id").GetGuid();
+
+        var response = await _bartek.PutJsonAsync($"/api/v1/variants/{id}/visibility", new { visibility = "private" });
+
+        var updated = await ContractAssert.IsJsonAsync(response, HttpStatusCode.OK, "VariantDetail");
+        updated.GetProperty("visibility").GetString().ShouldBe("private");
+        updated.GetProperty("version").GetUInt32().ShouldNotBe(created.GetProperty("version").GetUInt32());
+        await ContractAssert.IsProblemAsync(await _ania.GetAsync($"/api/v1/variants/{id}"), HttpStatusCode.NotFound, "variant.not_found");
+    }
+
+    [Fact]
+    public async Task SetVisibility_ByAnotherUser_Returns403_WhenInvisible404_WhenInvalid400()
+    {
+        var recipe = await AddRecipeAsync(VisibilityLevel.Public);
+        var id = (await CreateAsync(_bartek, recipe, "Cudza", "public")).GetProperty("id").GetGuid();
+        var privateId = (await CreateAsync(_bartek, recipe, "Prywatna", "private")).GetProperty("id").GetGuid();
+
+        await ContractAssert.IsProblemAsync(await _ania.PutJsonAsync($"/api/v1/variants/{id}/visibility", new { visibility = "private" }), HttpStatusCode.Forbidden, "variant.not_author");
+        await ContractAssert.IsProblemAsync(await _ania.PutJsonAsync($"/api/v1/variants/{privateId}/visibility", new { visibility = "public" }), HttpStatusCode.NotFound, "variant.not_found");
+        await ContractAssert.IsProblemAsync(await _ania.PutJsonAsync($"/api/v1/variants/{Guid.NewGuid()}/visibility", new { visibility = "public" }), HttpStatusCode.NotFound, "variant.not_found");
+        (await _bartek.PutJsonAsync($"/api/v1/variants/{id}/visibility", new { visibility = "nope" })).StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await _bartek.PutJsonAsync($"/api/v1/variants/{id}/visibility", new { })).StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
     private async Task<Recipe> AddRecipeAsync(VisibilityLevel visibility, string title = "Kurczak w śmietanie")
     {
         await using var db = factory.CreateDbContext();

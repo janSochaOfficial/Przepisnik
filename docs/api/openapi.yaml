@@ -967,6 +967,32 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /variants/{id}/visibility:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [variants]
+      operationId: SetVariantVisibility
+      summary: Change a variant's visibility
+      description: Author only; never locked (PROJECT §6.1). Bumps the variant's version.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VisibilityWrite' }
+      responses:
+        '200':
+          description: The updated variant.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VariantDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /variants/{id}/resolved:
     parameters:
       - $ref: '#/components/parameters/Id'

@@ -8,19 +8,32 @@
 	import VisibilitySelect from './VisibilitySelect.svelte';
 
 	/**
-	 * The change-visibility dialog (PROJECT §4.4): `PUT /recipes/{id}/visibility`. Opened from the recipe menu
-	 * (F5). Narrowing is refused while other users have variants (409 `recipe.visibility_locked`),
-	 * which the dialog explains instead of showing a generic error.
+	 * The change-visibility dialog (PROJECT §4.4): `PUT /recipes/{id}/visibility`, or with
+	 * `kind="variant"` `PUT /variants/{id}/visibility` (never locked, §6.1). Opened from the recipe
+	 * menu (F5) and the variant menu (V2). Narrowing a recipe is refused while other users have
+	 * variants (409 `recipe.visibility_locked`), which the dialog explains instead of showing a
+	 * generic error.
 	 */
 	type Props = {
 		open?: boolean;
-		recipeId: string;
+		kind?: 'recipe' | 'variant';
+		/** The recipe's or the variant's id, by `kind`. */
+		id: string;
 		visibility: Visibility;
-		/** Called with the updated recipe after a successful change. */
+		/** Called with the updated recipe after a successful change (`kind="recipe"`). */
 		onChanged?: (recipe: components['schemas']['RecipeDetail']) => void;
+		/** Called with the updated variant after a successful change (`kind="variant"`). */
+		onVariantChanged?: (variant: components['schemas']['VariantDetail']) => void;
 	};
 
-	let { open = $bindable(false), recipeId, visibility, onChanged }: Props = $props();
+	let {
+		open = $bindable(false),
+		kind = 'recipe',
+		id,
+		visibility,
+		onChanged,
+		onVariantChanged
+	}: Props = $props();
 
 	// Writable deriveds: they start over (current visibility, no error) whenever the dialog opens or closes.
 	let selected = $derived.by((): Visibility => {
@@ -44,15 +57,27 @@
 		saving = true;
 		error = null;
 		try {
-			const recipe = await unwrap(
-				createApi().PUT('/recipes/{id}/visibility', {
-					params: { path: { id: recipeId } },
-					body: { visibility: selected }
-				})
-			);
-			toast.success(t.recipes.changeVisibility.saved);
-			open = false;
-			onChanged?.(recipe);
+			if (kind === 'variant') {
+				const variant = await unwrap(
+					createApi().PUT('/variants/{id}/visibility', {
+						params: { path: { id } },
+						body: { visibility: selected }
+					})
+				);
+				toast.success(t.recipes.changeVisibility.saved);
+				open = false;
+				onVariantChanged?.(variant);
+			} else {
+				const recipe = await unwrap(
+					createApi().PUT('/recipes/{id}/visibility', {
+						params: { path: { id } },
+						body: { visibility: selected }
+					})
+				);
+				toast.success(t.recipes.changeVisibility.saved);
+				open = false;
+				onChanged?.(recipe);
+			}
 		} catch (e) {
 			error = e;
 		} finally {

@@ -231,6 +231,7 @@ type RecipeWrite = {
 | GET | `/variants/{id}/resolved` | — | `200 ResolvedRecipe` | 404 |
 | POST | `/recipes/{id}/variants` | `VariantWrite` | `201 VariantDetail` | 404 (recipe not visible), 400 `variant.no_changes`, 400 `quantity.unit_incompatible`, 409 `variant.name_taken` |
 | PUT | `/variants/{id}` | `VariantWrite & { version: Version }` | `200 VariantDetail` | 403 `variant.not_author`, 409 |
+| PUT | `/variants/{id}/visibility` | `{ visibility: Visibility }` | `200 VariantDetail` (new `version`) | 403 `variant.not_author`, 404 `variant.not_found`. Never locked (PROJECT §6.1) |
 | PUT | `/variants/{id}/favorite` | — | `204` (idempotent) | 404 |
 | DELETE | `/variants/{id}/favorite` | — | `204` (idempotent) | |
 | DELETE | `/variants/{id}` | — | `204` | 403 |

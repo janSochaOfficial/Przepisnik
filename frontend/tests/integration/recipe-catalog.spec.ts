@@ -174,9 +174,10 @@ test.describe('Moje warianty and Ulubione', () => {
 		await expect(lost.getByRole('link')).toHaveCount(0);
 		expect(api.calls.some((c) => c.key === 'GET /variants')).toBe(true);
 
-		await lost.getByRole('button', { name: 'Usuń wariant' }).click();
+		await lost.getByRole('button', { name: 'Akcje wariantu „Utracony”' }).click();
+		await page.getByRole('button', { name: 'Usuń wariant' }).click();
 		await page
-			.getByRole('alertdialog', { name: 'Usunąć wariant?' })
+			.getByRole('alertdialog', { name: 'Usunąć wariant „Utracony”?' })
 			.getByRole('button', { name: 'Usuń wariant' })
 			.click();
 		await expect(lost).toHaveCount(0);

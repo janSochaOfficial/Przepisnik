@@ -29,6 +29,9 @@ public interface IVariantService
     /// <summary>Re-diffs an edited copy into the caller's variant.</summary>
     Task<VariantDetailModel> UpdateAsync(Guid id, VariantInput input, uint version, CancellationToken ct);
 
+    /// <summary>Changes the visibility of the caller's variant. Never locked (PROJECT 6.1); bumps the version.</summary>
+    Task<VariantDetailModel> SetVisibilityAsync(Guid id, VisibilityLevel visibility, CancellationToken ct);
+
     /// <summary>Deletes the caller's variant and drops remembered picks that pointed at its options.</summary>
     Task DeleteAsync(Guid id, CancellationToken ct);
 
@@ -234,6 +237,20 @@ public sealed class VariantService(
 
             throw;
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<VariantDetailModel> SetVisibilityAsync(Guid id, VisibilityLevel visibility, CancellationToken ct)
+    {
+        var variant = await LoadOwnVariantAsync(id, ct);
+        if (variant.Visibility != visibility)
+        {
+            variant.Visibility = visibility;
+            variant.UpdatedAt = clock.GetUtcNow();
+            await db.SaveChangesAsync(ct);
+        }
+
+        return await GetAsync(id, ct);
     }
 
     /// <inheritdoc />
