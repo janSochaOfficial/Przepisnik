@@ -26,6 +26,16 @@ const base: MockHandlers = {
 };
 const url = `/przepisy/${recipeId}`;
 
+/** A remembered selection that pins the base's option in every slot. */
+function basePicks() {
+	return Object.fromEntries(
+		matrix().slots.map((slot) => [
+			slot.key,
+			{ optionKey: slot.options.find((o) => o.variantIds.includes('base'))?.key, source: 'user' }
+		])
+	);
+}
+
 const ingredients = (page: Page) => page.getByRole('list', { name: 'Lista składników' });
 
 /** Opens the option sheet of an ingredient row and picks an option. */
@@ -135,6 +145,29 @@ test.describe('auto-match', () => {
 		await page.goto(`${url}?wariant=${variantB}`);
 		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toBeVisible();
 		await expect(page.getByText('Krok wariantu B: dodaj śmietankę.')).toBeVisible();
+	});
+
+	test('?wariant= beats a remembered selection, and scaling applies to the variant', async ({
+		page
+	}) => {
+		await mockApi(page, {
+			...base,
+			'GET /recipes/:id/my-selection': () => ({
+				body: { recipeId, picks: basePicks(), updatedAt: '2026-10-10T10:00:00Z' }
+			})
+		});
+		await page.goto(`${url}?wariant=${variantB}`);
+		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toBeVisible();
+		await expect(ingredients(page).getByRole('button', { name: /mleko/ })).toBeHidden();
+		await expect(page.getByText('Krok wariantu B: dodaj śmietankę.')).toBeVisible();
+
+		await ingredients(page).getByRole('button', { name: /kurczak/ }).click();
+		await page.getByRole('dialog').getByLabel('Mam').fill('600');
+		await page.getByRole('dialog').getByRole('button', { name: 'Przelicz' }).click();
+		await expect(page.getByRole('status').filter({ hasText: 'Przeliczono' })).toBeVisible();
+		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toContainText(
+			/375/
+		);
 	});
 
 	test('a favourite variant becomes the auto choice once the pins are cleared', async ({

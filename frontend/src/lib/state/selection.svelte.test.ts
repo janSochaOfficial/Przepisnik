@@ -71,12 +71,55 @@ describe('SelectionState', () => {
 		expect(picksOfVariant(matrix(), 'nope')).toEqual({});
 	});
 
-	it('does not use ?wariant= when a selection is saved', () => {
+	it('?wariant= wins over a remembered selection and replaces its picks', () => {
+		const remembered = {
+			recipeId: 'r',
+			picks: picksOfVariant(matrix(), 'base'),
+			scaling: { anchorSlotKey: slotKey.chicken, anchorBaseAmount: 600 },
+			updatedAt: '2026-10-10T10:00:00Z'
+		};
+		const s = make({ pinVariantId: variantB, selection: remembered });
+		expect(s.match.bestVariantId).toBe(variantB);
+		expect(s.present.map((r) => r.ingredient?.product.name)).toContain('śmietanka');
+		// The anchor slot still has an amount in B, so the scaling is kept and applied to B's amounts.
+		expect(s.factor).toBe(1.5);
+		expect(s.cookIngredients[1]?.scaledBaseAmount).toBe(375);
+	});
+
+	it('resets the remembered scaling when its anchor slot has no amount in the opened variant', () => {
 		const s = make({
-			pinVariantId: variantB,
+			selection: {
+				recipeId: 'r',
+				picks: {},
+				scaling: { anchorSlotKey: slotKey.pepper, anchorBaseAmount: 2 },
+				updatedAt: '2026-10-10T10:00:00Z'
+			}
+		});
+		s.scaling = { anchorSlotKey: slotKey.pepper, anchorBaseAmount: 2 };
+		expect(s.openVariant(variantA)).toBe(true);
+		expect(s.scaling).toBeNull();
+		expect(s.factor).toBe(1);
+	});
+
+	it('an unknown ?wariant= falls back to the remembered selection', () => {
+		const s = make({
+			pinVariantId: 'nope',
 			selection: { recipeId: 'r', picks: {}, updatedAt: '2026-10-10T10:00:00Z' }
 		});
 		expect(s.match.bestVariantId).toBe('base');
+		expect(s.openVariant('nope')).toBe(false);
+	});
+
+	it('openVariant switches the shown variant, and "base" pins the base', async () => {
+		const s = make();
+		s.setFavorite(variantA, true);
+		expect(s.openVariant(variantB)).toBe(true);
+		expect(s.match.bestVariantId).toBe(variantB);
+		expect(s.openVariant('base')).toBe(true);
+		// Pinned, so the favourite variant does not win over the base.
+		expect(s.match.bestVariantId).toBe('base');
+		await vi.advanceTimersByTimeAsync(SAVE_DELAY_MS + 100);
+		expect(requests).toHaveLength(1);
 	});
 
 	it('scales every amount from the anchor and resets', () => {
