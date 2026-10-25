@@ -602,6 +602,28 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/variants/{id}/visibility': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		get?: never;
+		/**
+		 * Change a variant's visibility
+		 * @description Author only; never locked (PROJECT §6.1). Bumps the variant's version.
+		 */
+		put: operations['SetVariantVisibility'];
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/variants/{id}/resolved': {
 		parameters: {
 			query?: never;
@@ -3100,6 +3122,36 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content?: never;
+			};
+			400: components['responses']['BadRequest'];
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+			404: components['responses']['NotFound'];
+		};
+	};
+	SetVariantVisibility: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['VisibilityWrite'];
+			};
+		};
+		responses: {
+			/** @description The updated variant. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['VariantDetail'];
+				};
 			};
 			400: components['responses']['BadRequest'];
 			401: components['responses']['Unauthorized'];

@@ -45,10 +45,6 @@ export const recipes = {
 		noCover: 'Brak zdjęcia',
 		variantOf: (variant: string, recipe: string) => `wariant „${variant}” · przepis „${recipe}”`,
 		baseUnavailable: 'Przepis bazowy jest niedostępny',
-		deleteVariant: 'Usuń wariant',
-		deleteVariantTitle: 'Usunąć wariant?',
-		deleteVariantText: (name: string) => `Wariant „${name}” zostanie usunięty.`,
-		variantDeleted: 'Usunięto wariant.',
 		favoriteRemoved: 'Usunięto z ulubionych.',
 		favoriteFailed: 'Nie udało się zmienić ulubionych.'
 	},

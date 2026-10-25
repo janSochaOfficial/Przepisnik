@@ -91,6 +91,24 @@
 		});
 	}
 
+	/** The author deleted a variant from the Warianty tab: reload the matrix; leave it if it was shown. */
+	async function variantDeleted(id: string) {
+		const wasShown = selection.match.bestVariantId === id || data.pinVariantId === id;
+		try {
+			await selection.reloadMatrix();
+		} catch {
+			toast.error(t.errors['server.error']);
+			return;
+		}
+		if (!wasShown) return;
+		selection.openVariant('base');
+		appliedPin = null;
+		void goto(resolve('/przepisy/[id]', { id: selection.recipe.id }), {
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
 	const labels = t.variants;
 	let recipe = $derived(selection.recipe);
 	let isAuthor = $derived(recipe.author.id === data.me?.id);
@@ -265,6 +283,7 @@
 					state={selection}
 					shownId={match.isCustomMix ? null : match.bestVariantId}
 					onopen={openVariant}
+					ondeleted={variantDeleted}
 					oncreate={canCreateVariant ? () => newVariant(false) : undefined}
 				/>
 			{:else}
@@ -361,7 +380,7 @@
 {#if isAuthor && !recipe.isArchived}
 	<ChangeVisibilityDialog
 		bind:open={visibilityOpen}
-		recipeId={recipe.id}
+		id={recipe.id}
 		visibility={recipe.visibility}
 		onChanged={(updated) => (selection.recipe = updated)}
 	/>

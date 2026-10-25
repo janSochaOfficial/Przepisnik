@@ -105,6 +105,17 @@ export const variants = {
 		favoriteRemove: (name: string) => `Usuń wariant „${name}” z ulubionych`
 	},
 
+	variantMenu: {
+		open: (name: string) => `Akcje wariantu „${name}”`,
+		title: 'Działania',
+		edit: 'Edytuj wariant',
+		changeVisibility: 'Zmień widoczność',
+		delete: 'Usuń wariant',
+		deleteTitle: (name: string) => `Usunąć wariant „${name}”?`,
+		deleteText: 'Wariant zostanie usunięty razem z wpisem w ulubionych.',
+		deleted: 'Usunięto wariant.'
+	},
+
 	favorite: {
 		recipeAdd: 'Dodaj przepis do ulubionych',
 		recipeRemove: 'Usuń przepis z ulubionych',

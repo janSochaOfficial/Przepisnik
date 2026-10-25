@@ -205,6 +205,28 @@ export class SelectionState {
 		this.scheduleSave();
 	}
 
+	/**
+	 * Re-reads the matrix after a variant was deleted: the Warianty list and count follow, and remembered
+	 * picks of options that no longer exist are dropped (the server drops them too).
+	 */
+	async reloadMatrix(): Promise<void> {
+		const id = this.recipe.id;
+		const matrix = await unwrap(
+			createApi().GET('/recipes/{id}/variant-matrix', { params: { path: { id } } })
+		);
+		const picks: Record<string, Pick> = {};
+		for (const [slotKey, pick] of Object.entries(this.picks)) {
+			const slot = matrix.slots.find((s) => s.key === slotKey);
+			if (slot?.options.some((o) => o.key === pick.optionKey)) picks[slotKey] = pick;
+		}
+		this.matrix = matrix;
+		this.picks = picks;
+		this.recipe = {
+			...this.recipe,
+			variantCount: matrix.variants.filter((v) => v.id !== 'base').length
+		};
+	}
+
 	/** Keeps the matrix in step with a ♥ toggled on a variant ('base' is the recipe's own ♥). */
 	setFavorite(variantId: string, favorite: boolean): void {
 		this.matrix = {

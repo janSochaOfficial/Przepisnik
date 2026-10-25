@@ -160,7 +160,7 @@
 		</div>
 		<ChangeVisibilityDialog
 			bind:open={visibilityOpen}
-			recipeId={recipe.id}
+			id={recipe.id}
 			visibility={recipe.visibility}
 			onChanged={() => invalidate(`app:recipe:${recipe.id}`)}
 		/>

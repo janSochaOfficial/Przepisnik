@@ -7,7 +7,6 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { createApi, unwrap } from '$lib/api/client';
 	import { setFavorite } from '$lib/components/catalog/favorites';
 	import { loadNames, type Named } from '$lib/components/catalog/names';
 	import RecipeCard from '$lib/components/catalog/RecipeCard.svelte';
@@ -25,7 +24,6 @@
 	import {
 		Button,
 		Chip,
-		ConfirmDialog,
 		EmptyState,
 		ErrorMessage,
 		IconButton,
@@ -49,8 +47,6 @@
 
 	const list = new CatalogList();
 	let allTags = $state<Named[]>([]);
-	let variantToDelete = $state<Extract<CatalogEntry, { kind: 'variant' }> | null>(null);
-	let deleteOpen = $state(false);
 
 	let view = $derived<CatalogView>({ tab, sub, q: appliedQ, tagIds });
 	let filterable = $derived(isFilterable(view));
@@ -117,21 +113,6 @@
 				}
 			}
 		});
-	}
-
-	async function deleteVariant() {
-		const entry = variantToDelete;
-		if (!entry) return;
-		try {
-			await unwrap(
-				createApi().DELETE('/variants/{id}', { params: { path: { id: entry.variant.id } } })
-			);
-		} catch (error) {
-			toast.error(t.errors['server.error']);
-			throw error;
-		}
-		list.remove(entry.key);
-		toast.success(labels.variantDeleted);
 	}
 
 	let emptyKind = $derived.by((): keyof typeof empties => {
@@ -244,10 +225,7 @@
 									<VariantCard
 										bind:variant={entry.variant}
 										onfavorite={(on) => !on && unfavorited(entry)}
-										ondelete={() => {
-											variantToDelete = entry;
-											deleteOpen = true;
-										}}
+										ondeleted={() => list.remove(entry.key)}
 									/>
 								{/if}
 							</li>
@@ -271,11 +249,3 @@
 </Page>
 
 <ImportDialog bind:open={importOpen} />
-
-<ConfirmDialog
-	bind:open={deleteOpen}
-	title={labels.deleteVariantTitle}
-	description={variantToDelete ? labels.deleteVariantText(variantToDelete.variant.name) : undefined}
-	confirmLabel={labels.deleteVariant}
-	onConfirm={deleteVariant}
-/>

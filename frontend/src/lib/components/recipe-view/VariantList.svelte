@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { createApi, unwrap } from '$lib/api/client';
 	import FavoriteButton from '$lib/components/catalog/FavoriteButton.svelte';
+	import VariantActions from '$lib/components/catalog/VariantActions.svelte';
 	import { Button, EmptyState } from '$lib/components/ui';
 	import type { Visibility } from '$lib/domain/types';
 	import { t } from '$lib/i18n';
@@ -16,9 +18,13 @@
 		shownId: string | null;
 		onopen: (id: string) => void;
 		oncreate?: () => void;
+		/** The viewer deleted one of their variants from its menu. */
+		ondeleted?: (id: string) => void;
 	};
 
-	let { state: selection, shownId, onopen, oncreate }: Props = $props();
+	let { state: selection, shownId, onopen, oncreate, ondeleted }: Props = $props();
+
+	let meId = $derived(page.data.me?.id);
 
 	const labels = t.variants.list;
 
@@ -95,6 +101,15 @@
 					removeLabel={labels.favoriteRemove(v.name)}
 					onchange={(on) => selection.setFavorite(v.id, on)}
 				/>
+				{#if v.author.id === meId}
+					<VariantActions
+						variantId={v.id}
+						name={v.name}
+						visibility={visibility[v.id]}
+						onvisibility={(next) => (visibility = { ...visibility, [v.id]: next })}
+						ondeleted={() => ondeleted?.(v.id)}
+					/>
+				{/if}
 			</li>
 		{/each}
 	</ul>

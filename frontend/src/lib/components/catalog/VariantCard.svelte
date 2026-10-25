@@ -1,23 +1,26 @@
 <script lang="ts">
-	import Trash from '@lucide/svelte/icons/trash';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import type { components } from '$lib/api/schema';
-	import { IconButton } from '$lib/components/ui';
 	import { t } from '$lib/i18n';
 	import FavoriteButton from './FavoriteButton.svelte';
+	import VariantActions from './VariantActions.svelte';
 
 	/**
 	 * A variant in "Ulubione" and "Moje warianty". It opens the base recipe with the variant
 	 * preselected (`?wariant=`). When the base recipe is no longer visible, the card says so and offers
-	 * only deletion (PROJECT §6.5).
+	 * only deletion (PROJECT §6.5). The author also gets the ⋯ menu (`VariantActions`).
 	 */
 	type Props = {
 		variant: components['schemas']['VariantSummary'];
 		onfavorite?: (favorite: boolean) => void;
-		ondelete?: () => void;
+		/** The variant was deleted from its menu. */
+		ondeleted?: () => void;
 	};
 
-	let { variant = $bindable(), onfavorite, ondelete }: Props = $props();
+	let { variant = $bindable(), onfavorite, ondeleted }: Props = $props();
+
+	let isAuthor = $derived(variant.author.id === page.data.me?.id);
 
 	let href = $derived(
 		`${resolve('/przepisy/[id]', { id: variant.recipeId })}?wariant=${variant.id}`
@@ -42,20 +45,25 @@
 			<p class="text-sm font-semibold text-ink">{t.recipes.catalog.baseUnavailable}</p>
 		{/if}
 	</div>
-	{#if variant.baseAvailable}
-		<FavoriteButton
-			kind="variant"
-			id={variant.id}
-			bind:favorite={variant.isFavorite}
-			class="relative z-10 shrink-0"
-			onchange={onfavorite}
-		/>
-	{:else if ondelete}
-		<IconButton
-			icon={Trash}
-			label={t.recipes.catalog.deleteVariant}
-			class="relative z-10 shrink-0"
-			onclick={ondelete}
-		/>
-	{/if}
+	<div class="flex shrink-0 items-center">
+		{#if variant.baseAvailable}
+			<FavoriteButton
+				kind="variant"
+				id={variant.id}
+				bind:favorite={variant.isFavorite}
+				class="relative z-10 shrink-0"
+				onchange={onfavorite}
+			/>
+		{/if}
+		{#if isAuthor}
+			<VariantActions
+				variantId={variant.id}
+				name={variant.name}
+				visibility={variant.visibility}
+				baseAvailable={variant.baseAvailable}
+				onvisibility={(v) => (variant.visibility = v)}
+				{ondeleted}
+			/>
+		{/if}
+	</div>
 </article>
