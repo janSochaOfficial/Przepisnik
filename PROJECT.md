@@ -281,7 +281,7 @@ Remembered picks are stored **per user on the server** (D-05); the client keeps 
 
 ### 6.7 The Warianty tab
 The recipe view has two tabs: **Przepis** (the cook view) and **Warianty (N)** (D-38). Warianty lists the base recipe (**"Przepis bazowy"**) first, then every variant the viewer can see (§6.1), most cooked first, then oldest first: name, author, visibility, cook count, the variant's ♥, and a mark on the one currently shown.
-- Opening an entry, or opening a link with `?wariant=<id>` (variant cards, after an import), switches to **Przepis** and shows **exactly that variant**: every slot is pinned to that variant's option (user picks, §6.3), its steps, utensils, times and servings are shown, and any active scaling is applied to its amounts. Remembered picks for the recipe are replaced by this choice; the scaling choice is kept when its anchor slot still has an amount, and reset otherwise. The base entry clears all picks.
+- Opening an entry, or opening a link with `?wariant=<id>` (variant cards, after an import), switches to **Przepis** and shows **exactly that variant**: every slot is pinned to that variant's option (user picks, §6.3), its steps, utensils, times and servings are shown, and any active scaling is applied to its amounts. Remembered picks for the recipe are replaced by this choice; the scaling choice is kept when its anchor slot still has an amount, and reset otherwise. The base entry pins every slot to the base's options (clearing the picks would let a favourite variant win the auto-match).
 - The URL keeps the open variant (`?wariant=`) so a reload or a shared link shows the same thing; opening another variant on the same recipe page updates the view without a full reload.
 
 ## 7. Product catalog

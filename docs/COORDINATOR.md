@@ -33,9 +33,9 @@ Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| R1 | 1 | running | task/R1-recipe-view-variants | sonnet/medium: a real selection-state bug + page restructure, frontend only |
+| R1 | 1 | merged | task/R1-recipe-view-variants | sonnet/medium. merged 2026-10-25, no model or contract changes; agent gate green (235 playwright). Accepted: `SelectionState.openVariant` (re-applied on client navigation); the base entry pins the base (PROJECT §6.7 updated); visibility fetched lazily from `GET /recipes/{id}/variants`; additive `titleAside` on `Page`; `FavoriteButton` `addLabel`/`removeLabel`. Follow-up: `?wariant=` saves even when the picks equal the remembered ones |
 | I2 | 2 | running | task/I2-import-format-help | haiku/low: static help page, low risk; example validated against the schema |
-| R2 | 3 | todo | task/R2-servings | opus/medium: model + contract + variant engine + export + scaling change together (high compound risk). Expect model changes → coordinator migration `R2_Servings` |
+| R2 | 3 | running | task/R2-servings | opus/medium: model + contract + variant engine + export + scaling change together (high compound risk). Expect model changes → coordinator migration `R2_Servings` |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
