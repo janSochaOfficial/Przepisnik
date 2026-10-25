@@ -141,17 +141,25 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 - "Move bought items to the fridge": a checked product with no amount and no default package size **stays on the list**.
 - The default fridge is set on create or join only if you have none. When you lose it, it falls back to a fridge you own, then the one you joined earliest.
 - Sort orders: fridges oldest first; members owner first, then by join time; items by category, name, then most-used package; shopping list unchecked first, then by category and name; invites newest first.
-- Shopping PATCH treats `null` as "unchanged", so **an amount can't be cleared**. Unchecking doesn't merge an entry into another one.
-- Amounts in the fridge and shopping forms are typed in **base units** (g / ml / szt.).
+- Shopping PATCH treats `null` as "unchanged"; an amount is cleared with `clearAmount` (U2). Unchecking doesn't merge an entry into another one.
+- Amounts in the fridge form are typed in **base units** (g / ml / szt.); the shopping dialogs take any valid unit (U2).
 - Editing a fridge item saves with a "Zapisz zmiany" button, not when the slider is released.
 - Undo of an item delete re-creates the item under a new id.
+- **U2 (shopping units):** metric quantities on the list show a decimal comma (`1,5 l`, PROJECT §10) instead of U1's `1 ½ l`; other units use U1's as-entered format. The dialogs have no piece-size selector (an existing size is kept when converting). An item with only a base amount opens in its base unit and is saved with it. Unit conversion for the dialogs is frontend-only; the merge uses `IQuantityConverter`.
 - Concurrent accepts of the same invite are idempotent; a concurrent undo of a deduction → 409 (T90).
 
-### 5.7 Import and export (B6)
+### 5.7 Import and export (B6, I1)
 - Export removes the "originally by @nick" footer and reports that nickname as `authorNickname`, so export → import → export round-trips and the original author survives chains of imports. Variants carry the footer too.
 - A description that goes over 2000 characters with the footer is **cut with "…"** instead of rejecting the file.
 - Clashing variant names get " (2)", " (3)".
 - Photos are re-encoded on import, so their bytes differ from the original.
+- **Import as variants (I1):**
+  - Besides an empty diff, a candidate is skipped when its result equals the target, a visible existing variant of it, or a variant created earlier in the same import.
+  - A file photo byte-identical to a step photo of the target (or a visible variant) reuses that image; new photos are stored only when a created variant uses them; the cover is ignored.
+  - A time missing from the file keeps the target's time (a variant can't clear a base time).
+  - Section start and end count as step anchors, so steps with no common text are paired by position; LCS ties keep the earliest target row.
+  - The file's recipe is validated with `RecipeInputValidator`; errors → 400 `import.invalid_format`. A 201 has `Location: /api/v1/variants/{first id}`.
+  - A file without a usable title (1–150 chars) skips matching. A success toast follows a variant import.
 - System tags (`szybkie`) aren't exported. Op key names are fixed (`key`, `targetKey`, `afterKey`, `productKey`, `imageKey`).
 
 ### 5.8 Quantities library (F1)
