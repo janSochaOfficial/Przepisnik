@@ -34,3 +34,17 @@ Content-Type: application/json
 X-Requested-With: fetch
 
 { "moveToFridge": true }
+
+### Add with a unit (amount and quantity are exclusive); a merge keeps the existing unit
+POST {{baseUrl}}/fridges/{{fridgeId}}/shopping-list/items
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "items": [ { "productId": "{{productId}}", "quantity": { "value": 1.5, "unit": "l" } } ] }
+
+### Change the unit (quantity), set a base amount (amount) or remove both (clearAmount)
+PATCH {{baseUrl}}/fridges/{{fridgeId}}/shopping-list/items/{{itemId}}
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "version": 0, "clearAmount": true }

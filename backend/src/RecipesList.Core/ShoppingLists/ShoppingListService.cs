@@ -2,18 +2,24 @@ using Microsoft.EntityFrameworkCore;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Fridges;
+using RecipesList.Core.Quantities;
 using RecipesList.Core.Recipes;
+using RecipesList.Core.Units;
 
 namespace RecipesList.Core.ShoppingLists;
 
 /// <summary>A shopping-list entry with its product (null for free text) and the user who added it.</summary>
-public sealed record ShoppingListItemModel(ShoppingListItem Item, Product? Product, FridgeUserRef AddedBy);
+public sealed record ShoppingListItemModel(ShoppingListItem Item, Product? Product, FridgeUserRef AddedBy, CustomUnit? CustomUnit = null);
 
-/// <summary>One entry to add: a product (with an optional amount) or free text (API.md §7 <c>ShoppingListItemWrite</c>).</summary>
-public sealed record ShoppingListItemInput(Guid? ProductId, string? Text, decimal? Amount);
+/// <summary>
+/// One entry to add: a product (with an optional base amount or quantity, exclusive) or free text
+/// (API.md §7 <c>ShoppingListItemWrite</c>).
+/// </summary>
+public sealed record ShoppingListItemInput(Guid? ProductId, string? Text, decimal? Amount, Quantity? Quantity = null);
 
 /// <summary>A partial edit; null fields are left unchanged (API.md §7 <c>ShoppingListItemPatch</c>).</summary>
-public sealed record ShoppingListItemPatchInput(uint Version, bool? Checked, decimal? Amount, string? Text);
+public sealed record ShoppingListItemPatchInput(
+    uint Version, bool? Checked, decimal? Amount, string? Text, Quantity? Quantity = null, bool? ClearAmount = null);
 
 /// <summary>What <c>complete</c> did: how many checked entries were removed and the fridge items created from them.</summary>
 public sealed record CompleteShoppingListModel(int Removed, IReadOnlyList<FridgeItemModel> CreatedFridgeItems);
@@ -26,7 +32,7 @@ public interface IShoppingListService
 
     /// <summary>
     /// Adds entries. A product that already has an unchecked entry (or appears earlier in the batch) is merged into it
-    /// by summing the amounts (null + x = x). Returns the created or merged entries, one per distinct target, in
+    /// by summing the base amounts (null + x = x); the merged entry keeps the existing unit, or takes the new one when it had none. Returns the created or merged entries, one per distinct target, in
     /// request order.
     /// </summary>
     Task<IReadOnlyList<ShoppingListItemModel>> AddAsync(Guid fridgeId, IReadOnlyList<ShoppingListItemInput> items, CancellationToken ct);
@@ -46,7 +52,8 @@ public interface IShoppingListService
 }
 
 /// <inheritdoc />
-public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUser, FridgeAccess access, TimeProvider time)
+public sealed class ShoppingListService(
+    IAppDbContext db, ICurrentUser currentUser, FridgeAccess access, TimeProvider time, IQuantityConverter converter)
     : IShoppingListService
 {
     public const int MaxTextLength = 200;
@@ -84,10 +91,12 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
         }
 
         var productIds = items.Where(i => i.ProductId is not null).Select(i => i.ProductId!.Value).Distinct().ToList();
-        var known = (await db.Products.Where(p => productIds.Contains(p.Id)).Select(p => p.Id).ToListAsync(ct)).ToHashSet();
+        var products = await db.Products.Where(p => productIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, ct);
+        var units = await db.LoadCustomUnitsAsync(items.Select(i => i.Quantity), ct);
+        var amounts = new decimal?[items.Count];
         for (var i = 0; i < items.Count; i++)
         {
-            ValidateWrite(items[i], $"items[{i}]", known, errors);
+            amounts[i] = ValidateWrite(items[i], $"items[{i}]", products, units, errors);
         }
 
         ThrowIfAny(errors);
@@ -103,27 +112,35 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
             byProduct.TryAdd(item.ProductId!.Value, item);
         }
 
+        // The units of the open entries are needed to express a merged total exactly.
+        var allUnits = new Dictionary<Guid, CustomUnit>(units);
+        foreach (var (id, unit) in await db.LoadCustomUnitsAsync(byProduct.Values.Select(i => i.Quantity), ct))
+        {
+            allUnits[id] = unit;
+        }
+
         var now = time.GetUtcNow();
         var touched = new List<ShoppingListItem>();
-        foreach (var input in items)
+        for (var n = 0; n < items.Count; n++)
         {
+            var input = items[n];
             ShoppingListItem target;
             if (input.ProductId is { } productId)
             {
                 if (byProduct.TryGetValue(productId, out var existing))
                 {
-                    existing.Amount = Sum(existing.Amount, input.Amount);
+                    Merge(existing, amounts[n], input.Quantity, products[productId], allUnits);
                     target = existing;
                 }
                 else
                 {
-                    target = NewItem(fridgeId, productId, null, input.Amount, now);
+                    target = NewItem(fridgeId, productId, null, amounts[n], input.Quantity, now);
                     byProduct[productId] = target;
                 }
             }
             else
             {
-                target = NewItem(fridgeId, null, input.Text!.Trim(), null, now);
+                target = NewItem(fridgeId, null, input.Text!.Trim(), null, null, now);
             }
 
             if (!touched.Contains(target))
@@ -141,19 +158,30 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
     {
         ArgumentNullException.ThrowIfNull(patch);
         await access.RequireMemberAsync(fridgeId, ct);
-        var item = await db.ShoppingListItems.SingleOrDefaultAsync(i => i.Id == itemId && i.FridgeId == fridgeId, ct)
+        var item = await db.ShoppingListItems.Include(i => i.Product).SingleOrDefaultAsync(i => i.Id == itemId && i.FridgeId == fridgeId, ct)
             ?? throw new NotFoundException(ErrorCodes.ShoppingItemNotFound);
 
         var errors = new ValidationErrors();
-        if (patch.Amount is { } amount)
+        var clear = patch.ClearAmount == true;
+        decimal? quantityAmount = null;
+        if (patch.Amount is not null || patch.Quantity is not null || clear)
         {
-            if (item.ProductId is null)
+            if (item.Product is not { } product)
             {
-                errors.Add("amount", ErrorCodes.ShoppingItemInvalid);
+                errors.Add(clear ? "clearAmount" : patch.Quantity is not null ? "quantity" : "amount", ErrorCodes.ShoppingItemInvalid);
             }
-            else if (amount <= 0)
+            else if ((patch.Amount is not null ? 1 : 0) + (patch.Quantity is not null ? 1 : 0) + (clear ? 1 : 0) > 1)
+            {
+                errors.Add("quantity", ErrorCodes.ShoppingItemInvalid);
+            }
+            else if (patch.Amount is <= 0)
             {
                 errors.Add("amount", "out_of_range");
+            }
+            else if (patch.Quantity is { } quantity)
+            {
+                var units = await db.LoadCustomUnitsAsync([quantity], ct);
+                quantityAmount = ValidateQuantity(quantity, product, units, "quantity", errors);
             }
         }
 
@@ -186,9 +214,20 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
             item.Checked = isChecked;
         }
 
-        if (patch.Amount is not null)
+        if (clear)
+        {
+            item.Amount = null;
+            item.Quantity = null;
+        }
+        else if (patch.Quantity is { } newQuantity)
+        {
+            item.Amount = quantityAmount;
+            item.Quantity = newQuantity;
+        }
+        else if (patch.Amount is not null)
         {
             item.Amount = patch.Amount;
+            item.Quantity = null;
         }
 
         if (text is not null)
@@ -281,7 +320,8 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
             .Select(i => new ShoppingListItemModel(
                 i,
                 i.Product,
-                new FridgeUserRef(i.AddedById, users.Where(u => u.Id == i.AddedById).Select(u => u.Nickname).FirstOrDefault() ?? "")));
+                new FridgeUserRef(i.AddedById, users.Where(u => u.Id == i.AddedById).Select(u => u.Nickname).FirstOrDefault() ?? ""),
+                i.CustomUnit));
     }
 
     private async Task<IReadOnlyList<ShoppingListItemModel>> LoadInOrderAsync(List<Guid> ids, CancellationToken ct)
@@ -290,7 +330,7 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
         return [.. models.OrderBy(m => ids.IndexOf(m.Item.Id))];
     }
 
-    private ShoppingListItem NewItem(Guid fridgeId, Guid? productId, string? text, decimal? amount, DateTimeOffset now)
+    private ShoppingListItem NewItem(Guid fridgeId, Guid? productId, string? text, decimal? amount, Quantity? quantity, DateTimeOffset now)
     {
         var item = new ShoppingListItem
         {
@@ -298,6 +338,7 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
             ProductId = productId,
             Text = text,
             Amount = amount,
+            Quantity = quantity,
             AddedById = currentUser.Id,
             CreatedAt = now,
         };
@@ -305,18 +346,28 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
         return item;
     }
 
-    private static void ValidateWrite(ShoppingListItemInput input, string path, HashSet<Guid> knownProducts, ValidationErrors errors)
+    /// <summary>Validates one entry and returns its base amount (from the amount or the quantity; null for none).</summary>
+    private decimal? ValidateWrite(
+        ShoppingListItemInput input,
+        string path,
+        Dictionary<Guid, Product> products,
+        IReadOnlyDictionary<Guid, CustomUnit> units,
+        ValidationErrors errors)
     {
         var hasText = !string.IsNullOrWhiteSpace(input.Text);
         if (input.ProductId is { } productId)
         {
-            if (input.Text is not null)
+            if (input.Text is not null || (input.Amount is not null && input.Quantity is not null))
             {
                 errors.Add(path, ErrorCodes.ShoppingItemInvalid);
             }
-            else if (!knownProducts.Contains(productId))
+            else if (!products.TryGetValue(productId, out var product))
             {
                 errors.Add($"{path}.productId", ErrorCodes.ProductNotFound);
+            }
+            else if (input.Quantity is { } quantity)
+            {
+                return ValidateQuantity(quantity, product, units, $"{path}.quantity", errors);
             }
 
             if (input.Amount is <= 0)
@@ -324,10 +375,10 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
                 errors.Add($"{path}.amount", "out_of_range");
             }
 
-            return;
+            return input.Amount;
         }
 
-        if (!hasText || input.Amount is not null)
+        if (!hasText || input.Amount is not null || input.Quantity is not null)
         {
             errors.Add(path, ErrorCodes.ShoppingItemInvalid);
         }
@@ -335,6 +386,55 @@ public sealed class ShoppingListService(IAppDbContext db, ICurrentUser currentUs
         {
             errors.Add($"{path}.text", "too_long");
         }
+
+        return null;
+    }
+
+    /// <summary>Checks a quantity against the product and returns its base amount; adds an error and returns null otherwise.</summary>
+    private decimal? ValidateQuantity(
+        Quantity quantity, Product product, IReadOnlyDictionary<Guid, CustomUnit> units, string path, ValidationErrors errors)
+    {
+        if (!quantity.IsWellFormed)
+        {
+            errors.Add(path, ErrorCodes.QuantityInvalid);
+        }
+        else if (quantity.Unit == Unit.Custom && units.UnitOf(quantity) is null)
+        {
+            errors.Add(path, ErrorCodes.UnitNotFound);
+        }
+        else if ((quantity.Size is not null && !product.HasSizes)
+            || converter.ToBaseAmount(quantity, product, units.UnitOf(quantity)) is not { } amount)
+        {
+            errors.Add(path, ErrorCodes.QuantityUnitIncompatible);
+        }
+        else
+        {
+            return amount;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Adds an incoming amount to an open entry (PROJECT §10): the base amounts are summed; the entry keeps its unit, or
+    /// takes the incoming one when it had none, with the total expressed exactly in that unit (4 decimals).
+    /// </summary>
+    private void Merge(
+        ShoppingListItem existing, decimal? amount, Quantity? incoming, Product product, IReadOnlyDictionary<Guid, CustomUnit> units)
+    {
+        var total = Sum(existing.Amount, amount);
+        var unit = existing.Quantity ?? incoming;
+        existing.Amount = total;
+        if (unit is null || total is null)
+        {
+            existing.Quantity = null;
+            return;
+        }
+
+        var one = converter.ToBaseAmount(unit with { Value = 1m }, product, units.UnitOf(unit));
+        existing.Quantity = one is > 0
+            ? unit with { Value = Math.Round(total.Value / one.Value, QuantityConstants.BaseAmountDecimals, MidpointRounding.AwayFromZero) }
+            : null;
     }
 
     /// <summary>

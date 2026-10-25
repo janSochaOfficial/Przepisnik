@@ -24,7 +24,7 @@ internal static class ShoppingListsFeature
         api.MapPost("/fridges/{id:guid}/shopping-list/items", async Task<Ok<ShoppingListItemDto[]>> (
                 Guid id, ShoppingListItemsWriteRequest request, IShoppingListService list, CancellationToken ct) =>
             {
-                var inputs = request.Items.Select(i => new ShoppingListItemInput(i.ProductId, i.Text, i.Amount)).ToList();
+                var inputs = request.Items.Select(i => new ShoppingListItemInput(i.ProductId, i.Text, i.Amount, i.Quantity)).ToList();
                 return TypedResults.Ok((await list.AddAsync(id, inputs, ct)).Select(ShoppingListItemDto.From).ToArray());
             })
             .WithName("AddShoppingListItems")
@@ -35,7 +35,7 @@ internal static class ShoppingListsFeature
         api.MapPatch("/fridges/{id:guid}/shopping-list/items/{itemId:guid}", async Task<Ok<ShoppingListItemDto>> (
                 Guid id, Guid itemId, ShoppingListItemPatchRequest request, IShoppingListService list, CancellationToken ct) =>
             {
-                var patch = new ShoppingListItemPatchInput(request.Version, request.Checked, request.Amount, request.Text);
+                var patch = new ShoppingListItemPatchInput(request.Version, request.Checked, request.Amount, request.Text, request.Quantity, request.ClearAmount);
                 return TypedResults.Ok(ShoppingListItemDto.From(await list.PatchAsync(id, itemId, patch, ct)));
             })
             .WithName("PatchShoppingListItem")
