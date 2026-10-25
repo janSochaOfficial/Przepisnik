@@ -201,9 +201,8 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 
 - A concurrent import that creates the same new product, tag or utensil → 500 (needs a savepoint or `ON CONFLICT`).
 - Export when an image file is missing from storage → 500.
-- A shopping-list amount can't be cleared (needs a contract change).
 - Old deductions are never pruned; they only serve undo.
 - Recomputing product preferences reads all of a user's selections on every save.
-- Real Google sign-in is untested end to end (no OAuth client id configured).
+- Real Google sign-in is confirmed only on `npm run dev` (G1); the Docker stack (:8080) is untried.
 - Small duplications: recipe and variant DTO shapes; the client and F2 both order added slots.
 - Playwright tests can time out when the machine is under heavy load (rerunning passes).
