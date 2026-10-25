@@ -4,6 +4,11 @@ import type { components } from '$lib/api/schema';
 
 type RecipeExport = components['schemas']['RecipeExport'];
 type RecipeDetail = components['schemas']['RecipeDetail'];
+type RecipeSummary = components['schemas']['RecipeSummary'];
+type VariantImportResult = components['schemas']['VariantImportResult'];
+
+/** The longest title `GET /recipes/import-matches` accepts (API §4). */
+export const MAX_MATCH_TITLE = 150;
 
 /** The file name from a `Content-Disposition` header, if any. */
 export function fileNameFrom(header: string | null, fallback: string): string {
@@ -42,8 +47,34 @@ export async function readExportFile(file: File): Promise<RecipeExport> {
 	}
 }
 
-/** `POST /recipes/import` with the contents of `file`. Resolves to the new (private) recipe. */
-export async function importRecipe(file: File): Promise<RecipeDetail> {
-	const body = await readExportFile(file);
+/**
+ * The title to look for existing recipes with (PROJECT §4.7, D-35), or `null` when the file has
+ * none the matching endpoint accepts; such a file goes straight to the normal import, which reports it.
+ */
+export function matchTitle(file: unknown): string | null {
+	const recipe = (file as { recipe?: unknown } | null)?.recipe;
+	const title = (recipe as { title?: unknown } | null | undefined)?.title;
+	if (typeof title !== 'string') return null;
+	const trimmed = title.trim();
+	return trimmed.length >= 1 && trimmed.length <= MAX_MATCH_TITLE ? trimmed : null;
+}
+
+/** `GET /recipes/import-matches`: visible, non-archived recipes with the same normalized title. */
+export async function findImportMatches(title: string): Promise<RecipeSummary[]> {
+	return unwrap(createApi().GET('/recipes/import-matches', { params: { query: { title } } }));
+}
+
+/** `POST /recipes/import` with a parsed export file. Resolves to the new (private) recipe. */
+export async function importRecipe(body: RecipeExport): Promise<RecipeDetail> {
 	return unwrap(createApi().POST('/recipes/import', { body }));
+}
+
+/** `POST /recipes/{id}/variants/import`: the file's recipe and variants become private variants of `recipeId`. */
+export async function importAsVariants(
+	recipeId: string,
+	body: RecipeExport
+): Promise<VariantImportResult> {
+	return unwrap(
+		createApi().POST('/recipes/{id}/variants/import', { params: { path: { id: recipeId } }, body })
+	);
 }

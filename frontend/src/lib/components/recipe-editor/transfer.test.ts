@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fileNameFrom } from './transfer';
+import { fileNameFrom, MAX_MATCH_TITLE, matchTitle } from './transfer';
 import { checkImageFile } from './upload';
 
 describe('fileNameFrom', () => {
@@ -15,6 +15,26 @@ describe('fileNameFrom', () => {
 
 	it('falls back without a header', () => {
 		expect(fileNameFrom(null, 'x.json')).toBe('x.json');
+	});
+});
+
+describe('matchTitle', () => {
+	it('returns the trimmed recipe title of a parsed file', () => {
+		expect(matchTitle({ recipe: { title: '  Naleśniki ' } })).toBe('Naleśniki');
+	});
+
+	it('accepts titles up to the limit', () => {
+		expect(matchTitle({ recipe: { title: 'a'.repeat(MAX_MATCH_TITLE) } })).toHaveLength(150);
+		expect(matchTitle({ recipe: { title: 'a'.repeat(MAX_MATCH_TITLE + 1) } })).toBeNull();
+	});
+
+	it('is null when the file has no usable title, so the normal import reports it', () => {
+		expect(matchTitle({})).toBeNull();
+		expect(matchTitle(null)).toBeNull();
+		expect(matchTitle([])).toBeNull();
+		expect(matchTitle({ recipe: null })).toBeNull();
+		expect(matchTitle({ recipe: { title: 5 } })).toBeNull();
+		expect(matchTitle({ recipe: { title: '   ' } })).toBeNull();
 	});
 });
 

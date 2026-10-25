@@ -496,6 +496,48 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/recipes/import-matches': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Recipes an imported file could become variants of (D-35)
+		 * @description Visible, non-archived recipes whose normalized title equals the normalized `title`; the caller's own first, then newest; at most 10.
+		 */
+		get: operations['ListImportMatches'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/recipes/{id}/variants/import': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Import a recipe export file as variants of an existing recipe (≤ 25 MB, D-35)
+		 * @description The file's recipe becomes "Wersja @<author>", each file variant another variant; identical ones are skipped. All are private and owned by the caller.
+		 */
+		post: operations['ImportRecipeAsVariants'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/recipes/{id}/variants': {
 		parameters: {
 			query?: never;
@@ -1668,6 +1710,12 @@ export interface components {
 			removed: number;
 			createdFridgeItems: components['schemas']['FridgeItem'][];
 		};
+		/** @description The variants created by an import as variants (in file order) and how many candidates were skipped. */
+		VariantImportResult: {
+			recipeId: components['schemas']['Uuid'];
+			variants: components['schemas']['VariantSummary'][];
+			skipped: number;
+		};
 		/** @description Self-contained recipe file (API.md §8). Keys are opaque strings unique within the file. */
 		RecipeExport: {
 			/** @constant */
@@ -2798,6 +2846,74 @@ export interface operations {
 			400: components['responses']['BadRequest'];
 			401: components['responses']['Unauthorized'];
 			403: components['responses']['Forbidden'];
+			413: components['responses']['PayloadTooLarge'];
+			429: components['responses']['TooManyRequests'];
+		};
+	};
+	ListImportMatches: {
+		parameters: {
+			query: {
+				title: string;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description The matching recipes. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['RecipeSummary'][];
+				};
+			};
+			400: components['responses']['BadRequest'];
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+		};
+	};
+	ImportRecipeAsVariants: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['RecipeExport'];
+			};
+		};
+		responses: {
+			/** @description Nothing was created; every candidate was skipped. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['VariantImportResult'];
+				};
+			};
+			/** @description At least one variant was created. */
+			201: {
+				headers: {
+					Location: components['headers']['Location'];
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['VariantImportResult'];
+				};
+			};
+			400: components['responses']['BadRequest'];
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+			404: components['responses']['NotFound'];
+			409: components['responses']['Conflict'];
 			413: components['responses']['PayloadTooLarge'];
 			429: components['responses']['TooManyRequests'];
 		};

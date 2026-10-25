@@ -19,3 +19,14 @@ Content-Type: application/json
 X-Requested-With: fetch
 
 < ../../shared/samples/export-v1.json
+
+### Recipes the sample file could become variants of: visible, non-archived, same normalized title (own first, then newest; at most 10)
+GET {{baseUrl}}/recipes/import-matches?title=Nale%C5%9Bniki
+
+### Import the sample file as variants of a recipe: "Wersja @<author>" plus one variant per file variant
+### (201 when something was created, 200 when everything was skipped; 404 recipe.not_found, 409 recipe.archived)
+POST {{baseUrl}}/recipes/{{recipeId}}/variants/import
+Content-Type: application/json
+X-Requested-With: fetch
+
+< ../../shared/samples/export-v1.json

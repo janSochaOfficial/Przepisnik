@@ -347,6 +347,8 @@ test.describe('editing a recipe', () => {
 test.describe('importing a recipe', () => {
 	test('picks a file, posts it and opens the new recipe', async ({ page }) => {
 		const api = await mockApi(page, {
+			// No recipe with the file's title yet (D-35); listed first so `GET /recipes/:id` doesn't answer it.
+			'GET /recipes/import-matches': { body: [] },
 			...base,
 			'POST /recipes/import': {
 				status: 201,

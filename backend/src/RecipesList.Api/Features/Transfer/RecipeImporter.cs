@@ -18,7 +18,7 @@ namespace RecipesList.Api.Features.Transfer;
 /// Everything happens in one transaction; photos are stored first and removed again when the import fails.
 /// Products, tags and utensils are matched by normalized name through the catalog code, and created when missing.
 /// </summary>
-internal sealed class RecipeImporter(
+internal sealed partial class RecipeImporter(
     IAppDbContext db,
     ICurrentUser currentUser,
     IRecipeService recipes,
@@ -26,25 +26,40 @@ internal sealed class RecipeImporter(
     ProductCatalog productCatalog,
     NameCatalogs nameCatalogs,
     IQuantityConverter converter,
+    IVariantEngine engine,
+    VisibilityRules visibility,
     TimeProvider time)
 {
     /// <summary>Returns the id of the new recipe. Any invalid content is reported as 400 <c>import.invalid_format</c>.</summary>
     public async Task<Guid> ImportAsync(RecipeExportDocument document, CancellationToken ct)
     {
         ExportValidator.EnsureValid(document);
-        var images = DecodeImages(document);
+        var images = DecodeImages(document, ExportValidator.ReferencedImageKeys(document));
+        return await InTransactionAsync(
+            async storedIds =>
+            {
+                var imageIds = await StoreImagesAsync(images, storedIds, ct);
+                var products = await ResolveProductsAsync(document, ct);
+                var units = await ResolveUnitsAsync(document, products, ct);
+                var recipeId = await CreateRecipeAsync(document, imageIds, products, units, ct);
+                await CreateVariantsAsync(document, recipeId, imageIds, new FileRefs(products, units), ct);
+                return recipeId;
+            });
+    }
 
+    /// <summary>
+    /// Runs <paramref name="work"/> in one transaction. Photos it stores (listed in the given list) are deleted again
+    /// when it fails, and any invalid content is reported as 400 <c>import.invalid_format</c>.
+    /// </summary>
+    private async Task<T> InTransactionAsync<T>(Func<List<Guid>, Task<T>> work)
+    {
         var storedIds = new List<Guid>();
         try
         {
             using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
-            var imageIds = await StoreImagesAsync(images, storedIds, ct);
-            var products = await ResolveProductsAsync(document, ct);
-            var units = await ResolveUnitsAsync(document, products, ct);
-            var recipeId = await CreateRecipeAsync(document, imageIds, products, units, ct);
-            await CreateVariantsAsync(document, recipeId, imageIds, new FileRefs(products, units), ct);
+            var result = await work(storedIds);
             scope.Complete();
-            return recipeId;
+            return result;
         }
         catch (DomainValidationException e) when (e.Code != ErrorCodes.ImportInvalidFormat && e.Code != ErrorCodes.ImportUnsupportedVersion)
         {
@@ -66,8 +81,8 @@ internal sealed class RecipeImporter(
     }
 
     // Only the photos that something references; the rest of the file's images are ignored.
-    private static Dictionary<string, byte[]> DecodeImages(RecipeExportDocument document) =>
-        ExportValidator.ReferencedImageKeys(document).ToDictionary(
+    private static Dictionary<string, byte[]> DecodeImages(RecipeExportDocument document, IEnumerable<string> keys) =>
+        keys.ToDictionary(
             key => key,
             key => Convert.FromBase64String(document.Images[key].DataBase64),
             StringComparer.Ordinal);
@@ -343,7 +358,7 @@ internal sealed class RecipeImporter(
             case ExportModifyIngredientOp m:
                 var modified = ToQuantity(m.Quantity, refs.Units);
                 return new ModifyIngredientOp(
-                    baseIngredients[m.TargetKey], products[m.ProductKey].Id, modified, BaseAmount(modified, products[m.ProductKey], refs, index), Clean(m.Note), m.Optional);
+                    baseIngredients[m.TargetKey], products[m.ProductKey].Id, modified, BaseAmount(modified, products[m.ProductKey], refs, $"ingredientOps[{index}].quantity"), Clean(m.Note), m.Optional);
             case ExportRemoveIngredientOp r:
                 return new RemoveIngredientOp(baseIngredients[r.TargetKey]);
             case ExportAddIngredientOp a:
@@ -351,7 +366,7 @@ internal sealed class RecipeImporter(
                 added[a.Key] = id;
                 var after = a.AfterKey is { } key ? (baseIngredients.TryGetValue(key, out var baseId) ? baseId : added[key]) : (Guid?)null;
                 var addedQuantity = ToQuantity(a.Quantity, refs.Units);
-                return new AddIngredientOp(id, after, products[a.ProductKey].Id, addedQuantity, BaseAmount(addedQuantity, products[a.ProductKey], refs, index), Clean(a.Note), a.Optional);
+                return new AddIngredientOp(id, after, products[a.ProductKey].Id, addedQuantity, BaseAmount(addedQuantity, products[a.ProductKey], refs, $"ingredientOps[{index}].quantity"), Clean(a.Note), a.Optional);
             default:
                 throw new InvalidOperationException("Unknown ingredient operation.");
         }
@@ -376,7 +391,7 @@ internal sealed class RecipeImporter(
     }
 
     // The server computes the canonical amount when an op is stored (VariantService does the same).
-    private decimal? BaseAmount(Quantity? quantity, Product product, FileRefs refs, int opIndex)
+    private decimal? BaseAmount(Quantity? quantity, Product product, FileRefs refs, string path)
     {
         if (quantity is null)
         {
@@ -389,7 +404,7 @@ internal sealed class RecipeImporter(
             : null;
         return amount ?? throw new DomainValidationException(
             ErrorCodes.ImportInvalidFormat,
-            new Dictionary<string, string[]> { [$"ingredientOps[{opIndex}].quantity"] = [ErrorCodes.QuantityUnitIncompatible] });
+            new Dictionary<string, string[]> { [path] = [ErrorCodes.QuantityUnitIncompatible] });
     }
 
     /// <summary>The catalog entries the file's keys resolved to.</summary>

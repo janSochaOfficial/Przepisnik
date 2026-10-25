@@ -2,17 +2,25 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RecipesList.Api.Features.Recipes;
+using RecipesList.Api.Features.Variants;
 using RecipesList.Api.Hosting;
 using RecipesList.Api.Middleware;
 using RecipesList.Core.Common;
+using RecipesList.Core.Recipes;
 using RecipesList.Core.Transfer;
+using RecipesList.Core.Variants;
+using RecipesList.Core.Visibility;
 
 namespace RecipesList.Api.Features.Transfer;
 
-/// <summary>Recipe JSON export and import (API.md §4, §8).</summary>
+/// <summary>The result of importing a file as variants (API.md §4 <c>VariantImportResult</c>).</summary>
+internal sealed record VariantImportResultDto(Guid RecipeId, IReadOnlyList<VariantSummaryResponse> Variants, int Skipped);
+
+/// <summary>Recipe JSON export and import (API.md §4, §8), including import as variants of an existing recipe (D-35).</summary>
 internal static class TransferFeature
 {
     private const int MaxJsonDepth = 64;
+    private const int MaxMatches = 10;
 
     private static readonly JsonSerializerOptions ImportOptions = CreateImportOptions();
 
@@ -39,7 +47,78 @@ internal static class TransferFeature
             .Produces<RecipeDetailDto>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status413PayloadTooLarge);
+
+        api.MapGet("/recipes/import-matches", ImportMatchesAsync)
+            .WithName("ListImportMatches")
+            .WithSummary("Visible, non-archived recipes whose normalized title equals the given title")
+            .Produces<RecipeSummaryDto[]>()
+            .ProducesValidationProblem();
+
+        api.MapPost("/recipes/{id:guid}/variants/import", ImportAsVariantsAsync)
+            .WithName("ImportRecipeAsVariants")
+            .WithSummary("Import a recipe export file as variants of an existing recipe")
+            .RequireRateLimiting(RateLimitPolicies.Import)
+            .Accepts<RecipeExportDocument>("application/json")
+            .Produces<VariantImportResultDto>(StatusCodes.Status201Created)
+            .Produces<VariantImportResultDto>()
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status413PayloadTooLarge);
         return api;
+    }
+
+    // The caller's own recipes first, then the newest (PROJECT §4.7).
+    private static async Task<Ok<List<RecipeSummaryDto>>> ImportMatchesAsync(
+        string? title,
+        VisibilityRules visibility,
+        ICurrentUser currentUser,
+        RecipeQueries queries,
+        CancellationToken ct)
+    {
+        var trimmed = title?.Trim() ?? "";
+        if (trimmed.Length is < 1 or > RecipeInputValidator.MaxTitle)
+        {
+            throw new DomainValidationException(
+                ErrorCodes.ValidationFailed,
+                new Dictionary<string, string[]> { ["title"] = [ErrorCodes.ValidationFailed] });
+        }
+
+        var me = currentUser.Id;
+        var normalized = NameNormalizer.Normalize(trimmed);
+        var matches = visibility.VisibleRecipes(me)
+            .Where(r => !r.IsArchived && r.NormalizedTitle == normalized)
+            .OrderByDescending(r => r.AuthorId == me)
+            .ThenByDescending(r => r.CreatedAt)
+            .ThenByDescending(r => r.Id)
+            .Take(MaxMatches);
+        return TypedResults.Ok(await queries.SummarizeAsync(matches, ct));
+    }
+
+    private static async Task<Results<Created<VariantImportResultDto>, Ok<VariantImportResultDto>, ProblemHttpResult>> ImportAsVariantsAsync(
+        Guid id,
+        HttpRequest request,
+        RecipeImporter importer,
+        IVariantService variants,
+        CancellationToken ct)
+    {
+        var body = await ReadBodyAsync(request, ct);
+        if (body is null)
+        {
+            return TooLarge();
+        }
+
+        var outcome = await importer.ImportAsVariantsAsync(id, Parse(body), ct);
+        var created = outcome.CreatedVariantIds.ToHashSet();
+        var summaries = (await variants.ListForRecipeAsync(id, ct))
+            .Where(v => created.Contains(v.Id))
+            .OrderBy(v => outcome.CreatedVariantIds.ToList().IndexOf(v.Id))
+            .Select(VariantSummaryResponse.From)
+            .ToList();
+        var result = new VariantImportResultDto(outcome.RecipeId, summaries, outcome.Skipped);
+        return summaries.Count > 0
+            ? TypedResults.Created($"/api/v1/variants/{summaries[0].Id}", result)
+            : TypedResults.Ok(result);
     }
 
     private static async Task<Ok<RecipeExportDocument>> ExportAsync(Guid id, RecipeExporter exporter, HttpContext http, CancellationToken ct)
