@@ -42,9 +42,9 @@ Lane A: V2 → C1 (both change `VariantService` and the recipe view). Lane B: L1
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| V2 | 1 | running | task/V2-variant-actions | sonnet/medium: one endpoint (`PUT /variants/{id}/visibility`) + a menu reused in 3 places; delete refreshes the recipe page state |
-| L1 | 2 | running | task/L1-text-clipping | haiku/low: CSS (descenders clipped by `truncate` + tight line height), low risk. Sent back once (2026-10-25): it fixed only PageHeader; asked for one `app.css` rule for every `.truncate` and checks on the other spots |
-| C1 | 3 | todo (after V2) | task/C1-cook-counts | sonnet/high: base-count fix + "Ugotowane!" + the 12-hour rule in two paths (concurrency); low-stakes data. Expect model changes → coordinator migration `C1_CookCounts` with the `base_count` data fix (D-42, D-43) |
+| V2 | 1 | merged | task/V2-variant-actions | sonnet/medium. merged 2026-10-25, no model changes; contract `PUT /variants/{id}/visibility`. Full verify green (370 unit, 404 integration, 625 vitest, 302 playwright). Accepted: `SelectionState.reloadMatrix()` instead of `invalidate`; keys under `variants.variantMenu`; Publiczny still confirms; visibility item waits for the list's visibility. Follow-up: `visibility` in the matrix would drop the extra `GET /recipes/{id}/variants` |
+| L1 | 2 | merged | task/L1-text-clipping | haiku/low. Sent back once (fixed only PageHeader). merged 2026-10-25: one `.truncate { padding-block: .2em; margin-block: -.2em }` rule in app.css, rail label `block`. Full verify green (276 playwright). The spec fails without the rule only for the recipe h1 (the reported case); the other checks are defensive |
+| C1 | 3 | running | task/C1-cook-counts | sonnet/high: base-count fix + "Ugotowane!" + the 12-hour rule in two paths (concurrency); low-stakes data. Expect model changes → coordinator migration `C1_CookCounts` with the `base_count` data fix (D-42, D-43) |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
