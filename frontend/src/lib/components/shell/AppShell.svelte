@@ -71,7 +71,7 @@
 							>
 								<item.icon size={24} aria-hidden="true" strokeWidth={current ? 2.25 : 1.75} />
 							</span>
-							<span class="max-w-full truncate">{item.label}</span>
+							<span class="block max-w-full truncate">{item.label}</span>
 						</a>
 					</li>
 				{/each}

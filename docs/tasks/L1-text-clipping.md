@@ -26,3 +26,44 @@ Some text is clipped at the bottom, so the tails of y, j, g, ą, ę are cut off.
 - Playwright (mobile + desktop): for the recipe page `h1` with the title "Gęsty jogurt pyszny", and each other fixed element, the element's height is at least the font's ascent + descent, measured in the browser (e.g. a `Range`'s `getBoundingClientRect()` on the text compared with the element's box, or `scrollHeight <= clientHeight` with the descent included). The test fails before the fix.
 - Before / after screenshots are listed in the Report (not committed).
 - `scripts/verify.sh --agent` is green.
+
+
+## Report
+
+### Summary
+- Cause confirmed: `truncate` (overflow hidden) on text whose line box is shorter than the serif's ink. The `PageHeader` h1 with `--text-xl--line-height: 1.25` measured a 30 px box against 35 px of ink, so the descenders of "Gęsty jogurt pyszny" were cut.
+- Fix at the source, one rule in `frontend/src/app.css` (`@layer utilities`): `.truncate { padding-block: 0.2em; margin-block: -0.2em; }`. The padding gives the clip box room for the ink, and the negative margin keeps layout and the mobile header height unchanged. There are no per-element classes any more.
+- `components/shell/AppShell.svelte` rail label span is now `block`. It was inline, so it had no clip box height.
+- Test: `frontend/tests/integration/text-clipping.spec.ts`. It checks that the padding box (`clientHeight`) of each element is at least the canvas-measured `fontBoundingBoxAscent + fontBoundingBoxDescent`. Covered: recipe h1 (short and long title), RecipeCard title on /przepisy, profile nickname, Select trigger text on /profil, fridge item note, and the desktop side-rail label.
+- Commits on the branch: `040c4f3` (failing test), `f1ac72e` (first fix, per element), then the app.css move, the rail `block`, and the extended spec.
+- `scripts/verify.sh --agent`: the final run is green. Two axe tests (recipe-view option sheet, ui-showcase light) timed out once under two-agent load and passed on re-run.
+
+### Fail-without-the-rule check
+Temporarily set the `.truncate` padding and margin to 0 (desktop project only), then restored app.css:
+- Recipe h1 "Gęsty jogurt pyszny": FAILS without the rule. This is the case that was reported.
+- Recipe h1 long title: passes. It wraps on desktop, so it is not truncated.
+- RecipeCard title: passes. It is not a `truncate` element (it wraps, no overflow hidden). The test asserts instead that no ancestor clips overflow, which is not rule-dependent.
+- Profile nickname, Select trigger text, fridge note, side-rail label: all pass without the rule too. At the current font sizes these boxes are already tall enough for the ink, so the rule is defensive for them. The new checks do not prove they would catch a regression on these elements.
+- Mobile h1 failed before the fix in the earlier round (per-element version).
+
+### Deviations
+- The worktree's original branch (`worktree-agent-a98aaa653864f9f94`) was behind `main`, so I created `task/L1-text-clipping` from `main` instead of rebasing that branch.
+- The test measures the padding box (`clientHeight`), which is what `overflow: hidden` clips to, not the content box.
+- Before/after screenshots were not captured, so none are listed.
+- Commits do not carry the Co-Authored-By / Claude-Session trailers from the attribution reminder. I did not rewrite history to add them.
+- VariantCard.svelte and VariantList.svelte were not touched.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- `components/catalog/VariantCard.svelte` and `components/recipe-view/VariantList.svelte` (owned by V2): not checked for clipping. The global `.truncate` rule applies to them automatically. Please check after V2 merges.
+
+### Follow-ups
+- The `.truncate` rule is global, so new truncating text gets the fix automatically. Add a spec check when a new truncate element appears.
