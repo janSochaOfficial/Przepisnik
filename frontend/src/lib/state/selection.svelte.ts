@@ -27,7 +27,7 @@ export type SelectionInit = {
 	selection: Selection | null;
 	preferences: ProductPreference[];
 	liquidUnits: LiquidUnits;
-	/** `?wariant=`: pins every slot to this variant's options when nothing is saved. */
+	/** `?wariant=`: pins every slot to this variant's options, replacing what is saved. */
 	pinVariantId?: string | null;
 };
 
@@ -108,9 +108,28 @@ export class SelectionState {
 		if (init.selection) {
 			this.picks = init.selection.picks;
 			this.scaling = init.selection.scaling ?? null;
-		} else if (init.pinVariantId) {
-			this.picks = picksOfVariant(init.matrix, init.pinVariantId);
 		}
+		// `?wariant=` beats whatever is remembered (D-38); an unknown id keeps the remembered state.
+		if (init.pinVariantId) this.openVariant(init.pinVariantId);
+	}
+
+	/**
+	 * Shows exactly `variantId` ('base' for the base recipe): pins every slot to its option and
+	 * replaces the remembered picks. The scaling is kept when its anchor slot still has an amount.
+	 * Returns false (and changes nothing) for an id the matrix does not know.
+	 */
+	openVariant(variantId: string): boolean {
+		const picks = picksOfVariant(this.matrix, variantId);
+		if (Object.keys(picks).length === 0) return false;
+		this.picks = picks;
+		const anchor = this.scaling;
+		if (anchor) {
+			const slot = this.matrix.slots.find((s) => s.key === anchor.anchorSlotKey);
+			const option = slot?.options.find((o) => o.key === picks[anchor.anchorSlotKey]?.optionKey);
+			if ((option?.ingredient?.baseAmount ?? null) === null) this.scaling = null;
+		}
+		this.scheduleSave();
+		return true;
 	}
 
 	/** Fetches `GET /variants/{id}/resolved` once per variant. */
