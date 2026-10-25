@@ -33,8 +33,8 @@ Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| R1 | 1 | todo | task/R1-recipe-view-variants | sonnet/medium: a real selection-state bug + page restructure, frontend only |
-| I2 | 2 | todo | task/I2-import-format-help | haiku/low: static help page, low risk; example validated against the schema |
+| R1 | 1 | running | task/R1-recipe-view-variants | sonnet/medium: a real selection-state bug + page restructure, frontend only |
+| I2 | 2 | running | task/I2-import-format-help | haiku/low: static help page, low risk; example validated against the schema |
 | R2 | 3 | todo | task/R2-servings | opus/medium: model + contract + variant engine + export + scaling change together (high compound risk). Expect model changes → coordinator migration `R2_Servings` |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
