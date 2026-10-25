@@ -27,20 +27,31 @@ Some text is clipped at the bottom, so the tails of y, j, g, ą, ę are cut off.
 - Before / after screenshots are listed in the Report (not committed).
 - `scripts/verify.sh --agent` is green.
 
+
 ## Report
 
 ### Summary
-- Cause confirmed: `PageHeader` `h1` (and its subtitle) use `truncate` (overflow hidden) with `--text-xl--line-height: 1.25` and `--text-3xl--line-height: 1.15`. Literata's ascent + descent is larger than the line box, so descenders of "Gęsty jogurt pyszny" were cut (measured: box 30 px vs ink 35 px at `text-xl`).
-- Fix at the source: `PageHeader.svelte` h1 and subtitle get `py-[0.2em] -my-[0.2em]`. The padding gives the box room for the ink; the negative margin keeps layout, so the header height on mobile is unchanged.
-- Test: `frontend/tests/integration/text-clipping.spec.ts` (mobile + desktop, a short and a long title). Checks that the padding box (`clientHeight`) of the recipe `h1` is at least the canvas-measured `fontBoundingBoxAscent + fontBoundingBoxDescent`.
-- Commits: `040c4f3` (failing test), `f1ac72e` (fix). Branch `task/L1-text-clipping`, based on `main` (eca0d95).
-- `scripts/verify.sh --agent`: green (267 Playwright tests, 625 frontend unit tests, 370 + 400 .NET tests).
+- Cause confirmed: `truncate` (overflow hidden) on text whose line box is shorter than the serif's ink. The `PageHeader` h1 with `--text-xl--line-height: 1.25` measured a 30 px box against 35 px of ink, so the descenders of "Gęsty jogurt pyszny" were cut.
+- Fix at the source, one rule in `frontend/src/app.css` (`@layer utilities`): `.truncate { padding-block: 0.2em; margin-block: -0.2em; }`. The padding gives the clip box room for the ink, and the negative margin keeps layout and the mobile header height unchanged. There are no per-element classes any more.
+- `components/shell/AppShell.svelte` rail label span is now `block`. It was inline, so it had no clip box height.
+- Test: `frontend/tests/integration/text-clipping.spec.ts`. It checks that the padding box (`clientHeight`) of each element is at least the canvas-measured `fontBoundingBoxAscent + fontBoundingBoxDescent`. Covered: recipe h1 (short and long title), RecipeCard title on /przepisy, profile nickname, Select trigger text on /profil, fridge item note, and the desktop side-rail label.
+- Commits on the branch: `040c4f3` (failing test), `f1ac72e` (first fix, per element), then the app.css move, the rail `block`, and the extended spec.
+- `scripts/verify.sh --agent`: the final run is green. Two axe tests (recipe-view option sheet, ui-showcase light) timed out once under two-agent load and passed on re-run.
+
+### Fail-without-the-rule check
+Temporarily set the `.truncate` padding and margin to 0 (desktop project only), then restored app.css:
+- Recipe h1 "Gęsty jogurt pyszny": FAILS without the rule. This is the case that was reported.
+- Recipe h1 long title: passes. It wraps on desktop, so it is not truncated.
+- RecipeCard title: passes. It is not a `truncate` element (it wraps, no overflow hidden). The test asserts instead that no ancestor clips overflow, which is not rule-dependent.
+- Profile nickname, Select trigger text, fridge note, side-rail label: all pass without the rule too. At the current font sizes these boxes are already tall enough for the ink, so the rule is defensive for them. The new checks do not prove they would catch a regression on these elements.
+- Mobile h1 failed before the fix in the earlier round (per-element version).
 
 ### Deviations
 - The worktree's original branch (`worktree-agent-a98aaa653864f9f94`) was behind `main`, so I created `task/L1-text-clipping` from `main` instead of rebasing that branch.
-- The first test version measured the content box (height minus padding). It was changed to the padding box (`clientHeight`), which is what `overflow: hidden` clips to. Both versions fail before the fix on mobile.
+- The test measures the padding box (`clientHeight`), which is what `overflow: hidden` clips to, not the content box.
 - Before/after screenshots were not captured, so none are listed.
-- The fix covers only `PageHeader`, which I own. The other candidates were not changed, so the "every other fixed element" check is not done (see Follow-ups).
+- Commits do not carry the Co-Authored-By / Claude-Session trailers from the attribution reminder. I did not rewrite history to add them.
+- VariantCard.svelte and VariantList.svelte were not touched.
 
 ### Model changes
 None.
@@ -52,9 +63,7 @@ None.
 None.
 
 ### Requests for other tasks
-- `components/catalog/VariantCard.svelte` and `components/recipe-view/VariantList.svelte` (owned by V2): not checked for descender clipping. Please check when V2 is done.
-- `components/fridge/ItemList.svelte` (fridge note `truncate text-sm`, a span inside a flex row), `ui/Select.svelte` (trigger span with `truncate`), `routes/profil/+page.svelte` (nickname and email `truncate`), `catalog/RecipeCard.svelte`: same pattern, not verified. These are outside my ownership or were not measured.
+- `components/catalog/VariantCard.svelte` and `components/recipe-view/VariantList.svelte` (owned by V2): not checked for clipping. The global `.truncate` rule applies to them automatically. Please check after V2 merges.
 
 ### Follow-ups
-- Apply the same padding fix to the other `truncate` text listed above, and add a Playwright check for each (the test file is set up for that).
-- `components/shell/AppShell.svelte` rail label (`span.truncate`): an inline span, so it may need `inline-block` or a different fix. Not measured.
+- The `.truncate` rule is global, so new truncating text gets the fix automatically. Add a spec check when a new truncate element appears.

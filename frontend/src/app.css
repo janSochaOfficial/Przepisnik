@@ -194,6 +194,18 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Truncated text is clipped (overflow hidden) at its line box, which is shorter than the ink of
+ * the fonts (descenders of y, j, g, ą, ę). Pad the clip box and pull the layout back with a
+ * negative margin, so every `truncate` element keeps its height and the ink stays inside.
+ */
+@layer utilities {
+	.truncate {
+		padding-block: 0.2em;
+		margin-block: -0.2em;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
