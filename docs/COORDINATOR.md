@@ -28,6 +28,15 @@ Lane A: U1 → U2. Lane B: P1 → S2 → I1 (I1 also needs U1). G1 (Google sign-
 | U2 | 5 | merged | task/U2-shopping-units | merged 2026-10-25 + coordinator migration `U2_ShoppingItemQuantity` (4 nullable columns, FK RESTRICT to custom_units). Full verify: everything green except 6 Playwright timeouts at load ~23 (I1 verifying) in auth-profile/ui-showcase; those specs + fridge-shopping rerun green with 2 workers (96 passed). Accepted: metric quantities show a decimal comma (`1,5 l`, PROJECT §10) via `shoppingQuantityText`, others U1's formatter; no piece-size selector in the dialogs (size kept on conversion; follow-up); amount-only items open in the base unit; conversion lives in the frontend (no backend `Convert` helper). Coordinator kept main's COORDINATOR.md (the agent's rebase reverted board rows). Follow-up: "Dodaj brakujące" could send the recipe's unit |
 | G1 | 0 | merged | (coordinator, on main) | Google sign-in confirmed by the user 2026-10-25 on `npm run dev` (Chrome). D-36 login page + docs (595fd2e); FedCM for the button (82175be) fixed the popup hanging on /gsi/transform. Client ID and admin email in git-ignored `.env.local` / `deploy/.env`; the Docker stack (:8080) is not tried yet |
 
+### Wave v1.2 (notes.md, 2026-10-25)
+Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2. PROJECT D-37–D-40 record the functional choices (assumptions marked).
+
+| Task | Slot | State | Branch | Notes |
+|---|---|---|---|---|
+| R1 | 1 | todo | task/R1-recipe-view-variants | sonnet/medium: a real selection-state bug + page restructure, frontend only |
+| I2 | 2 | todo | task/I2-import-format-help | haiku/low: static help page, low risk; example validated against the schema |
+| R2 | 3 | todo | task/R2-servings | opus/medium: model + contract + variant engine + export + scaling change together (high compound risk). Expect model changes → coordinator migration `R2_Servings` |
+
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
 ## 2. Loop

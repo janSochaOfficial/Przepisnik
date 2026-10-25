@@ -18,13 +18,13 @@ The app scales a recipe from what you actually have ("I have 600 g of chicken").
 ### Goals (v1)
 1. Write down recipes with text and photos mixed together, plus tags and required utensils. Each recipe and variant is private, shared with your fridges, or public, and can be marked as a favourite (♥).
 2. Keep variants as diffs against the base recipe, and let a cook mix variant choices ingredient by ingredient. The app remembers those choices.
-3. Scale a recipe from any one ingredient, with kitchen-friendly units.
+3. Scale a recipe from any one ingredient, or by the number of servings, with kitchen-friendly units.
 4. Track one or more fridges, shared between people, with "how much is left" percentages.
 5. Deduct a cooked recipe from a fridge, and push the missing items to a shopping list that can be shared to Google Keep.
 6. Export and import recipes as self-contained JSON.
 
 ### Non-goals (v1): see also §12
-Servings-based scaling, expiry dates, a direct Google Keep API, offline/PWA, languages other than Polish, native apps, ratings and comments.
+Expiry dates, a direct Google Keep API, offline/PWA, languages other than Polish, native apps, ratings and comments.
 
 ---
 
@@ -45,7 +45,7 @@ On mobile the bottom tab bar shows **Przepisy** · **Lodówka** · **Lista zakup
 | Screen | Polish label | Content |
 |---|---|---|
 | Recipe catalog | **Przepisy** | Every recipe I can see (§4.4). Search, tag filter, sub-tabs **Wszystkie / Moje przepisy / Moje warianty**. **Moje przepisy** is split into **Utworzone** (written by me) and **Ulubione** (my ♥ recipes and variants, §4.6) |
-| Recipe view ("cook mode") | (recipe title) | Variant picker, scaling, ingredients, prep, instructions, ♥, actions at the bottom |
+| Recipe view ("cook mode") | (recipe title) | Tabs **Przepis** (variant picker, scaling, servings, ingredients, prep, instructions, actions at the bottom) and **Warianty** (§6.7); the recipe's ♥ next to the title |
 | Recipe editor | **Nowy przepis / Edytuj przepis** | Full editor (§4), including the visibility setting; editing is restricted by §4.5 |
 | Variant editor | **Nowy wariant / Edytuj wariant** | Diff editor on top of the base recipe (§6) |
 | Fridge | **Lodówka** | Fridge switcher, items, members, invites (§8) |
@@ -63,6 +63,7 @@ On mobile the bottom tab bar shows **Przepisy** · **Lodówka** · **Lista zakup
 | Description | optional short intro, plain text, ≤ 2000 characters |
 | Cover photo | optional |
 | Prep time / cook time | minutes, optional, used for the auto tag |
+| Servings (**Liczba porcji**) | whole number 1–100, optional (§5.7) |
 | Tags | many; see §4.3 |
 | Utensils (**Przybory**) | many; from a growing shared catalog (like tags), e.g. "piekarnik", "blender", "patelnia" |
 | **Składniki** (ingredients) | ordered list (§4.2) |
@@ -115,13 +116,14 @@ Changing visibility is a separate action, not an edit, so it never deletes varia
 Because a base recipe can only change when it has no variants (or they are deleted), variants never point at rows that no longer exist.
 
 ### 4.6 Favourites (♥)
-- Any recipe or variant the user can see can be marked as a favourite with a heart icon. The heart appears on recipe cards, in the recipe view header, and next to each variant name (in the variant picker and on variant cards).
+- Any recipe or variant the user can see can be marked as a favourite with a heart icon. The heart appears on recipe cards, in the recipe view **next to the recipe title** (the recipe's own heart, D-39), and next to each variant name (the active variant's name, the **Warianty** tab and variant cards).
 - **Moje przepisy → Ulubione** lists favourite recipes and variants together, most recently favourited first. A variant entry shows "wariant *X* · przepis *Y*" and opens the recipe with that variant preselected.
 - Favourites the user can no longer see (visibility changed, fridge left) are **hidden, not deleted**, and come back when access returns. Favourites of deleted recipes or variants are removed.
 - Favourite variants rank higher in the variant auto-match (§6.3).
 - Favourites are private: nobody else sees who favourited what.
 
 ### 4.7 Export and import (JSON)
+- **Format help** (D-40): the import dialog links to **"Format pliku"**, a page (`/przepisy/import/format`) explaining in Polish the JSON format of [docs/API.md §8](docs/API.md): the overall structure, every field with its meaning and limits, units and custom units, variants as operations, photos as base64, and a short complete example that can be copied. Opening it does not lose the dialog's progress (it opens in a new tab or returns to the dialog).
 - **Export** is available to anyone who can see the recipe. It produces one self-contained file: the recipe, **all its variants that the exporter can see**, and every referenced photo embedded as base64. Products, tags and utensils are referenced **by name and properties**, not by database ID. Format: [docs/API.md §8](docs/API.md).
 - **Import** creates a **new private recipe owned by the importer**, together with all its variants, also private and owned by the importer. Each keeps an "originally by @nick" note. Products, tags, utensils and custom units are matched by normalized name and created if missing. The format is versioned (`formatVersion: 1`), and the file limit is 25 MB.
 - **Importing a recipe that already exists** (D-35). Before importing, the app looks for recipes the importer can see, that are not archived, and whose title matches the file's recipe title (normalized: case, diacritics and spaces ignored). If there are any, it asks **"Ten przepis już istnieje"** and offers:
@@ -213,6 +215,14 @@ Besides the built-in units, recipes can use **custom units** (`własne jednostki
 - Like products, a unit can't be changed by a regular user after it is created, so it never silently changes other people's recipes. Admins can edit the name and plural forms at any time, and the amount only while no recipe, variant or shopping-list item uses the unit.
 - **Scaling and display** (D-31): at factor 1 the amount shows as entered (`2 puszki`). Once scaled, an amount entered in a custom unit **stays in that unit**, rounded to the nearest ¼ with a minimum of ¼ (`1 ½ puszki`, `¾ kostki`), with the `~` prefix rule of §5.4. Fridge items and the deduction dialog keep the metric inventory format (D-19).
 
+### 5.7 Servings
+A recipe can state how many servings it makes (`servings`, D-37). A variant can override it, like the times (§6.1).
+- When the resolved recipe has servings, the recipe view shows **"Porcje: N"** with − / + buttons (step 1, range 1–100) and a field to type the number. Choosing **M** servings scales the recipe by `M / N` exactly like "Mam:" (§5.3): every ingredient with a quantity is multiplied, the display rules of §5.4 apply, and the scaling banner and **"Przywróć"** work the same way.
+- There is **one scaling choice** at a time: setting servings replaces an ingredient anchor and vice versa. When the recipe is scaled from an ingredient, the servings line shows `N × factor`, rounded to ½ (`~3 ½ porcji`, with the `~` rule of §5.4).
+- The servings choice is remembered like the "Mam:" choice (§6.6).
+- A recipe without servings shows no servings control; scaling from an ingredient works as before.
+- Polish forms: `porcja / porcje / porcji / porcji` (§5.5).
+
 ## 6. Variants
 
 ### 6.1 Concept
@@ -227,7 +237,7 @@ A variant has a name (e.g. "Wersja wege", "Ostrzejsza"), an optional description
 | Ingredients | **modify** (product and/or quantity and/or note/optional flag), **remove**, **add** (after a given ingredient) |
 | Prep / instruction steps | **replace** content, **remove**, **add** (after a given step) |
 | Utensils | add / remove |
-| Times | override prep and/or cook time |
+| Times and servings | override prep and/or cook time, and the servings (§5.7) |
 
 **Resolving** a variant means applying its operations to the current base recipe to get a full recipe.
 
@@ -268,6 +278,11 @@ Remembered picks are stored **per user on the server** (D-05); the client keeps 
 - **Per recipe:** for each slot, the chosen option and whether it came from the user or from auto. Also the last scaling choice. Remembered auto picks act as soft preferences, so the view does not jump around when new variants appear. User picks are restored as pins.
 - **Across recipes (product preferences):** when a user pins an option whose product differs from the base product (e.g. base `śmietana 18%` → picked `śmietanka 30%`), the server increases the weight for the pair *from → to*. In other recipes these weights raise the rank of variants that make the same swap (rank criterion 2).
 - Changes are saved automatically, debounced by about 1 s.
+
+### 6.7 The Warianty tab
+The recipe view has two tabs: **Przepis** (the cook view) and **Warianty (N)** (D-38). Warianty lists the base recipe (**"Przepis bazowy"**) first, then every variant the viewer can see (§6.1), most cooked first, then oldest first: name, author, visibility, cook count, the variant's ♥, and a mark on the one currently shown.
+- Opening an entry, or opening a link with `?wariant=<id>` (variant cards, after an import), switches to **Przepis** and shows **exactly that variant**: every slot is pinned to that variant's option (user picks, §6.3), its steps, utensils, times and servings are shown, and any active scaling is applied to its amounts. Remembered picks for the recipe are replaced by this choice; the scaling choice is kept when its anchor slot still has an amount, and reset otherwise. The base entry clears all picks.
+- The URL keeps the open variant (`?wariant=`) so a reload or a shared link shows the same thing; opening another variant on the same recipe page updates the view without a full reload.
 
 ## 7. Product catalog
 
@@ -337,7 +352,7 @@ Server rules (D-10):
 - **Deployment**: runs locally first; ready for self-hosting with Docker Compose.
 
 ## 12. Out of scope for v1 (future candidates)
-Servings-based scaling · expiry dates and "use soon" highlighting · direct Google Keep / Google Tasks sync · "what can I cook from my fridge" · ratings and comments · offline/PWA · languages other than Polish · moderating the product catalog beyond admin merge.
+Expiry dates and "use soon" highlighting · direct Google Keep / Google Tasks sync · "what can I cook from my fridge" · ratings and comments · offline/PWA · languages other than Polish · moderating the product catalog beyond admin merge.
 
 ## 13. Decision log
 
@@ -379,3 +394,7 @@ Servings-based scaling · expiry dates and "use soon" highlighting · direct Goo
 | D-34 | Shopping-list items keep their amount in the unit the user chose (built-in or custom); changing the unit converts the amount; merging sums in base units and keeps the existing item's unit; an amount can be removed | user (change unit) + assumption (conversion, merge, removal) |
 | D-35 | Import of a recipe whose normalized title matches a visible, non-archived recipe offers adding it as variants of that recipe: the file's recipe becomes "Wersja @author", each file variant another variant, aligned in order (ingredients by product, steps by text); identical ones are skipped | user (prompt to import as a variant) + assumption (matching, naming, alignment) |
 | D-36 | In Development the login page shows Google sign-in and, below it, the dev-login form, when both are available | assumption (coordinator, so several test users stay easy once Google is configured) |
+| D-37 | Recipes have optional servings (1–100) that variants can override; choosing a servings count scales like "Mam:", as the single scaling choice; remembered like it | user (servings with scaling) + assumption (override, one scaling choice, range) |
+| D-38 | The recipe view has tabs Przepis / Warianty; opening a variant (from the tab or `?wariant=`) pins all its options and replaces the remembered picks, so its own ingredients are shown and scaled | user (Warianty tab, bug report) + assumption (pin all, replace memory, ordering) |
+| D-39 | The recipe's own ♥ sits next to the title, apart from the active variant's ♥ | user |
+| D-40 | The import dialog links to a Polish "Format pliku" page describing the export JSON with a complete example | user (explanation page) + assumption (separate route, contents) |
