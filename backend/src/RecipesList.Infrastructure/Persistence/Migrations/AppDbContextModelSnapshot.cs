@@ -553,6 +553,10 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("prep_minutes");
 
+                    b.Property<int?>("Servings")
+                        .HasColumnType("integer")
+                        .HasColumnName("servings");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -593,7 +597,10 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "NormalizedTitle" }, "ix_recipes_normalized_title_trgm"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "NormalizedTitle" }, "ix_recipes_normalized_title_trgm"), new[] { "gin_trgm_ops" });
 
-                    b.ToTable("recipes", (string)null);
+                    b.ToTable("recipes", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_recipes_servings_range", "servings BETWEEN 1 AND 100");
+                        });
                 });
 
             modelBuilder.Entity("RecipesList.Core.Recipes.RecipeCookCount", b =>
@@ -1069,6 +1076,10 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("recipe_id");
 
+                    b.Property<int?>("ServingsOverride")
+                        .HasColumnType("integer")
+                        .HasColumnName("servings_override");
+
                     b.Property<string>("StepOps")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -1110,7 +1121,10 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_variants_recipe_id_author_id_name");
 
-                    b.ToTable("variants", (string)null);
+                    b.ToTable("variants", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_variants_servings_override_range", "servings_override BETWEEN 1 AND 100");
+                        });
                 });
 
             modelBuilder.Entity("RecipesList.Core.Variants.VariantCookCount", b =>
