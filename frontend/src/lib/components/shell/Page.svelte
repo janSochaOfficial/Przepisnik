@@ -15,10 +15,20 @@
 		subtitle?: string;
 		width?: 'reading' | 'wide';
 		actions?: Snippet;
+		titleAside?: Snippet;
 		children: Snippet;
 	};
 
-	let { title, back, backLabel, subtitle, width = 'reading', actions, children }: Props = $props();
+	let {
+		title,
+		back,
+		backLabel,
+		subtitle,
+		width = 'reading',
+		actions,
+		titleAside,
+		children
+	}: Props = $props();
 </script>
 
 <div
@@ -27,7 +37,7 @@
 		width === 'reading' ? 'max-w-[calc(45rem+5rem)]' : 'max-w-[calc(72rem+5rem)]'
 	]}
 >
-	<PageHeader {title} {back} {backLabel} {subtitle} {actions} />
+	<PageHeader {title} {back} {backLabel} {subtitle} {actions} {titleAside} />
 	<div class="pt-2 lg:pt-4">
 		{@render children()}
 	</div>

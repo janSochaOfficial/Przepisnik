@@ -6,7 +6,7 @@
 // with real UUIDs and complete products so the recipe view can format it.
 import { cardamom, milk, onion } from './catalog';
 import type { MockHandlers } from './index';
-import { ania, bartek, detail, recipeId } from './recipes';
+import { ania, bartek, detail, recipeId, variantSummary } from './recipes';
 import type { Schemas } from './types';
 
 type Ingredient = Schemas['Ingredient'];
@@ -245,6 +245,13 @@ export const variantsHandlers: MockHandlers = {
 	'GET /recipes/:id': { body: baseRecipe() },
 	'GET /recipes/:id/variant-matrix': { body: matrix() },
 	'GET /recipes/:id/my-selection': { status: 204 },
+	'GET /recipes/:id/variants': {
+		body: [
+			variantSummary({ id: variantA, name: 'Wersja wege', visibility: 'private', cookCount: 2 }),
+			variantSummary({ id: variantB, name: 'Kremowa', visibility: 'fridges', cookCount: 1 }),
+			variantSummary({ id: variantC, name: 'Z papryką', visibility: 'public', cookCount: 0 })
+		]
+	},
 	'GET /me/product-preferences': { body: [] },
 	'GET /variants/:id/resolved': ({ params }) => ({ body: resolved[params.id ?? ''] }),
 	'PUT /recipes/:id/my-selection': { status: 200, body: {} }
