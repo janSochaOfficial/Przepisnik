@@ -4,7 +4,14 @@ import { createApi, unwrap } from '$lib/api/client';
 import { buildRows, type SlotRow } from '$lib/components/recipe-view/rows';
 import { toast } from '$lib/components/ui';
 import { clearUserPicks, matchVariants, pin, type MatchResult } from '$lib/domain/matching';
-import { scaleFactor, scaleIngredients } from '$lib/domain/scaling';
+import {
+	clampServings,
+	scaledServings,
+	scaleFactor,
+	scaleIngredients,
+	servingsFactor,
+	type ScaledServings
+} from '$lib/domain/scaling';
 import type {
 	Ingredient,
 	LiquidUnits,
@@ -70,13 +77,36 @@ export class SelectionState {
 
 	hasUserPins = $derived(Object.values(this.picks).some((p) => p.source === 'user'));
 
-	/** The scaling factor; 1 when there is no anchor or the anchor row has no amount. */
+	/**
+	 * The servings of what is shown (the steps source: the best variant's override or the recipe's),
+	 * or null when it states none (PROJECT §5.7).
+	 */
+	servings: number | null = $derived.by(() => this.stepsSource.servings ?? null);
+
+	/**
+	 * The scaling factor: chosen / shown servings for a servings choice (1 without servings), entered
+	 * / recipe amount for an ingredient anchor (1 when the anchor row has no amount).
+	 */
 	factor = $derived.by(() => {
-		const anchor = this.scaling;
-		if (!anchor) return 1;
-		const row = this.rows.find((r) => r.slotKey === anchor.anchorSlotKey);
+		const scaling = this.scaling;
+		if (!scaling) return 1;
+		if (scaling.kind === 'servings') return servingsFactor(this.servings, scaling.servings);
+		const row = this.rows.find((r) => r.slotKey === scaling.anchorSlotKey);
 		const base = row?.ingredient?.baseAmount ?? null;
-		return base === null ? 1 : scaleFactor(base, anchor.anchorBaseAmount);
+		return base === null ? 1 : scaleFactor(base, scaling.anchorBaseAmount);
+	});
+
+	/**
+	 * The servings line: the chosen number, the shown servings (unscaled), or `servings × factor`
+	 * rounded to ½ when scaled from an ingredient. Null when the shown recipe has no servings.
+	 */
+	shownServings: ScaledServings | null = $derived.by(() => {
+		const servings = this.servings;
+		if (servings === null) return null;
+		const scaling = this.scaling;
+		if (scaling?.kind === 'servings') return { value: scaling.servings, approximate: false };
+		if (!scaling || this.factor === 1) return { value: servings, approximate: false };
+		return scaledServings(servings, this.factor);
 	});
 
 	/** The effective, scaled ingredient list (consumed by F6 through `CookContext`). */
@@ -115,15 +145,16 @@ export class SelectionState {
 
 	/**
 	 * Shows exactly `variantId` ('base' for the base recipe): pins every slot to its option and
-	 * replaces the remembered picks. The scaling is kept when its anchor slot still has an amount.
-	 * Returns false (and changes nothing) for an id the matrix does not know.
+	 * replaces the remembered picks. An ingredient anchor is kept when its slot still has an amount;
+	 * a servings choice is always kept (it is about people, not a slot) and its factor follows the
+	 * new variant's servings. Returns false (and changes nothing) for an id the matrix does not know.
 	 */
 	openVariant(variantId: string): boolean {
 		const picks = picksOfVariant(this.matrix, variantId);
 		if (Object.keys(picks).length === 0) return false;
 		this.picks = picks;
 		const anchor = this.scaling;
-		if (anchor) {
+		if (anchor && anchor.kind !== 'servings') {
 			const slot = this.matrix.slots.find((s) => s.key === anchor.anchorSlotKey);
 			const option = slot?.options.find((o) => o.key === picks[anchor.anchorSlotKey]?.optionKey);
 			if ((option?.ingredient?.baseAmount ?? null) === null) this.scaling = null;
@@ -157,8 +188,15 @@ export class SelectionState {
 		this.scheduleSave();
 	}
 
+	/** "Mam: …" on an ingredient; replaces a servings choice (one scaling choice, PROJECT §5.7). */
 	setScaling(slotKey: string, anchorBaseAmount: number): void {
 		this.scaling = { anchorSlotKey: slotKey, anchorBaseAmount };
+		this.scheduleSave();
+	}
+
+	/** Chooses a number of servings (clamped to 1–100); replaces an ingredient anchor. */
+	setServings(servings: number): void {
+		this.scaling = { kind: 'servings', servings: clampServings(servings) };
 		this.scheduleSave();
 	}
 

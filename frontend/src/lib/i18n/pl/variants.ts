@@ -68,6 +68,15 @@ export const variants = {
 		reset: 'Przywróć'
 	},
 
+	servings: {
+		label: 'Porcje:',
+		input: 'Liczba porcji',
+		decrease: 'Mniej porcji',
+		increase: 'Więcej porcji',
+		fromIngredient: (servings: string) => `Przeliczone składniki wystarczą na ${servings}.`,
+		range: 'Podaj liczbę porcji od 1 do 100.'
+	},
+
 	clearSelection: 'Wyczyść wybór',
 	selectionSaveFailed: 'Nie udało się zapisać twojego wyboru.',
 

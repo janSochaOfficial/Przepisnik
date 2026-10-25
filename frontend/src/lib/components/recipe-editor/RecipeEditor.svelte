@@ -184,6 +184,15 @@
 				bind:value={draft.cookMinutes}
 				error={errors.cookMinutes ?? null}
 			/>
+			<NumberField
+				label={labels.servings}
+				hint={labels.servingsHint}
+				optional
+				min={1}
+				max={100}
+				bind:value={draft.servings}
+				error={errors.servings ?? null}
+			/>
 		</div>
 		{#if mode === 'recipe'}
 			<TagInput

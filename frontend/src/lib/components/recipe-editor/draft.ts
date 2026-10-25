@@ -20,6 +20,8 @@ export const LIMITS = {
 	title: 150,
 	description: 2000,
 	minutes: 2880,
+	servingsMin: 1,
+	servingsMax: 100,
 	ingredients: 100,
 	steps: 50,
 	note: 300,
@@ -60,6 +62,8 @@ export type RecipeDraft = {
 	cover: ImageInfo | null;
 	prepMinutes: number | null;
 	cookMinutes: number | null;
+	/** Liczba porcji (PROJECT §5.7); null when not stated (a variant then inherits the base's). */
+	servings: number | null;
 	tags: string[];
 	utensils: string[];
 	ingredients: DraftIngredient[];
@@ -124,6 +128,7 @@ export function emptyDraft(): RecipeDraft {
 		cover: null,
 		prepMinutes: null,
 		cookMinutes: null,
+		servings: null,
 		tags: [],
 		utensils: [],
 		ingredients: [emptyIngredient()],
@@ -140,6 +145,7 @@ export type RecipeLike = Pick<
 	| 'coverImage'
 	| 'prepMinutes'
 	| 'cookMinutes'
+	| 'servings'
 	| 'tags'
 	| 'utensils'
 	| 'ingredients'
@@ -163,6 +169,7 @@ export function draftFromRecipe(recipe: RecipeLike, options: { base?: boolean } 
 		cover: recipe.coverImage,
 		prepMinutes: recipe.prepMinutes,
 		cookMinutes: recipe.cookMinutes,
+		servings: recipe.servings ?? null,
 		tags: recipe.tags.filter((tag) => !tag.isSystem).map((tag) => tag.name),
 		utensils: recipe.utensils.map((u) => u.name),
 		ingredients: recipe.ingredients.map((i) => ({
@@ -243,6 +250,7 @@ export function buildBody(draft: RecipeDraft): BuiltBody {
 			...(draft.cover ? { coverImageId: draft.cover.id } : {}),
 			...(draft.prepMinutes !== null ? { prepMinutes: draft.prepMinutes } : {}),
 			...(draft.cookMinutes !== null ? { cookMinutes: draft.cookMinutes } : {}),
+			...(draft.servings !== null ? { servings: draft.servings } : {}),
 			ingredients,
 			prepSteps: steps('prepSteps'),
 			instructionSteps: steps('instructionSteps')
@@ -270,6 +278,7 @@ export function toVariantRecipeWrite(
 		recipe: {
 			...(body.prepMinutes !== undefined ? { prepMinutes: body.prepMinutes } : {}),
 			...(body.cookMinutes !== undefined ? { cookMinutes: body.cookMinutes } : {}),
+			...(body.servings !== undefined ? { servings: body.servings } : {}),
 			utensilIds,
 			ingredients: body.ingredients,
 			prepSteps: body.prepSteps,
@@ -301,6 +310,10 @@ export function validateDraft(draft: RecipeDraft, mode: EditorMode = 'recipe'): 
 		if (v !== null && (!Number.isInteger(v) || v < 0 || v > LIMITS.minutes)) {
 			errors[key] = fe.minutesRange;
 		}
+	}
+	const s = draft.servings;
+	if (s !== null && (!Number.isInteger(s) || s < LIMITS.servingsMin || s > LIMITS.servingsMax)) {
+		errors.servings = fe.servingsRange;
 	}
 	const active = draft.ingredients.filter((i) => !i.removed);
 	if (active.length < 1 || active.length > LIMITS.ingredients)
