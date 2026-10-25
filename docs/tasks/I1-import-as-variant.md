@@ -72,6 +72,8 @@ type VariantImportResult = { recipeId: Uuid; variants: VariantSummary[]; skipped
 - I edited the existing import test in `recipe-editor.spec.ts` (an import spec, which this task owns) to mock `GET /recipes/import-matches` with `[]`. Note for mocks: `GET /recipes/:id` also matches `/recipes/import-matches`, so the transfer handlers must be spread first (documented in `mocks/transfer.ts`).
 - The Svelte autofixer suggests removing the `eslint-disable-next-line svelte/no-navigation-without-resolve` before the `?wariant=` navigation, but ESLint fails without it. This is the same pattern as `warianty/nowy` and `warianty/[id]/edytuj`.
 
+- Gate: the first `verify.sh --agent` run (before U2 was merged) failed with Playwright timeouts under load from the concurrent agent (6 axe/debounce tests, 3 of them existing ones). The same specs passed with `--workers=2`. After rebasing onto main with U2 in it (no conflicts; `schema.d.ts` regenerated with no diff), `scripts/verify.sh --agent` is green, with no timeouts raised.
+
 ### Model changes
 None.
 
