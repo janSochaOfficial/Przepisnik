@@ -37,6 +37,14 @@ Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2
 | I2 | 2 | merged | task/I2-import-format-help | haiku/low. merged 2026-10-25, no model or contract changes. Full verify green with 2 workers (350 unit, 383 integration, 583 vitest, 247 playwright). Accepted: focusable scroll regions (`svelte-ignore`), table wrappers `role="group"`, limits taken from openapi / `RecipeWrite`. Watch: the agent saw 4 mobile `recipe-view.spec.ts` timeouts under two-agent load (green alone and on main) |
 | R2 | 3 | merged | task/R2-servings | opus/medium. merged 2026-10-25 + coordinator migration `R2_Servings` (`recipes.servings`, `variants.servings_override`, nullable, CHECK 1–100). Full verify green (370 unit, 402 integration, 625 vitest, 263 playwright). Accepted (AGENT_DECISIONS §5.10): variant clear = inherit; §5.4 `~` rule over the task's wrong vector; `ScalingState` `kind` union, unknown kind → 400 `request.invalid`; >100 typed empties the field. Coordinator added servings to the I2 help page + a schema-coverage test (`fix(merge)`). Follow-up: recipe cards don't show servings |
 
+### Wave v1.3 (user request, 2026-10-25)
+Independent lanes: V2 and L1 (L1 leaves V2's two variant components alone). PROJECT D-41.
+
+| Task | Slot | State | Branch | Notes |
+|---|---|---|---|---|
+| V2 | 1 | running | task/V2-variant-actions | sonnet/medium: one endpoint (`PUT /variants/{id}/visibility`) + a menu reused in 3 places; delete refreshes the recipe page state |
+| L1 | 2 | running | task/L1-text-clipping | haiku/low: CSS (descenders clipped by `truncate` + tight line height), low risk |
+
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
 ## 2. Loop

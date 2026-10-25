@@ -270,7 +270,8 @@ This is the core interaction in the recipe view.
 A base recipe never changes while it has variants: public recipes are read-only, and editing a private or fridge-only recipe deletes all its variants (§4.5). So variant operations always point at rows that exist. No revision tracking or "stale change" handling is needed.
 
 ### 6.5 Ownership
-Only the author can edit or delete a variant, or change its visibility. Variants can be edited at any time, whatever the visibility. Deleting a variant, whether directly or because of §4.5, removes it from every user's remembered picks and favourites.
+Only the author can edit or delete a variant, or change its visibility. Variants can be edited at any time, whatever the visibility.
+For the author, every variant entry (the **Warianty** tab, §6.7, and the variant cards in **Moje warianty** and **Ulubione**) has a **⋯** menu with **"Edytuj wariant"** (opens the variant editor), **"Zmień widoczność"** (the same dialog as for recipes, §4.4, without the narrowing lock) and **"Usuń wariant"** (after a confirmation **"Usunąć wariant „X”?"**) (D-41). Other users see no menu. Deleting a variant, whether directly or because of §4.5, removes it from every user's remembered picks and favourites.
 A variant author who loses access to the base recipe (e.g. by leaving the fridge it was shared through) still sees the variant in "Moje warianty" with the note "Przepis bazowy jest niedostępny" (the base recipe is unavailable), and can only delete it.
 
 ### 6.6 Selection memory
@@ -398,3 +399,4 @@ Expiry dates and "use soon" highlighting · direct Google Keep / Google Tasks sy
 | D-38 | The recipe view has tabs Przepis / Warianty; opening a variant (from the tab or `?wariant=`) pins all its options and replaces the remembered picks, so its own ingredients are shown and scaled | user (Warianty tab, bug report) + assumption (pin all, replace memory, ordering) |
 | D-39 | The recipe's own ♥ sits next to the title, apart from the active variant's ♥ | user |
 | D-40 | The import dialog links to a Polish "Format pliku" page describing the export JSON with a complete example | user (explanation page) + assumption (separate route, contents) |
+| D-41 | Variant authors get a ⋯ menu (edit, change visibility, delete with confirmation) on variant entries in the Warianty tab, Moje warianty and Ulubione; visibility changes alone, without re-sending the variant | user + assumption (where, confirmation, own endpoint) |
