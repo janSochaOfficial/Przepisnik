@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import { inventoryText } from '$lib/components/fridge/amount';
+	import { shoppingQuantityText } from '$lib/domain/shopping-text';
 	import { IconButton } from '$lib/components/ui';
 	import type { LiquidUnits, ShoppingListItem } from '$lib/domain/types';
 	import { t } from '$lib/i18n';
@@ -17,9 +18,11 @@
 
 	let name = $derived(item.product?.name ?? item.text ?? '');
 	let amount = $derived(
-		item.product && item.amount !== null && item.amount > 0
-			? inventoryText(item.amount, item.product, liquidUnits)
-			: null
+		item.product && item.quantity
+			? shoppingQuantityText(item.quantity, item.product)
+			: item.product && item.amount !== null && item.amount > 0
+				? inventoryText(item.amount, item.product, liquidUnits)
+				: null
 	);
 </script>
 

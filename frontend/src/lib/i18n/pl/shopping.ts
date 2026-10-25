@@ -1,4 +1,4 @@
-// Shopping list and sharing (owned by F6).
+// Shopping list and sharing (owned by F6; units by U2).
 export const shopping = {
 	title: 'Lista zakupów',
 	shareTitle: (fridgeName: string) => `Lista zakupów — ${fridgeName}`,
@@ -19,6 +19,8 @@ export const shopping = {
 	kindProduct: 'Produkt',
 	kindText: 'Dowolny tekst',
 	amountLabel: 'Ilość',
+	unitLabel: 'Jednostka',
+	clearAmount: 'Usuń ilość',
 	textLabel: 'Pozycja',
 	textPlaceholder: 'np. papier do pieczenia',
 	productRequired: 'Wybierz produkt z listy.',

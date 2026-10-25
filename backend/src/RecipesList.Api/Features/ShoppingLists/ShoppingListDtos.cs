@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using RecipesList.Api.Features.Fridges;
+using RecipesList.Api.Features.Units;
+using RecipesList.Core.Quantities;
 using RecipesList.Core.ShoppingLists;
 
 namespace RecipesList.Api.Features.ShoppingLists;
@@ -10,6 +12,7 @@ internal sealed record ShoppingListItemDto(
     uint Version,
     FridgeProductRefDto? Product,
     string? Text,
+    QuantityDto? Quantity,
     decimal? Amount,
     bool Checked,
     FridgeUserRefDto AddedBy,
@@ -20,14 +23,15 @@ internal sealed record ShoppingListItemDto(
         m.Item.Version,
         m.Product is null ? null : FridgeProductRefDto.From(m.Product),
         m.Item.Text,
+        QuantityDto.From(m.Item.Quantity, m.CustomUnit),
         m.Item.Amount,
         m.Item.Checked,
         FridgeUserRefDto.From(m.AddedBy),
         m.Item.CreatedAt);
 }
 
-/// <summary>One entry to add: a product (optional amount, base units) or free text.</summary>
-internal sealed record ShoppingListItemWriteRequest(Guid? ProductId, string? Text, decimal? Amount);
+/// <summary>One entry to add: a product (optional amount in base units or quantity, exclusive) or free text.</summary>
+internal sealed record ShoppingListItemWriteRequest(Guid? ProductId, string? Text, decimal? Amount, Quantity? Quantity = null);
 
 /// <summary>Body of <c>POST /fridges/{id}/shopping-list/items</c> (1–100 entries).</summary>
 internal sealed record ShoppingListItemsWriteRequest
@@ -43,7 +47,14 @@ internal sealed record ShoppingListItemPatchRequest
 
     public bool? Checked { get; init; }
 
+    /// <summary>Sets the unit and the amount.</summary>
+    public Quantity? Quantity { get; init; }
+
+    /// <summary>Sets a base amount and drops the chosen unit.</summary>
     public decimal? Amount { get; init; }
+
+    /// <summary>True removes the amount and the unit.</summary>
+    public bool? ClearAmount { get; init; }
 
     [MaxLength(200)]
     public string? Text { get; init; }

@@ -4,6 +4,7 @@ using NSubstitute;
 using RecipesList.Core.Catalog;
 using RecipesList.Core.Common;
 using RecipesList.Core.Fridges;
+using RecipesList.Core.Quantities;
 using RecipesList.Core.ShoppingLists;
 using RecipesList.Infrastructure.Persistence;
 using RecipesList.IntegrationTests.Infrastructure;
@@ -44,7 +45,7 @@ public sealed class FridgeQueryCountTests(ApiFactory factory) : IClassFixture<Ap
             await CountAsync(user, (db, access) => new FridgeService(db, user, access, TimeProvider.System).GetAsync(s.FridgeId, ct)),
             await CountAsync(user, (db, access) => new FridgeService(db, user, access, TimeProvider.System).ListInvitesAsync(s.FridgeId, ct)),
             await CountAsync(user, (db, access) => new FridgeItemService(db, user, access, TimeProvider.System).ListAsync(s.FridgeId, ct)),
-            await CountAsync(user, (db, access) => new ShoppingListService(db, user, access, TimeProvider.System).ListAsync(s.FridgeId, ct)));
+            await CountAsync(user, (db, access) => new ShoppingListService(db, user, access, TimeProvider.System, new QuantityConverter()).ListAsync(s.FridgeId, ct)));
     }
 
     private async Task<int> CountAsync<T>(ICurrentUser user, Func<AppDbContext, FridgeAccess, Task<T>> read)

@@ -12,6 +12,7 @@ export const entry = (
 	version: 1,
 	product: null,
 	text: null,
+	quantity: null,
 	amount: null,
 	checked: false,
 	addedBy: owner,
@@ -28,15 +29,30 @@ export function shoppingHandlers(initial = [milkEntry, textEntry, flourEntry]): 
 	return {
 		'GET /fridges/:id/shopping-list': () => ({ body: items }),
 		'PATCH /fridges/:id/shopping-list/items/:itemId': (ctx) => {
-			const patch = ctx.json as { checked?: boolean };
+			const patch = ctx.json as {
+				checked?: boolean;
+				quantity?: Schemas['Quantity'];
+				clearAmount?: boolean;
+			};
 			const old = items.find((i) => i.id === ctx.params.itemId)!;
-			const updated = { ...old, ...patch, version: old.version + 1 };
+			const { quantity, clearAmount, ...rest } = patch;
+			const updated = { ...old, ...rest, version: old.version + 1 };
+			if (clearAmount) Object.assign(updated, { quantity: null, amount: null });
+			if (quantity) {
+				// Only the units the specs use: millilitres, litres and glasses.
+				const ml = { ml: 1, l: 1000, glass: 250 }[quantity.unit as 'ml' | 'l' | 'glass'];
+				Object.assign(updated, { quantity, amount: quantity.value * ml });
+			}
 			items = items.map((i) => (i.id === old.id ? updated : i));
 			return { body: updated };
 		},
 		'POST /fridges/:id/shopping-list/items': (ctx) => {
-			const added = (ctx.json as { items: { text?: string }[] }).items.map((w, n) =>
-				entry(`1${n}`, { text: w.text ?? 'x' })
+			const added = (
+				ctx.json as { items: { text?: string; quantity?: Schemas['Quantity'] }[] }
+			).items.map((w, n) =>
+				w.quantity
+					? entry(`1${n}`, { product: milk, quantity: w.quantity, amount: w.quantity.value * 1000 })
+					: entry(`1${n}`, { text: w.text ?? 'x' })
 			);
 			items = [...items, ...added];
 			return { body: added };

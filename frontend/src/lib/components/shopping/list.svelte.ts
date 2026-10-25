@@ -1,7 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { createApi, unwrap } from '$lib/api/client';
 import type { components } from '$lib/api/schema';
-import type { ShoppingListItem } from '$lib/domain/types';
+import type { Quantity, ShoppingListItem } from '$lib/domain/types';
 
 type Schemas = components['schemas'];
 export type ShoppingListItemWrite = Schemas['ShoppingListItemWrite'];
@@ -100,8 +100,11 @@ export class ShoppingListState {
 		}
 	}
 
-	/** Changes the amount of a product entry or the text of a free-text entry. */
-	async patch(id: string, change: { amount?: number; text?: string }): Promise<void> {
+	/** Sets the quantity (value and unit) of a product entry, clears it, or changes the text of a free-text entry. */
+	async patch(
+		id: string,
+		change: { quantity?: Quantity; clearAmount?: boolean; text?: string }
+	): Promise<void> {
 		await this.#queue(id, async () => {
 			const latest = this.items.find((i) => i.id === id);
 			if (!latest) return;

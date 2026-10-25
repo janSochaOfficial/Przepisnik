@@ -2663,7 +2663,7 @@ components:
       additionalProperties: false
     ShoppingListItem:
       type: object
-      required: [id, version, product, text, amount, checked, addedBy, createdAt]
+      required: [id, version, product, text, quantity, amount, checked, addedBy, createdAt]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         version: { $ref: '#/components/schemas/Version' }
@@ -2673,8 +2673,13 @@ components:
             - $ref: '#/components/schemas/ProductRef'
             - type: 'null'
         text: { type: [string, 'null'] }
+        quantity:
+          description: The amount as the user chose it (a custom unit embeds `customUnit`); null means no chosen unit.
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
         amount:
-          description: Base units, only with a product.
+          description: Base units, only with a product; derived from `quantity` when that is set. Null means no amount.
           type: [number, 'null']
         checked: { type: boolean }
         addedBy: { $ref: '#/components/schemas/UserRef' }
@@ -2689,6 +2694,11 @@ components:
             - type: 'null'
         text: { type: [string, 'null'], maxLength: 200 }
         amount: { type: [number, 'null'], exclusiveMinimum: 0 }
+        quantity:
+          description: Exclusive with `amount`; only with a product.
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
       additionalProperties: false
     ShoppingListItemsWrite:
       type: object
@@ -2706,7 +2716,18 @@ components:
       properties:
         version: { $ref: '#/components/schemas/Version' }
         checked: { type: [boolean, 'null'] }
-        amount: { type: [number, 'null'], exclusiveMinimum: 0 }
+        quantity:
+          description: Sets the unit and the amount. Exclusive with `amount` and `clearAmount`.
+          oneOf:
+            - $ref: '#/components/schemas/Quantity'
+            - type: 'null'
+        amount:
+          description: Sets a base amount and drops the chosen unit.
+          type: [number, 'null']
+          exclusiveMinimum: 0
+        clearAmount:
+          description: True removes the amount and the unit.
+          type: [boolean, 'null']
         text: { type: [string, 'null'], maxLength: 200 }
       additionalProperties: false
     CompleteShoppingListRequest:

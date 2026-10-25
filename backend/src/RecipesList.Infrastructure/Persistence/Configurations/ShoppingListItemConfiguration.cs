@@ -13,6 +13,7 @@ internal sealed class ShoppingListItemConfiguration : IEntityTypeConfiguration<S
         b.HasKey(x => x.Id);
         b.Property(x => x.Text).HasMaxLength(200);
         b.Property(x => x.Amount).HasColumnType("numeric");
+        b.Ignore(x => x.Quantity);
         b.Property(x => x.Version).IsRowVersion();
         b.HasIndex(x => new { x.FridgeId, x.Checked });
         b.HasIndex(x => x.ProductId);
@@ -24,6 +25,12 @@ internal sealed class ShoppingListItemConfiguration : IEntityTypeConfiguration<S
         b.HasOne(x => x.Product)
             .WithMany()
             .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // A custom unit in use cannot be deleted (PROJECT §5.6).
+        b.HasOne(x => x.CustomUnit)
+            .WithMany()
+            .HasForeignKey(x => x.QuantityCustomUnitId)
             .OnDelete(DeleteBehavior.Restrict);
         b.HasOne<User>().WithMany().HasForeignKey(x => x.AddedById).OnDelete(DeleteBehavior.Restrict);
     }

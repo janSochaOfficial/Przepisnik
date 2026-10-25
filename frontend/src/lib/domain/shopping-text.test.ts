@@ -50,6 +50,19 @@ describe('shoppingLine', () => {
 		expect(shoppingLine(item({ product: egg, amount: 10 }), 'metric')).toBe('Jajko — 10 jajek');
 	});
 
+	it('shows the quantity as entered when there is one', () => {
+		const quantity = { value: 2.5, unit: 'glass' } as const;
+		expect(shoppingLine(item({ product: milk, amount: 625, quantity }), 'metric')).toBe(
+			'Mleko — 2 ½ szklanki'
+		);
+		expect(
+			shoppingLine(
+				item({ product: milk, amount: 1500, quantity: { value: 1.5, unit: 'l' } }),
+				'kitchen'
+			)
+		).toBe('Mleko — 1,5 l');
+	});
+
 	it('shows only the name without an amount, and free text as typed', () => {
 		expect(shoppingLine(item({ product: milk }), 'metric')).toBe('Mleko');
 		expect(shoppingLine(item({ text: ' papier do pieczenia ' }), 'metric')).toBe(

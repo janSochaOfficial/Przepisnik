@@ -68,12 +68,17 @@ internal sealed class UnitAdmin(AppDbContext db, ICurrentUser currentUser, IQuan
     }
 
     /// <summary>
-    /// Whether a recipe ingredient or a variant operation uses the unit. Variant ops are jsonb; ids are v7 GUIDs that are
+    /// Whether a recipe ingredient, a shopping-list item or a variant operation uses the unit. Variant ops are jsonb; ids are v7 GUIDs that are
     /// unique across entities, so a text search for the quoted id finds exactly the <c>customUnitId</c> fields.
     /// </summary>
     public async Task<bool> IsInUseAsync(Guid id, CancellationToken ct)
     {
         if (await db.RecipeIngredients.AnyAsync(i => i.QuantityCustomUnitId == id, ct))
+        {
+            return true;
+        }
+
+        if (await db.ShoppingListItems.AnyAsync(i => i.QuantityCustomUnitId == id, ct))
         {
             return true;
         }

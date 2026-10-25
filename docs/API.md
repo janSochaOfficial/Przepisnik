@@ -363,8 +363,8 @@ A `PUT` with `remainingPercent = 0` deletes the item and returns `204`.
 | POST | `/fridges/{id}/deductions` | `DeductionRequest` | `201 DeductionResult` | 404, 400 `deduction.empty` |
 | POST | `/fridges/{id}/deductions/{deductionId}/undo` | — | `200 DeductionResult` (with `undone: true`) | 409 `deduction.items_changed`, 409 `deduction.already_undone` |
 | GET | `/fridges/{id}/shopping-list` | — | `200 ShoppingListItem[]` (unchecked first, then by category, then name) | 404 |
-| POST | `/fridges/{id}/shopping-list/items` | `{ items: ShoppingListItemWrite[] }` (1–100) | `200 ShoppingListItem[]` (created or merged) | 400 |
-| PATCH | `/fridges/{id}/shopping-list/items/{itemId}` | `ShoppingListItemPatch` | `200 ShoppingListItem` | 409 |
+| POST | `/fridges/{id}/shopping-list/items` | `{ items: ShoppingListItemWrite[] }` (1–100) | `200 ShoppingListItem[]` (created or merged) | 400 `quantity.unit_incompatible`, 400 `shopping_item.invalid` |
+| PATCH | `/fridges/{id}/shopping-list/items/{itemId}` | `ShoppingListItemPatch` | `200 ShoppingListItem` | 400 `quantity.unit_incompatible`, 400 `shopping_item.invalid`, 409 |
 | DELETE | `/fridges/{id}/shopping-list/items/{itemId}` | — | `204` | |
 | POST | `/fridges/{id}/shopping-list/complete` | `{ moveToFridge: boolean }` | `200 { removed: number; createdFridgeItems: FridgeItem[] }` | |
 
@@ -384,13 +384,21 @@ type DeductionResult = {
 type ShoppingListItem = {
   id: Uuid; version: Version;
   product?: ProductRef; text?: string;            // exactly one of product / text
-  amount?: number;                                // base units, only with product
+  quantity?: Quantity;                            // as chosen by the user (custom units embed customUnit); null = no chosen unit
+  amount?: number;                                // base units, only with product (derived from quantity when it is set); null = no amount
   checked: boolean; addedBy: UserRef; createdAt: DateTime;
 };
-type ShoppingListItemWrite = { productId?: Uuid; text?: string; amount?: number };
-type ShoppingListItemPatch = { version: Version; checked?: boolean; amount?: number; text?: string };
+type ShoppingListItemWrite = { productId?: Uuid; text?: string; amount?: number; quantity?: Quantity };  // amount and quantity are exclusive
+type ShoppingListItemPatch = {
+  version: Version; checked?: boolean; text?: string;
+  quantity?: Quantity;     // sets the unit and amount
+  amount?: number;         // sets a base amount and drops the chosen unit
+  clearAmount?: boolean;   // true removes the amount and the unit; exclusive with quantity / amount
+};
 ```
-Merge rule: posting a product that already has an **unchecked** item adds the amounts together (null + x = x).
+Errors: a quantity that does not fit the product → 400 `quantity.unit_incompatible`; `quantity` and `amount` together, or either with `text` → 400 `shopping_item.invalid`.
+
+Merge rule: posting a product that already has an **unchecked** item adds the **base** amounts together (null + x = x). The result keeps the existing item's unit, expressed exactly (value = total base ÷ base of one unit, 4 decimals); it takes the new item's unit if the existing one has none, and has no unit if neither has one.
 
 ## 8. Recipe export format (`RecipeExport`)
 
