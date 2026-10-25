@@ -160,6 +160,7 @@ The spec was silent on these points, so each agent picked a behaviour and the co
   - Section start and end count as step anchors, so steps with no common text are paired by position; LCS ties keep the earliest target row.
   - The file's recipe is validated with `RecipeInputValidator`; errors → 400 `import.invalid_format`. A 201 has `Location: /api/v1/variants/{first id}`.
   - A file without a usable title (1–150 chars) skips matching. A success toast follows a variant import.
+- **Format help page (I2):** field limits not in the export schema are taken from `RecipeWrite`; a Vitest test checks that the example validates and that the recipe and variant tables list every field of the contract.
 - System tags (`szybkie`) aren't exported. Op key names are fixed (`key`, `targetKey`, `afterKey`, `productKey`, `imageKey`).
 
 ### 5.8 Quantities library (F1)
@@ -179,6 +180,16 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 - On archived recipes, "Edytuj", "Zmień widoczność", "Nowy wariant" and "Utwórz nowy wariant…" are hidden, and `/warianty/nowy` explains why.
 - The recipe menu is a bottom sheet (there's no dropdown-menu component).
 - Option amounts in the picker sheet are shown scaled by the current factor.
+- **Warianty tab and opening a variant (R1):**
+  - `?wariant=` is applied by `SelectionState.openVariant`, also on client navigation; an unknown id changes nothing. A kept scaling anchor needs an amount in the opened variant.
+  - "Przepis bazowy" pins every slot to the base (clearing would let a favourite variant win the auto-match), so "Wyczyść wybór" shows afterwards. It has no ♥ of its own: the recipe's is by the title (`Page`'s additive `titleAside`).
+  - Visibility labels come from a lazy `GET /recipes/{id}/variants` (the matrix has no visibility).
+  - The two hearts have distinct accessible names ("… przepis …" / "… aktywny wariant …").
+- **Servings (R2):**
+  - Clearing servings in a variant means "inherit" (unlike times, where clearing a base time is rejected).
+  - The servings line under an ingredient scaling uses the §5.4 `~` rule: ×0.6 on 4 → `2 ½ porcji` without `~` (4.2 % < 5 %); the task file's vector was wrong.
+  - `ScalingState` is a `kind` union; an unknown `kind` → 400 `request.invalid`. A servings choice is kept when variants change or are deleted.
+  - Typing more than 100 servings in an editor empties the field (the shared `NumberField` behaviour, as for times), so the form saves without servings.
 
 ---
 
@@ -201,6 +212,8 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 - Fixed contract drift on merge: tags/utensils use a 60-character name type, and the "measureKind in use" error is documented.
 - Fixed the order of items created by "move to fridge" (it was random, because the batch shares one timestamp).
 - Recovered B6's branch after an interrupted commit (6 empty git objects quarantined, branch reset, work recommitted; `git fsck` clean).
+- Added the migrations `U1_CustomUnits`, `P1_ProductIsVerified`, `U2_ShoppingItemQuantity` (v1.1) and `R2_Servings` (two nullable columns with 1–100 checks).
+- After R2 the coordinator added `servings` / `servingsOverride` to the I2 help page (I2 owned it and had already merged).
 - B8's migration id was set to sort after B5's, because the system clock had been about 1.7 h fast.
 
 ---
@@ -213,4 +226,5 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 - Recomputing product preferences reads all of a user's selections on every save.
 - Real Google sign-in is confirmed only on `npm run dev` (G1); the Docker stack (:8080) is untried.
 - Small duplications: recipe and variant DTO shapes; the client and F2 both order added slots.
-- Playwright tests can time out when the machine is under heavy load (rerunning passes).
+- Playwright tests can time out when the machine is under heavy load (rerunning passes). Since 2026-10-25, `PLAYWRIGHT_WORKERS=2` is used while two agents run; I2 still saw 4 mobile `recipe-view` timeouts once.
+- `?wariant=` saves the selection even when the picks equal the remembered ones (R1). Recipe cards don't show servings (R2).
