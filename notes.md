@@ -3,3 +3,8 @@
 - when adding missing ingredinets to the shopping list and the recipie has optional ingredients, the app should ask the user if they want to add optional ingredients to the shopping list as well.
 - In the shopping list user should be able to change the unit of the ingredient.
 - when importing recipie the app should check if the recipie already exists in the database and if it does,  the app should prompt the user if they want to upload the recipie as a variant.
+- there should be an field to add number of servings, with similiar scaling functionality as the ingredients.
+- when on recipie page, there should be a tab called "Warianty" which shows all the variants of the recipie. 
+- when clicking on a variant, the recipie page does not show correctly scaled ingredients, instead it shows the ingredients of the original recipie. The app should show the ingredients of the variant instead.
+- move the like button to the top of the recipie page, next to the title. Right now it confuses with like variant button.
+- add an explanation page when clicking the import button, containging import JSON format.

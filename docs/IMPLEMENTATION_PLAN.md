@@ -94,6 +94,7 @@ Agents run at the same time on one machine, so nothing may rely on fixed ports o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Task | T00 / T90 | B1 | B2 | B3 | B4 | B5 | B6 | B7 | S1 | B8 | F0 | F1 | F2 | F3 | F4 | F5 | F6 |
 
+- `PLAYWRIGHT_WORKERS` (optional, same `.env.local` or exported) caps the Playwright workers; the coordinator sets it to `2` while two agents run (COORDINATOR §2), so concurrent suites don't time out under load. Unset means Playwright's default.
 - Backend integration tests use **Testcontainers** (random ports, a fresh database), so they need nothing extra.
 - If an agent needs a running API (e.g. to try something manually), it uses its own database `recipes_<taskid>` on the shared dev Postgres (`ConnectionStrings__Default=…;Database=recipes_b4`), created with `EnsureCreated`. **Never** use the default `recipes` database from a task.
 

@@ -34,17 +34,29 @@ States: `todo` → `running` → `review` (Report written) → `merged` (or `blo
 Repeat until every task is `merged`:
 
 1. **Pick ready tasks**: `todo` tasks whose dependencies are all `merged` (plan §3). Start them in parallel, but no more than **2 at once** (user decision, 2026-10-24). Prefer the critical path (B3, B4, F0, F1, F2).
-2. **Spawn** each one with the Agent tool, `isolation: "worktree"`, and the prompt in §3. Set it to `running`.
+2. **Spawn** each one with the Agent tool, `isolation: "worktree"`, the prompt in §3, and a `model` + `effort` from §2.1. Set it to `running`.
+   - **Two agents at once → Playwright runs with 2 workers** (user decision, 2026-10-25). Whenever a second agent is (or will be) running, both get `PLAYWRIGHT_WORKERS=2` in their `.env.local`; tell an already-running agent by SendMessage. The coordinator exports `PLAYWRIGHT_WORKERS=2` for its own `verify.sh` while any agent runs. With a single agent and an idle coordinator, leave it unset (Playwright's default).
 3. **When an agent finishes**, read its Report and go through it:
    - *Model changes / Contract changes / Dependencies added*: check that they are justified and within the agent's own scope;
    - *Requests for other tasks*: turn them into notes on the affected task (or a small follow-up task) before that task starts;
    - *Deviations*: accept them, or send the agent back (SendMessage to the same agent) with a concrete fix request.
 4. **Merge** it (§4). Set it to `merged`, update the board, and go back to step 1.
 
+### 2.1 Model and effort (user decision, 2026-10-25)
+Pass `model` and `effort` on every spawn.
+
+| Model | Use for |
+|---|---|
+| `haiku` (Haiku 5.5) | Small UI changes, refactors, other low-risk tasks: local, easy to review, a mistake is cheap and visible |
+| `sonnet` (Sonnet 5.5) | **The default**: every task that isn't clearly one of the other two |
+| `opus` (Opus 5.5) | Only essential tasks with **high compound risk**: data model or migration-shaping changes, auth, contract changes many tasks build on, cross-cutting logic (scaling, variant resolution) where a subtle error spreads |
+
+**Effort follows the task's complexity, not its workload.** A large but mechanical task (many files, one pattern) stays `low`; a small task with subtle logic or edge cases gets `medium` or `high`. Note the choice and the reason in the board's Notes column.
+
 ## 3. Spawn prompt
 
 > You are implementing task `<ID>` of the RecipesList project, port slot `<n>`.
-> First create `.env.local` in your worktree with `API_PORT=<5100+n>`, `WEB_PORT=<5200+n>` and `PREVIEW_PORT=<5300+n>`, and export them in every shell command that starts a server or Playwright.
+> First create `.env.local` in your worktree with `API_PORT=<5100+n>`, `WEB_PORT=<5200+n>` and `PREVIEW_PORT=<5300+n>`<, and `PLAYWRIGHT_WORKERS=2` (only when another agent runs, §2)>, and export them in every shell command that starts a server or Playwright. If the coordinator later tells you to set `PLAYWRIGHT_WORKERS=2`, add it to `.env.local`.
 > Read `CLAUDE.md`, then `docs/tasks/<file>.md`, and every document it lists under "Read first". Follow `docs/IMPLEMENTATION_PLAN.md §4` exactly: file ownership, no migrations, test vectors in your own file, ports, and dependencies as separate `deps:` commits.
 > Work on branch `task/<ID>-<slug>`. Commit in small Conventional Commits.
 > When the acceptance criteria are met: `git fetch && git rebase main`, then run `scripts/verify.sh --agent` until it is green, append `## Report` (sections from plan §4.7) to the task file, commit, and stop. Do not merge.

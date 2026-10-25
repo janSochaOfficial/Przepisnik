@@ -39,6 +39,13 @@ export function parseEnv(text: string): Record<string, string> {
 	return out;
 }
 
+/** Reads `KEY` from the exported variables, then from `.env.local` (same precedence as the ports). */
+function readSetting(key: string, env: NodeJS.ProcessEnv, start: string): string | undefined {
+	if (env[key]) return env[key];
+	const file = findEnvLocal(start);
+	return file ? parseEnv(readFileSync(file, 'utf8'))[key] : undefined;
+}
+
 function toPort(value: string | undefined, fallback: number): number {
 	const n = Number(value);
 	return Number.isInteger(n) && n > 0 && n < 65536 ? n : fallback;
@@ -56,4 +63,16 @@ export function loadPorts(
 		webPort: pick('WEB_PORT'),
 		previewPort: pick('PREVIEW_PORT')
 	};
+}
+
+/**
+ * Playwright worker count from `PLAYWRIGHT_WORKERS` (COORDINATOR §2: 2 while two task agents run).
+ * `undefined` (unset or not a positive integer) keeps Playwright's default.
+ */
+export function loadPlaywrightWorkers(
+	env: NodeJS.ProcessEnv = process.env,
+	start: string = dirname(fileURLToPath(import.meta.url))
+): number | undefined {
+	const n = Number(readSetting('PLAYWRIGHT_WORKERS', env, start));
+	return Number.isInteger(n) && n > 0 ? n : undefined;
 }

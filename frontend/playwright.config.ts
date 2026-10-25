@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { loadPorts } from './config/ports.ts';
+import { loadPlaywrightWorkers, loadPorts } from './config/ports.ts';
 
 // Integration tests: the real built app (vite preview) with a mocked API (TECHNICAL §6).
 const { previewPort } = loadPorts();
@@ -10,6 +10,8 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
+	// PLAYWRIGHT_WORKERS=2 while two task agents share the machine (COORDINATOR §2); unset = Playwright's default.
+	workers: loadPlaywrightWorkers(),
 	reporter: process.env.CI ? 'github' : 'list',
 	use: {
 		baseURL,
