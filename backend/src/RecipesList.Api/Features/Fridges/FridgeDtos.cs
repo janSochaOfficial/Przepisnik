@@ -146,12 +146,15 @@ internal sealed record DeductionResultLineDto(
     Guid ProductId, decimal Requested, decimal Deducted, decimal Shortfall, IReadOnlyList<DeductionItemResultDto> Items);
 
 /// <summary>A recorded deduction (API.md §7 <c>DeductionResult</c>).</summary>
-internal sealed record DeductionResultDto(Guid Id, bool Undone, DateTimeOffset CreatedAt, IReadOnlyList<DeductionResultLineDto> Lines)
+internal sealed record DeductionResultDto(
+    Guid Id, bool Undone, DateTimeOffset CreatedAt, bool CookCounted, IReadOnlyList<DeductionResultLineDto> Lines)
 {
-    public static DeductionResultDto From(Deduction d) => new(
+    /// <summary>An undo never counts a cook, so <paramref name="cookCounted"/> is false there.</summary>
+    public static DeductionResultDto From(Deduction d, bool cookCounted = false) => new(
         d.Id,
         d.UndoneAt is not null,
         d.CreatedAt,
+        cookCounted,
         [.. d.Lines.Select(l => new DeductionResultLineDto(
             l.ProductId,
             l.Requested,

@@ -227,6 +227,25 @@ export class SelectionState {
 		};
 	}
 
+	/**
+	 * Mirrors a cook the server counted (a deduction or "Ugotowane!", PROJECT §9.1): the recipe's total, the own
+	 * count of `variantId` ('base' for the base recipe) and the caller's 12-hour timestamp. The cooked entry is
+	 * the shown one, so its higher count cannot make another variant the best match.
+	 */
+	countCook(variantId: string, countedAt: string): void {
+		this.matrix = {
+			...this.matrix,
+			variants: this.matrix.variants.map((v) =>
+				v.id === variantId ? { ...v, cookCount: v.cookCount + 1 } : v
+			)
+		};
+		this.recipe = {
+			...this.recipe,
+			cookCount: this.recipe.cookCount + 1,
+			myLastCountedCookAt: countedAt
+		};
+	}
+
 	/** Keeps the matrix in step with a ♥ toggled on a variant ('base' is the recipe's own ♥). */
 	setFavorite(variantId: string, favorite: boolean): void {
 		this.matrix = {

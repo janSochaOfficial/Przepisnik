@@ -91,6 +91,7 @@ internal sealed record RecipeDetailDto(
     IReadOnlyList<StepDto> PrepSteps,
     IReadOnlyList<StepDto> InstructionSteps,
     int CookCount,
+    DateTimeOffset? MyLastCountedCookAt,
     int VariantCount,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);
@@ -137,3 +138,13 @@ internal sealed record RecipeWriteRequest(
 
 /// <summary>Body of <c>PUT /recipes/{id}/visibility</c>.</summary>
 internal sealed record SetVisibilityRequest([property: JsonRequired] VisibilityLevel Visibility);
+
+/// <summary>Body of <c>POST /recipes/{id}/cooked</c>: the variant that was shown, if any.</summary>
+internal sealed record CookRequest(Guid? VariantId);
+
+/// <summary>A recorded cook (API.md §4 <c>CookResult</c>).</summary>
+internal sealed record CookResultDto(
+    bool Counted, int RecipeCookCount, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? VariantCookCount, DateTimeOffset NextAllowedAt)
+{
+    public static CookResultDto From(CookResult r) => new(true, r.RecipeCookCount, r.VariantCookCount, r.NextAllowedAt);
+}

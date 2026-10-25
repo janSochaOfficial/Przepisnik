@@ -56,7 +56,11 @@
 		},
 		get ingredients() {
 			return selection.cookIngredients;
-		}
+		},
+		get lastCountedCookAt() {
+			return selection.recipe.myLastCountedCookAt ?? null;
+		},
+		countCook: (variantId, countedAt) => selection.countCook(variantId, countedAt)
 	});
 
 	$effect(() => {

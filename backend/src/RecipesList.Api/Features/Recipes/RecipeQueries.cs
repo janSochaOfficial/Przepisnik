@@ -138,6 +138,11 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
         var isFavorite = await db.RecipeFavorites.AnyAsync(f => f.UserId == me && f.RecipeId == id, ct);
         var cookCount = await db.RecipeCookCounts.Where(c => c.RecipeId == id).Select(c => c.Count).FirstOrDefaultAsync(ct);
 
+        var lastCountedCookAt = await db.UserRecipeCooks
+            .Where(c => c.UserId == me && c.RecipeId == id)
+            .Select(c => (DateTimeOffset?)c.LastCountedAt)
+            .SingleOrDefaultAsync(ct);
+
         var total = 0;
         var foreign = 0;
         if (isAuthor)
@@ -174,6 +179,7 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             Steps(recipe, StepSection.Prep),
             Steps(recipe, StepSection.Instructions),
             cookCount,
+            lastCountedCookAt,
             visibleVariants,
             recipe.CreatedAt,
             recipe.UpdatedAt);

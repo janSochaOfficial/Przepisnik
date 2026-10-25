@@ -145,8 +145,10 @@ export function deductionHandlers(
 		id: 'd1',
 		undone: true,
 		createdAt: stamp,
+		cookCounted: false,
 		lines: []
-	}
+	},
+	cookCounted = true
 ): MockHandlers {
 	return {
 		'POST /fridges/:id/deductions': (ctx) => {
@@ -156,7 +158,8 @@ export function deductionHandlers(
 				body: {
 					id: '00000000-0000-7000-8000-0000000cd001',
 					undone: false,
-					createdAt: stamp,
+					createdAt: new Date().toISOString(),
+					cookCounted,
 					lines: req.lines.map((l) => ({
 						productId: l.productId,
 						requested: l.amount,

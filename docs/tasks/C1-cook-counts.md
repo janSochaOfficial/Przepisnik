@@ -50,3 +50,51 @@ cookCounted: boolean;                    // false when there was no recipeId or 
 - Integration: deduction without a variant → base +1 and total +1; with a variant → variant +1 and total +1, base unchanged; a second deduction within 12 h → deducted, `cookCounted: false`, no count change; after 12 h (a fake clock) → counted; "Ugotowane!" → 200, then 409 `cook.too_soon` with `nextAllowedAt`; two concurrent "Ugotowane!" requests → exactly one counted; another user is not limited by mine; undo doesn't change counts or the timestamp; archived → 409; invisible → 404.
 - Playwright: press "Ugotowane!" → toast, the button is disabled with the hint; open the deduction dialog within 12 h → the warning is shown and deducting still works; axe light + dark on the action bar and the dialog.
 - `scripts/verify.sh --agent` is green.
+
+## Report
+
+### Summary
+- **Bug fix (failing test first, d2aa845):** a deduction made while a variant is shown now counts for that variant and the total only; the base's own count (`recipe_cook_counts.base_count`) goes up only for cooks without a variant. The matrix column `base` (Warianty tab, auto-match criterion 4) reads `base_count`; `RecipeDetail.cookCount` stays the total.
+- **12-hour rule, one place:** `Core/Recipes/CookService.TryCountAsync(userId, recipeId, variantId)` runs `INSERT ... ON CONFLICT (user_id, recipe_id) DO UPDATE SET last_counted_at = ... WHERE last_counted_at <= now - 12 h` on `user_recipe_cooks` (one atomic statement, so two simultaneous requests cannot both count; the loser waits for the row lock and re-evaluates the `WHERE`), then increments the counts, all in the caller's transaction. `DeductionService` always deducts and counts through it (`DeductionOutcome.CookCounted` → `DeductionResult.cookCounted`; false on an undo, without a recipe, or inside the 12 hours).
+- **`POST /recipes/{id}/cooked`** (`CookService.CookAsync`): 200 `CookResult`, 404 `recipe.not_found` / `variant.not_found`, 409 `recipe.archived`, 409 `cook.too_soon` with the extension `nextAllowedAt`. `RecipeDetail.myLastCountedCookAt` for the caller. `backend/http/recipes.http` has the request.
+- **Frontend:** `CookActions` has a "Ugotowane!" button (toast "Zapisano: ugotowane!", disabled for 12 hours with the hint "Zapisano jako ugotowane. Ponownie od <godz.>", with the date when it is not today; a 409 shows the same hint; re-enables itself when the 12 hours pass). The deduction dialog shows the PROJECT §9.1 warning while the rule applies; a deduction the server counted (`cookCounted`) starts the 12 hours (timestamp = the deduction's `createdAt`) and bumps the counts in the view. Pure logic in `domain/cook.ts` (+ vitest). Playwright: `tests/integration/cook-counts.spec.ts` (toast and disabled state, hint with date, 409, shown variant sent, warning plus deduct still works, counted vs not-counted deduction, axe light + dark on the action bar and the dialog, 360 px fit).
+- Backend integration tests (`CookCounts/CookCountTests.cs`) cover: deduction without a variant (base +1, total +1), with a variant (variant +1, total +1, base unchanged), second deduction inside 12 h (deducts, `cookCounted:false`, no change), after 12 h with a fake clock (counts), no recipe, undo changes neither counts nor timestamp, "Ugotowane!" 200 then 409 with `nextAllowedAt`, deduction then "Ugotowane!" and the reverse, two simultaneous "Ugotowane!" and a simultaneous deduction + "Ugotowane!" (exactly one counted), another user not limited, archived 409, invisible 404, foreign/unknown variant 404, `myLastCountedCookAt` on `RecipeDetail`. Test infrastructure: `ApiFactory.UseFakeClock()` swaps the app's `TimeProvider` (`SwitchableTimeProvider`); `DeductionTests.Undo...` now advances the fake clock by 13 h before its second deduction, since it relied on every deduction counting.
+
+### Deviations
+- Files outside C1's **Owns** list, all minimal:
+  - `frontend/src/lib/state/selection.svelte.ts` (+ `CookContext` in `components/recipe-view/cook-context.ts` and `routes/przepisy/[id]/+page.svelte`): one method `SelectionState.countCook(variantId, countedAt)` and two context members (`lastCountedCookAt`, `countCook`), so that a cook updates the total, the Warianty tab's count and the 12-hour timestamp without a reload. `reloadMatrix()` alone would not refresh `RecipeDetail.cookCount` / `myLastCountedCookAt`.
+  - `frontend/src/lib/components/shell/ActionBar.svelte`: `flex-wrap` added, because three buttons ("Dodaj brakujące do listy", "Ugotowane!", "Odejmij z lodówki") do not fit a 360 px bar (covered by the 360 px spec).
+  - `frontend/src/lib/i18n/pl/errors.ts`: one additive key `cook.too_soon`.
+  - `backend/tests/.../Infrastructure/ApiFactory.cs`, `SwitchableTimeProvider.cs`, `Fridges/DeductionTests.cs` (shared test infrastructure and an existing test that assumed every deduction counts).
+  - `docs/API.md` / `docs/api/openapi.yaml`: the cook endpoint, `CookResult`, `RecipeDetail.myLastCountedCookAt`, `DeductionResult.cookCounted`, the `cook.too_soon` code; `ResolvedRecipe`'s `Omit` list gains `myLastCountedCookAt`.
+- `myLastCountedCookAt` is optional and nullable in the contract (as in the task); the server always sends it (`null` when none).
+- `cook.too_soon` is added to the `errors.ts` map (generic text) although the button shows the time-based hint instead.
+- After a counted deduction the client uses the deduction's `createdAt` (server clock) as the 12-hour start, because `DeductionResult` has no `nextAllowedAt`; the server stays the authority (409).
+- The autofixer suggests (not issues) about `setTimeout` in an `$effect` in `CookActions.svelte`; the effect re-enables the button when the 12 hours pass and cannot be a `$derived`. `+page.svelte`'s `tab` effect suggestion predates C1.
+
+### Model changes
+No migration was added (plan §4.2). The coordinator's migration (suggested name `C1_CookCounts`) must contain:
+1. **`recipe_cook_counts`** gains `base_count integer NOT NULL DEFAULT 0`.
+2. **New table `user_recipe_cooks`**: `user_id uuid NOT NULL`, `recipe_id uuid NOT NULL`, `last_counted_at timestamp with time zone NOT NULL`; PK `(user_id, recipe_id)`; index on `recipe_id`; FK `user_id → users(id) ON DELETE CASCADE`; FK `recipe_id → recipes(id) ON DELETE CASCADE`. (Entity `UserRecipeCook`, configuration `UserRecipeCookConfiguration`; let EF generate it.) No backfill is needed: with no row, nothing is blocked.
+3. **Data fix for `base_count`** (past deductions can't be told apart any more, so the base gets the total minus what the recipe's variants counted), to run in the same migration after the column is added:
+```sql
+UPDATE recipe_cook_counts rc
+SET base_count = GREATEST(0, rc.count - COALESCE((
+    SELECT SUM(vc.count)
+    FROM variant_cook_counts vc
+    JOIN variants v ON v.id = vc.variant_id
+    WHERE v.recipe_id = rc.recipe_id), 0));
+```
+Variants that were deleted took their `variant_cook_counts` row with them (cascade), so for recipes with deleted variants the fixed `base_count` can be slightly too high; accepted (low-stakes data).
+
+### Contract changes
+`docs/API.md` and `docs/api/openapi.yaml`, together: `POST /recipes/{id}/cooked` (`CookRequest`, `CookResult`; 404/409 as in the task, `cook.too_soon` with `nextAllowedAt`), `RecipeDetail.myLastCountedCookAt` (optional, nullable; excluded from `ResolvedRecipe`), `DeductionResult.cookCounted` (required), `MatrixVariant.cookCount` documented as the base's own count for `'base'`, `cook.too_soon` in the error list. `schema.d.ts` was regenerated with `npm run gen:api` (not edited by hand).
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+- Coordinator: the migration above (`MigrationsAreInSync` will fail until it exists; agents skip it).
+
+### Follow-ups
+- Variant ♥/pins unaffected. If cook counts ever need a per-day (not per-12-hours) rule, `CookService.Window` is the single constant on the backend and `COOK_WINDOW_MS` in `domain/cook.ts` on the client.

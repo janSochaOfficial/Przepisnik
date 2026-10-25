@@ -83,7 +83,12 @@ export const variants = {
 	actions: {
 		group: 'Działania na przepisie',
 		deduct: 'Odejmij z lodówki',
-		addMissing: 'Dodaj brakujące do listy'
+		addMissing: 'Dodaj brakujące do listy',
+		/** "Ugotowane!" records a cook without a fridge (PROJECT §9.1). */
+		cooked: 'Ugotowane!',
+		cookedDone: 'Zapisano: ugotowane!',
+		/** `when` is a time (`07:30`) or a date and time (`26 października, 07:30`). */
+		cookedHint: (when: string) => `Zapisano jako ugotowane. Ponownie od ${when}`
 	},
 
 	tabs: {

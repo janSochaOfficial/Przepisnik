@@ -27,6 +27,7 @@ public static class ErrorCodes
     public const string RecipeHasVariants = "recipe.has_variants";
     public const string RecipeVisibilityLocked = "recipe.visibility_locked";
     public const string RecipeArchived = "recipe.archived";
+    public const string CookTooSoon = "cook.too_soon";
     public const string QuantityUnitIncompatible = "quantity.unit_incompatible";
     public const string QuantityInvalid = "quantity.invalid";
 

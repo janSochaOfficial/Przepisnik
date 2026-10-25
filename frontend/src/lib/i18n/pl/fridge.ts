@@ -118,6 +118,9 @@ export const fridge = {
 		missing: 'Brak w lodówce',
 		short: (amount: string) => `Za mało — jest ${amount}`,
 		noRows: 'Ten przepis nie ma składników z ilością do odjęcia.',
+		/** Shown while the 12-hour rule applies (PROJECT §9.1): the deduction still happens. */
+		cookNotCounted:
+			'Ten przepis był już liczony jako ugotowany w ciągu ostatnich 12 godzin, więc licznik się nie zwiększy.',
 		loadFailed: 'Nie udało się wczytać lodówki.',
 		deductSelected: 'Odejmij zaznaczone',
 		deductAll: 'Odejmij wszystko',

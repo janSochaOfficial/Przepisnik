@@ -99,9 +99,23 @@ const resolvedOf = (
 	ingredients: Ingredient[],
 	step: string
 ): Schemas['ResolvedRecipe'] => {
-	const { totalVariantCount, foreignVariantCount, canEdit, version, variantCount, ...rest } =
-		baseRecipe();
-	void [totalVariantCount, foreignVariantCount, canEdit, version, variantCount];
+	const {
+		totalVariantCount,
+		foreignVariantCount,
+		canEdit,
+		version,
+		variantCount,
+		myLastCountedCookAt,
+		...rest
+	} = baseRecipe();
+	void [
+		totalVariantCount,
+		foreignVariantCount,
+		canEdit,
+		version,
+		variantCount,
+		myLastCountedCookAt
+	];
 	return {
 		...rest,
 		ingredients,

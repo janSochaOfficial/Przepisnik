@@ -39,17 +39,28 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Variant> Variants => Set<Variant>();
 
-    public async Task IncrementCookCountsAsync(Guid? recipeId, Guid? variantId, CancellationToken ct)
+    public async Task<bool> TryClaimCookAsync(Guid userId, Guid recipeId, DateTimeOffset now, DateTimeOffset notAfter, CancellationToken ct)
     {
-        if (recipeId is { } recipe)
-        {
-            await Database.ExecuteSqlInterpolatedAsync(
-                $"""
-                INSERT INTO recipe_cook_counts (recipe_id, count) VALUES ({recipe}, 1)
-                ON CONFLICT (recipe_id) DO UPDATE SET count = recipe_cook_counts.count + 1
-                """,
-                ct);
-        }
+        var rows = await Database.ExecuteSqlInterpolatedAsync(
+            $"""
+            INSERT INTO user_recipe_cooks (user_id, recipe_id, last_counted_at) VALUES ({userId}, {recipeId}, {now})
+            ON CONFLICT (user_id, recipe_id) DO UPDATE SET last_counted_at = EXCLUDED.last_counted_at
+            WHERE user_recipe_cooks.last_counted_at <= {notAfter}
+            """,
+            ct);
+        return rows > 0;
+    }
+
+    public async Task IncrementCookCountsAsync(Guid recipeId, Guid? variantId, CancellationToken ct)
+    {
+        var baseCooks = variantId is null ? 1 : 0;
+        await Database.ExecuteSqlInterpolatedAsync(
+            $"""
+            INSERT INTO recipe_cook_counts (recipe_id, count, base_count) VALUES ({recipeId}, 1, {baseCooks})
+            ON CONFLICT (recipe_id) DO UPDATE
+            SET count = recipe_cook_counts.count + 1, base_count = recipe_cook_counts.base_count + {baseCooks}
+            """,
+            ct);
 
         if (variantId is { } variant)
         {
@@ -61,6 +72,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
                 ct);
         }
     }
+
+    public DbSet<UserRecipeCook> UserRecipeCooks => Set<UserRecipeCook>();
 
     public DbSet<RecipeCookCount> RecipeCookCounts => Set<RecipeCookCount>();
 
