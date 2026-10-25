@@ -161,20 +161,22 @@ test.describe('variant menu in the Warianty tab', () => {
 	});
 
 	for (const colorScheme of ['light', 'dark'] as const) {
-		test(`the open menu and the confirmation pass axe (${colorScheme})`, async ({ page }) => {
-			await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
-			const { handlers } = stateful();
-			await mockApi(page, handlers);
-			await page.goto(url);
-			await variantsTab(page).click();
-			await menuOf(page, 'Wersja wege').click();
-			await expect(page.getByRole('button', { name: 'Usuń wariant' })).toBeVisible();
-			expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-
-			await page.getByRole('button', { name: 'Usuń wariant' }).click();
-			await expect(page.getByRole('alertdialog')).toBeVisible();
-			expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-		});
+		for (const stage of ['menu', 'confirmation'] as const) {
+			test(`the open ${stage} passes axe (${colorScheme})`, async ({ page }) => {
+				await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+				const { handlers } = stateful();
+				await mockApi(page, handlers);
+				await page.goto(url);
+				await variantsTab(page).click();
+				await menuOf(page, 'Wersja wege').click();
+				await expect(page.getByRole('button', { name: 'Usuń wariant' })).toBeVisible();
+				if (stage === 'confirmation') {
+					await page.getByRole('button', { name: 'Usuń wariant' }).click();
+					await expect(page.getByRole('alertdialog')).toBeVisible();
+				}
+				expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+			});
+		}
 	}
 });
 
