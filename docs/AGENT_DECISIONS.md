@@ -147,6 +147,10 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 - Undo of an item delete re-creates the item under a new id.
 - **U2 (shopping units):** metric quantities on the list show a decimal comma (`1,5 l`, PROJECT §10) instead of U1's `1 ½ l`; other units use U1's as-entered format. The dialogs have no piece-size selector (an existing size is kept when converting). An item with only a base amount opens in its base unit and is saved with it. Unit conversion for the dialogs is frontend-only; the merge uses `IQuantityConverter`.
 - Concurrent accepts of the same invite are idempotent; a concurrent undo of a deduction → 409 (T90).
+- **Cook counts (C1, D-42, D-43):**
+  - The matrix's `base` column is the base's own count (`recipe_cook_counts.base_count`); `RecipeDetail.cookCount` stays the total. Past counts were split by the migration as total minus the variants' counts, so recipes with deleted variants may show a slightly high base count.
+  - One rule for deductions and "Ugotowane!" (`CookService.TryCountAsync`): one atomic upsert on `user_recipe_cooks`. Both cook transactions run at **read committed**; at the default serializable level, simultaneous requests failed with 500 (coordinator fix on merge).
+  - After a counted deduction the client starts the 12 hours from the deduction's `createdAt` (server clock). `myLastCountedCookAt` is optional in the contract but always sent. The action bar wraps (three buttons don't fit 360 px).
 
 ### 5.7 Import and export (B6, I1)
 - Export removes the "originally by @nick" footer and reports that nickname as `authorNickname`, so export → import → export round-trips and the original author survives chains of imports. Variants carry the footer too.
@@ -190,6 +194,8 @@ The spec was silent on these points, so each agent picked a behaviour and the co
   - The servings line under an ingredient scaling uses the §5.4 `~` rule: ×0.6 on 4 → `2 ½ porcji` without `~` (4.2 % < 5 %); the task file's vector was wrong.
   - `ScalingState` is a `kind` union; an unknown `kind` → 400 `request.invalid`. A servings choice is kept when variants change or are deleted.
   - Typing more than 100 servings in an editor empties the field (the shared `NumberField` behaviour, as for times), so the form saves without servings.
+- **Variant menu (V2):** after a delete the page reloads the matrix (`SelectionState.reloadMatrix()`) instead of invalidating the load. "Publiczny" still asks for confirmation. The visibility item waits for the lazily loaded visibility list.
+- **Clipped text (L1):** every `.truncate` gets `padding-block: .2em; margin-block: -.2em` so descenders aren't cut.
 
 ---
 
@@ -213,6 +219,7 @@ The spec was silent on these points, so each agent picked a behaviour and the co
 - Fixed the order of items created by "move to fridge" (it was random, because the batch shares one timestamp).
 - Recovered B6's branch after an interrupted commit (6 empty git objects quarantined, branch reset, work recommitted; `git fsck` clean).
 - Added the migrations `U1_CustomUnits`, `P1_ProductIsVerified`, `U2_ShoppingItemQuantity` (v1.1) and `R2_Servings` (two nullable columns with 1–100 checks).
+- Added `C1_CookCounts` (`base_count` with the data fix, table `user_recipe_cooks`) and switched both cook transactions to read committed, after C1's concurrency test failed on every run on main (the agent's run had passed).
 - After R2 the coordinator added `servings` / `servingsOverride` to the I2 help page (I2 owned it and had already merged).
 - B8's migration id was set to sort after B5's, because the system clock had been about 1.7 h fast.
 
