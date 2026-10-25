@@ -1357,7 +1357,7 @@ export interface components {
 			/** @description The recipe's total (base and variants), counted at most once per user per 12 hours (D-42, D-43). */
 			cookCount: number;
 			/** @description The caller's last counted cook of this recipe (any variant); the client derives the 12-hour state from it. */
-			myLastCountedCookAt: components['schemas']['DateTime'] | null;
+			myLastCountedCookAt?: components['schemas']['DateTime'] | null;
 			/** @description Variants visible to the caller. */
 			variantCount: number;
 			createdAt: components['schemas']['DateTime'];

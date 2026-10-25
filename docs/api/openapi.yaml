@@ -2096,7 +2096,7 @@ components:
       additionalProperties: false
     RecipeDetail:
       type: object
-      required: [id, version, isArchived, visibility, isFavorite, canEdit, totalVariantCount, foreignVariantCount, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, myLastCountedCookAt, variantCount, createdAt, updatedAt]
+      required: [id, version, isArchived, visibility, isFavorite, canEdit, totalVariantCount, foreignVariantCount, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, variantCount, createdAt, updatedAt]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         version: { $ref: '#/components/schemas/Version' }
