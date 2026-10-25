@@ -257,7 +257,7 @@ This is the core interaction in the recipe view.
    1. most matches with the user's remembered picks for this recipe,
    2. variants the user has marked as favourite (♥, §4.6),
    3. a product-preference score (§6.6),
-   4. cook count (how many times it was deducted from a fridge),
+   4. cook count (how many times it was cooked, §9.1; the base counts only cooks without a variant),
    5. the base recipe before other variants, then older variants first.
 6. **Auto picks.** Every unpinned slot takes the best variant's option, shown with an "auto" marker.
 7. **Ordering in the sheet.** Options supported by a compatible variant come first, then the rest, which are dimmed but still selectable (ranked, not hidden; D-04). Within each group, options with more supporting variants come first.
@@ -327,8 +327,17 @@ At the bottom of the recipe view, the **"Odejmij z lodówki"** (deduct from frid
 Server rules (D-10):
 - The deduction happens in base units, against the product's packages in that fridge, **most-used package first** (lowest remaining percent).
 - A shortfall deducts to 0, removes those items, and reports the shortfall.
-- A deduction is recorded with the previous state of every touched item, and the recipe and variant **cook count** goes up by one.
+- A deduction is recorded with the previous state of every touched item, and the recipe and variant **cook count** goes up by one, unless the 12-hour rule of §9.1 applies. The deduction itself is never limited.
 - **Undo** is offered as a toast ("Odjęto 6 produktów · Cofnij"). It succeeds only if none of the touched items has changed since; otherwise the API answers 409 and the UI explains why.
+
+### 9.1 Cook counts and "Ugotowane!"
+- **Counts** (D-42): every recipe has a **total** cook count (shown on the recipe), and every variant and the base recipe its own count. A cook while a variant is shown (or a custom mix, credited to the variant that matches the most pins) counts for that variant and the total; a cook of the base counts for the base and the total. So the base's count in the Warianty tab and in the auto-match (§6.3) is only cooks of the base itself.
+- **"Ugotowane!"** (D-43): a button in the recipe view's action bar, next to "Odejmij z lodówki", records a cook **without touching any fridge** (for meals cooked from things not tracked in the app). It counts like a deduction, for the shown variant (or the base).
+- **12-hour rule** (D-43): one user's cooks of one recipe (any variant) count **at most once per 12 hours**:
+  - "Ugotowane!" is disabled for 12 hours after a counted cook of that recipe by the user, with the hint **"Zapisano jako ugotowane. Ponownie od <godz.>"** (time, plus the date if it is not today). The server enforces it too (409).
+  - "Odejmij z lodówki" **always deducts**. Within the 12 hours, the deduction dialog shows the warning **"Ten przepis był już liczony jako ugotowany w ciągu ostatnich 12 godzin, więc licznik się nie zwiększy."**, and the cook count does not go up.
+  - Undoing a deduction does not lower any count and does not reset the 12 hours.
+  - After pressing "Ugotowane!" a toast confirms **"Zapisano: ugotowane!"**.
 
 ## 10. Shopping list
 
@@ -400,3 +409,5 @@ Expiry dates and "use soon" highlighting · direct Google Keep / Google Tasks sy
 | D-39 | The recipe's own ♥ sits next to the title, apart from the active variant's ♥ | user |
 | D-40 | The import dialog links to a Polish "Format pliku" page describing the export JSON with a complete example | user (explanation page) + assumption (separate route, contents) |
 | D-41 | Variant authors get a ⋯ menu (edit, change visibility, delete with confirmation) on variant entries in the Warianty tab, Moje warianty and Ulubione; visibility changes alone, without re-sending the variant | user + assumption (where, confirmation, own endpoint) |
+| D-42 | Cook counts: a recipe total, plus separate counts for the base and each variant; the base counts only cooks without a variant (it used to get every cook) | user (fix) + assumption (total kept) |
+| D-43 | An "Ugotowane!" button records a cook without a fridge; a user's cooks of a recipe count at most once per 12 hours: the button is disabled (and the server answers 409), while a deduction still deducts and only warns that the count won't go up | user + assumption (per user per recipe, label, undo doesn't reset) |

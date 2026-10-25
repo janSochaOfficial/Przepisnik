@@ -38,12 +38,13 @@ Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2
 | R2 | 3 | merged | task/R2-servings | opus/medium. merged 2026-10-25 + coordinator migration `R2_Servings` (`recipes.servings`, `variants.servings_override`, nullable, CHECK 1–100). Full verify green (370 unit, 402 integration, 625 vitest, 263 playwright). Accepted (AGENT_DECISIONS §5.10): variant clear = inherit; §5.4 `~` rule over the task's wrong vector; `ScalingState` `kind` union, unknown kind → 400 `request.invalid`; >100 typed empties the field. Coordinator added servings to the I2 help page + a schema-coverage test (`fix(merge)`). Follow-up: recipe cards don't show servings |
 
 ### Wave v1.3 (user request, 2026-10-25)
-Independent lanes: V2 and L1 (L1 leaves V2's two variant components alone). PROJECT D-41.
+Lane A: V2 → C1 (both change `VariantService` and the recipe view). Lane B: L1 (leaves V2's two variant components alone). PROJECT D-41–D-43.
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
 | V2 | 1 | running | task/V2-variant-actions | sonnet/medium: one endpoint (`PUT /variants/{id}/visibility`) + a menu reused in 3 places; delete refreshes the recipe page state |
-| L1 | 2 | running | task/L1-text-clipping | haiku/low: CSS (descenders clipped by `truncate` + tight line height), low risk |
+| L1 | 2 | running | task/L1-text-clipping | haiku/low: CSS (descenders clipped by `truncate` + tight line height), low risk. Sent back once (2026-10-25): it fixed only PageHeader; asked for one `app.css` rule for every `.truncate` and checks on the other spots |
+| C1 | 3 | todo (after V2) | task/C1-cook-counts | sonnet/high: base-count fix + "Ugotowane!" + the 12-hour rule in two paths (concurrency); low-stakes data. Expect model changes → coordinator migration `C1_CookCounts` with the `base_count` data fix (D-42, D-43) |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
 
