@@ -609,6 +609,12 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("recipe_id");
 
+                    b.Property<int>("BaseCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("base_count");
+
                     b.Property<int>("Count")
                         .HasColumnType("integer")
                         .HasColumnName("count");
@@ -755,6 +761,29 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_recipe_utensils_utensil_id");
 
                     b.ToTable("recipe_utensils", (string)null);
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Recipes.UserRecipeCook", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipe_id");
+
+                    b.Property<DateTimeOffset>("LastCountedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_counted_at");
+
+                    b.HasKey("UserId", "RecipeId")
+                        .HasName("pk_user_recipe_cooks");
+
+                    b.HasIndex("RecipeId")
+                        .HasDatabaseName("ix_user_recipe_cooks_recipe_id");
+
+                    b.ToTable("user_recipe_cooks", (string)null);
                 });
 
             modelBuilder.Entity("RecipesList.Core.ShoppingLists.ShoppingListItem", b =>
@@ -1402,6 +1431,23 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_recipe_utensils_utensils_utensil_id");
 
                     b.Navigation("Utensil");
+                });
+
+            modelBuilder.Entity("RecipesList.Core.Recipes.UserRecipeCook", b =>
+                {
+                    b.HasOne("RecipesList.Core.Recipes.Recipe", null)
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_recipe_cooks_recipes_recipe_id");
+
+                    b.HasOne("RecipesList.Core.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_recipe_cooks_users_user_id");
                 });
 
             modelBuilder.Entity("RecipesList.Core.ShoppingLists.ShoppingListItem", b =>
