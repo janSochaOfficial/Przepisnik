@@ -781,6 +781,24 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("product_id");
 
+                    b.Property<Guid?>("QuantityCustomUnitId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("quantity_custom_unit_id");
+
+                    b.Property<string>("QuantitySize")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("quantity_size");
+
+                    b.Property<string>("QuantityUnit")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("quantity_unit");
+
+                    b.Property<decimal?>("QuantityValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("quantity_value");
+
                     b.Property<string>("Text")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -800,6 +818,9 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId")
                         .HasDatabaseName("ix_shopping_list_items_product_id");
+
+                    b.HasIndex("QuantityCustomUnitId")
+                        .HasDatabaseName("ix_shopping_list_items_quantity_custom_unit_id");
 
                     b.HasIndex("FridgeId", "Checked")
                         .HasDatabaseName("ix_shopping_list_items_fridge_id_checked");
@@ -1390,6 +1411,14 @@ namespace RecipesList.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_shopping_list_items_products_product_id");
+
+                    b.HasOne("RecipesList.Core.Units.CustomUnit", "CustomUnit")
+                        .WithMany()
+                        .HasForeignKey("QuantityCustomUnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_shopping_list_items_custom_units_quantity_custom_unit_id");
+
+                    b.Navigation("CustomUnit");
 
                     b.Navigation("Product");
                 });
