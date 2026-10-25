@@ -93,6 +93,21 @@ public sealed class CookCountTests(ApiFactory factory) : IClassFixture<ApiFactor
     }
 
     [Fact]
+    public async Task Deduct_WithAVariant_CountsForTheVariantNotForTheBase()
+    {
+        var (recipe, variantId) = await ArrangeAsync();
+
+        await CookAsync(recipe.Id, variantId);
+
+        var matrix = await GetAsync($"/api/v1/recipes/{recipe.Id}/variant-matrix");
+        var counts = matrix.GetProperty("variants").EnumerateArray()
+            .ToDictionary(c => c.GetProperty("id").GetString()!, c => c.GetProperty("cookCount").GetInt32());
+        counts["base"].ShouldBe(0);
+        counts[variantId.ToString()].ShouldBe(1);
+        (await GetAsync($"/api/v1/recipes/{recipe.Id}")).GetProperty("cookCount").GetInt32().ShouldBe(1);
+    }
+
+    [Fact]
     public async Task NeverCooked_ReportsZero()
     {
         var (recipe, variantId) = await ArrangeAsync();
