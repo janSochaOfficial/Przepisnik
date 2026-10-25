@@ -711,6 +711,37 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
+  /recipes/{id}/cooked:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [recipes]
+      operationId: CookRecipe
+      summary: Record a cook without a fridge ("Ugotowane!", PROJECT §9.1)
+      description: |
+        Counts like a deduction (D-42, D-43): the recipe's total plus the shown variant's count, or the base's own count
+        without a variant. One user's cooks of one recipe (any variant) count at most once per 12 hours; inside that time
+        → 409 `cook.too_soon` with the extension `nextAllowedAt`. An archived recipe → 409 `recipe.archived`.
+        A variant that is not of this recipe or not visible → 404 `variant.not_found`.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CookRequest' }
+      responses:
+        '200':
+          description: Counted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CookResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
   /recipes/{id}/favorite:
     parameters:
       - $ref: '#/components/parameters/Id'
@@ -2065,7 +2096,7 @@ components:
       additionalProperties: false
     RecipeDetail:
       type: object
-      required: [id, version, isArchived, visibility, isFavorite, canEdit, totalVariantCount, foreignVariantCount, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, variantCount, createdAt, updatedAt]
+      required: [id, version, isArchived, visibility, isFavorite, canEdit, totalVariantCount, foreignVariantCount, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, myLastCountedCookAt, variantCount, createdAt, updatedAt]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         version: { $ref: '#/components/schemas/Version' }
@@ -2109,12 +2140,39 @@ components:
         instructionSteps:
           type: array
           items: { $ref: '#/components/schemas/Step' }
-        cookCount: { type: integer }
+        cookCount:
+          description: The recipe's total (base and variants), counted at most once per user per 12 hours (D-42, D-43).
+          type: integer
+        myLastCountedCookAt:
+          description: The caller's last counted cook of this recipe (any variant); the client derives the 12-hour state from it.
+          oneOf:
+            - $ref: '#/components/schemas/DateTime'
+            - type: 'null'
         variantCount:
           description: Variants visible to the caller.
           type: integer
         createdAt: { $ref: '#/components/schemas/DateTime' }
         updatedAt: { $ref: '#/components/schemas/DateTime' }
+      additionalProperties: false
+    CookRequest:
+      type: object
+      properties:
+        variantId:
+          description: The variant that was shown; omit (or null) for the base recipe.
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+      additionalProperties: false
+    CookResult:
+      type: object
+      required: [counted, recipeCookCount, nextAllowedAt]
+      properties:
+        counted: { type: boolean, const: true }
+        recipeCookCount: { type: integer, description: The recipe's total after this cook. }
+        variantCookCount: { type: integer, description: The variant's count after this cook; only when a variant was given. }
+        nextAllowedAt:
+          description: When the caller's next cook of this recipe counts (12 hours after this one).
+          $ref: '#/components/schemas/DateTime'
       additionalProperties: false
     IngredientWrite:
       type: object
@@ -2416,7 +2474,7 @@ components:
               type: [integer, 'null']
       unevaluatedProperties: false
     ResolvedRecipe:
-      description: '`Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id.'
+      description: '`Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit | myLastCountedCookAt>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id.'
       type: object
       required: [id, isArchived, visibility, isFavorite, title, description, coverImage, author, prepMinutes, cookMinutes, tags, utensils, ingredients, prepSteps, instructionSteps, cookCount, createdAt, updatedAt, variantId, variantName]
       properties:
@@ -2750,11 +2808,14 @@ components:
       additionalProperties: false
     DeductionResult:
       type: object
-      required: [id, undone, createdAt, lines]
+      required: [id, undone, createdAt, cookCounted, lines]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         undone: { type: boolean }
         createdAt: { $ref: '#/components/schemas/DateTime' }
+        cookCounted:
+          description: False when the request had no `recipeId`, when the 12-hour rule applied (D-43), and on an undo.
+          type: boolean
         lines:
           type: array
           items: { $ref: '#/components/schemas/DeductionResultLine' }

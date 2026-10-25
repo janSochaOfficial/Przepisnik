@@ -66,11 +66,21 @@ public interface IAppDbContext
     DbSet<CustomUnit> CustomUnits { get; }
 
     /// <summary>
-    /// Adds one cook to the recipe's and/or the variant's count with one atomic upsert each
-    /// (<c>INSERT ... ON CONFLICT DO UPDATE SET count = count + 1</c>), joining the current transaction. The
-    /// versioned recipe and variant rows are not touched (D-28).
+    /// The 12-hour rule in one atomic statement (<c>INSERT ... ON CONFLICT DO UPDATE ... WHERE last_counted_at &lt;=
+    /// <paramref name="notAfter"/></c>): records <paramref name="now"/> as the user's last counted cook of the recipe
+    /// and returns true, or leaves the row alone and returns false when the last one is newer. Two simultaneous calls
+    /// cannot both win: the second waits for the first's row lock and then sees its timestamp.
     /// </summary>
-    Task IncrementCookCountsAsync(Guid? recipeId, Guid? variantId, CancellationToken ct);
+    Task<bool> TryClaimCookAsync(Guid userId, Guid recipeId, DateTimeOffset now, DateTimeOffset notAfter, CancellationToken ct);
+
+    /// <summary>
+    /// Adds one counted cook with atomic upserts joining the current transaction: the recipe's total, plus either the
+    /// recipe's base count (no variant) or the variant's count. The versioned recipe and variant rows are not touched
+    /// (D-28).
+    /// </summary>
+    Task IncrementCookCountsAsync(Guid recipeId, Guid? variantId, CancellationToken ct);
+
+    DbSet<UserRecipeCook> UserRecipeCooks { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct);
 }

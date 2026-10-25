@@ -437,6 +437,31 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/recipes/{id}/cooked': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Record a cook without a fridge ("Ugotowane!", PROJECT §9.1)
+		 * @description Counts like a deduction (D-42, D-43): the recipe's total plus the shown variant's count, or the base's own count
+		 *     without a variant. One user's cooks of one recipe (any variant) count at most once per 12 hours; inside that time
+		 *     → 409 `cook.too_soon` with the extension `nextAllowedAt`. An archived recipe → 409 `recipe.archived`.
+		 *     A variant that is not of this recipe or not visible → 404 `variant.not_found`.
+		 */
+		post: operations['CookRecipe'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/recipes/{id}/favorite': {
 		parameters: {
 			query?: never;
@@ -1329,11 +1354,28 @@ export interface components {
 			ingredients: components['schemas']['Ingredient'][];
 			prepSteps: components['schemas']['Step'][];
 			instructionSteps: components['schemas']['Step'][];
+			/** @description The recipe's total (base and variants), counted at most once per user per 12 hours (D-42, D-43). */
 			cookCount: number;
+			/** @description The caller's last counted cook of this recipe (any variant); the client derives the 12-hour state from it. */
+			myLastCountedCookAt: components['schemas']['DateTime'] | null;
 			/** @description Variants visible to the caller. */
 			variantCount: number;
 			createdAt: components['schemas']['DateTime'];
 			updatedAt: components['schemas']['DateTime'];
+		};
+		CookRequest: {
+			/** @description The variant that was shown; omit (or null) for the base recipe. */
+			variantId?: components['schemas']['Uuid'] | null;
+		};
+		CookResult: {
+			/** @constant */
+			counted: true;
+			/** @description The recipe's total after this cook. */
+			recipeCookCount: number;
+			/** @description The variant's count after this cook; only when a variant was given. */
+			variantCookCount?: number;
+			/** @description When the caller's next cook of this recipe counts (12 hours after this one). */
+			nextAllowedAt: components['schemas']['DateTime'];
 		};
 		IngredientWrite: {
 			/** @description Keep the existing id on edit (needed for variant ops); omit for new rows. */
@@ -1501,7 +1543,7 @@ export interface components {
 			/** @description Override of the recipe's servings (1–100); null = inherit. */
 			servingsOverride?: number | null;
 		};
-		/** @description `Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id. */
+		/** @description `Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit | myLastCountedCookAt>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id. */
 		ResolvedRecipe: {
 			id: components['schemas']['Uuid'];
 			isArchived: boolean;
@@ -1697,6 +1739,8 @@ export interface components {
 			id: components['schemas']['Uuid'];
 			undone: boolean;
 			createdAt: components['schemas']['DateTime'];
+			/** @description False when the request had no `recipeId`, when the 12-hour rule applied (D-43), and on an undo. */
+			cookCounted: boolean;
 			lines: components['schemas']['DeductionResultLine'][];
 		};
 		DeductionResultLine: {
@@ -2785,6 +2829,37 @@ export interface operations {
 				};
 				content: {
 					'application/json': components['schemas']['RecipeDetail'];
+				};
+			};
+			400: components['responses']['BadRequest'];
+			401: components['responses']['Unauthorized'];
+			403: components['responses']['Forbidden'];
+			404: components['responses']['NotFound'];
+			409: components['responses']['Conflict'];
+		};
+	};
+	CookRecipe: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: components['parameters']['Id'];
+			};
+			cookie?: never;
+		};
+		requestBody?: {
+			content: {
+				'application/json': components['schemas']['CookRequest'];
+			};
+		};
+		responses: {
+			/** @description Counted. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['CookResult'];
 				};
 			};
 			400: components['responses']['BadRequest'];

@@ -161,7 +161,8 @@ internal static class FridgesFeature
     {
         api.MapPost("/fridges/{id:guid}/deductions", async Task<Created<DeductionResultDto>> (Guid id, DeductionRequest request, IDeductionService deductions, CancellationToken ct) =>
             {
-                var result = DeductionResultDto.From(await deductions.DeductAsync(id, request.ToInput(), ct));
+                var outcome = await deductions.DeductAsync(id, request.ToInput(), ct);
+                var result = DeductionResultDto.From(outcome.Deduction, outcome.CookCounted);
                 return TypedResults.Created($"/api/v1/fridges/{id}/deductions/{result.Id}", result);
             })
             .WithName("CreateDeduction")

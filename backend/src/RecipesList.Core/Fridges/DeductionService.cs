@@ -6,14 +6,18 @@ using RecipesList.Core.Visibility;
 
 namespace RecipesList.Core.Fridges;
 
+/// <summary>A recorded deduction and whether it also counted as a cook (false without a recipe, or inside the 12 hours, D-43).</summary>
+public sealed record DeductionOutcome(Deduction Deduction, bool CookCounted);
+
 /// <summary>Deducting a cooked recipe from a fridge, and undoing it (API.md §7, PROJECT §9, D-10).</summary>
 public interface IDeductionService
 {
     /// <summary>
     /// Deducts every line from the product's packages (most-used first, <see cref="DeductionAllocator"/>), records the
-    /// previous state of each touched item and bumps the recipe's and variant's cook counts.
+    /// previous state of each touched item and counts the cook through <see cref="ICookService.TryCountAsync"/> (at most
+    /// once per user and recipe per 12 hours; the deduction itself is never limited).
     /// </summary>
-    Task<Deduction> DeductAsync(Guid fridgeId, DeductionInput input, CancellationToken ct);
+    Task<DeductionOutcome> DeductAsync(Guid fridgeId, DeductionInput input, CancellationToken ct);
 
     /// <summary>
     /// Restores every touched item from its snapshot (re-creating removed ones under the same id). 409
@@ -29,10 +33,11 @@ public sealed class DeductionService(
     ICurrentUser currentUser,
     FridgeAccess access,
     VisibilityRules visibility,
+    ICookService cooks,
     TimeProvider time) : IDeductionService
 {
     /// <inheritdoc />
-    public async Task<Deduction> DeductAsync(Guid fridgeId, DeductionInput input, CancellationToken ct)
+    public async Task<DeductionOutcome> DeductAsync(Guid fridgeId, DeductionInput input, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(input);
         var me = currentUser.Id;
@@ -94,8 +99,9 @@ public sealed class DeductionService(
         using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
         await db.SaveChangesAsync(ct);
 
-        // Atomic upserts in the same transaction; the recipe's and variant's xmin is untouched.
-        await db.IncrementCookCountsAsync(input.RecipeId, input.VariantId, ct);
+        // One atomic statement decides whether the cook counts (12-hour rule), in the same transaction; the recipe's and
+        // variant's xmin is untouched.
+        var cookCounted = input.RecipeId is { } cookedRecipe && (await cooks.TryCountAsync(me, cookedRecipe, input.VariantId, ct)).Counted;
 
         var deduction = new Deduction
         {
@@ -120,7 +126,7 @@ public sealed class DeductionService(
         db.Deductions.Add(deduction);
         await db.SaveChangesAsync(ct);
         scope.Complete();
-        return deduction;
+        return new DeductionOutcome(deduction, cookCounted);
     }
 
     /// <inheritdoc />

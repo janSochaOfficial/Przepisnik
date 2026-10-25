@@ -11,6 +11,7 @@ internal static class RecipesFeature
     public static IServiceCollection AddRecipes(this IServiceCollection services)
     {
         services.AddScoped<IRecipeService, RecipeService>();
+        services.AddScoped<ICookService, CookService>();
         services.AddScoped<RecipeQueries>();
         return services;
     }
@@ -52,6 +53,13 @@ internal static class RecipesFeature
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
+        api.MapPost("/recipes/{id:guid}/cooked", CookedAsync)
+            .WithName("CookRecipe")
+            .WithSummary("Record a cook without a fridge (\"Ugotowane!\")")
+            .Produces<CookResultDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
         api.MapDelete("/recipes/{id:guid}", DeleteAsync)
             .WithName("DeleteRecipe")
             .WithSummary("Delete or archive a recipe")
@@ -60,6 +68,9 @@ internal static class RecipesFeature
             .ProducesProblem(StatusCodes.Status404NotFound);
         return api;
     }
+
+    private static async Task<Ok<CookResultDto>> CookedAsync(Guid id, CookRequest? request, ICookService cooks, CancellationToken ct) =>
+        TypedResults.Ok(CookResultDto.From(await cooks.CookAsync(id, request?.VariantId, ct)));
 
     private static async Task<Ok<PagedDto<RecipeSummaryDto>>> ListAsync(
         RecipeQueries queries,

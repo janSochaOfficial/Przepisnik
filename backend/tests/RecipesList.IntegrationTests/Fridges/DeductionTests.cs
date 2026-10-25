@@ -154,12 +154,14 @@ public sealed class DeductionTests(ApiFactory factory) : FridgeTestBase(factory)
         await AddItemAsync(anna, fridgeId, Milk, 1000m);
         var (recipeId, variantId) = await AddRecipeWithVariantAsync(anna.UserId, archived: false);
 
+        var clock = Factory.UseFakeClock();
         var deduction = await DeductAsync(anna, fridgeId, recipeId, variantId, (Milk, 100m));
         (await CookCountsAsync(recipeId, variantId)).ShouldBe((1, 1));
 
         (await anna.PostJsonAsync($"/api/v1/fridges/{fridgeId}/deductions/{Id(deduction)}/undo", null)).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await CookCountsAsync(recipeId, variantId)).ShouldBe((1, 1));
 
+        clock.Advance(TimeSpan.FromHours(13));
         await DeductAsync(anna, fridgeId, recipeId, null, (Milk, 100m));
         (await CookCountsAsync(recipeId, variantId)).ShouldBe((2, 1));
     }

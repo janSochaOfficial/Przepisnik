@@ -154,6 +154,7 @@ An image can only be referenced in recipes and variants by the user who uploaded
 | POST | `/recipes` | `RecipeWrite & { visibility: Visibility }` | `201 RecipeDetail` | 400 validation, 400 `quantity.unit_incompatible`, 400 `image.not_owned` |
 | PUT | `/recipes/{id}` | `RecipeWrite & { version: Version; deleteVariants: boolean }` | `200 RecipeDetail` | 403 `recipe.not_author`, 409 `recipe.archived`, 409 `recipe.public_locked`, 409 `recipe.has_variants` (when variants exist and `deleteVariants` is false; extensions `variantCount`, `foreignVariantCount`), 409 `concurrency.conflict` |
 | PUT | `/recipes/{id}/visibility` | `{ visibility: Visibility }` | `200 RecipeDetail` | 403 `recipe.not_author`, 409 `recipe.archived`, 409 `recipe.visibility_locked` (narrowing while other users have variants; extension `foreignVariantCount`) |
+| POST | `/recipes/{id}/cooked` | `{ variantId?: Uuid }` ("Ugotowane!", PROJECT §9.1) | `200 CookResult` | 404 `recipe.not_found` (not visible), 404 `variant.not_found` (not of this recipe or not visible), 409 `recipe.archived`, 409 `cook.too_soon` (inside the 12 hours; extension `nextAllowedAt`) |
 | PUT | `/recipes/{id}/favorite` | — | `204` (idempotent) | 404 |
 | DELETE | `/recipes/{id}/favorite` | — | `204` (idempotent) | |
 | DELETE | `/recipes/{id}` | — | `204` (deleted or archived, see PROJECT §4.4) | 403 |
@@ -200,9 +201,16 @@ type RecipeDetail = {
   tags: TagRef[];                 // includes system tag 'szybkie' when applicable
   utensils: UtensilRef[];
   ingredients: Ingredient[]; prepSteps: Step[]; instructionSteps: Step[];
-  cookCount: number; variantCount: number;   // variantCount = visible to the caller
+  cookCount: number;              // the total: base and variants (D-42)
+  myLastCountedCookAt?: DateTime | null;   // the caller's last counted cook of this recipe (any variant); the client derives the 12-hour state (D-43)
+  variantCount: number;           // visible to the caller
   createdAt: DateTime; updatedAt: DateTime;
 };
+
+// POST /recipes/{id}/cooked (no fridge involved). Counts like a deduction: the recipe's total plus the shown variant's
+// count, or the base's own count without a variant (D-42). One user's cooks of one recipe (any variant) count at most
+// once per 12 hours, decided by one atomic statement so simultaneous requests cannot both count (D-43).
+type CookResult = { counted: true; recipeCookCount: number; variantCookCount?: number; nextAllowedAt: DateTime };
 
 type IngredientWrite = {
   id?: Uuid;                      // keep existing id on edit (needed for variant ops!); omit for new rows
@@ -274,7 +282,7 @@ type VariantDetail = VariantSummary & {
   servingsOverride?: number | null;             // override of the recipe's servings (1–100); null = inherit
 };
 
-type ResolvedRecipe = Omit<RecipeDetail, 'version' | 'variantCount' | 'totalVariantCount' | 'foreignVariantCount' | 'canEdit'> & {
+type ResolvedRecipe = Omit<RecipeDetail, 'version' | 'variantCount' | 'totalVariantCount' | 'foreignVariantCount' | 'canEdit' | 'myLastCountedCookAt'> & {
   variantId?: Uuid;              // null ⇒ base
   variantName?: string;
 };                               // servings = variant.servingsOverride ?? recipe.servings
@@ -290,7 +298,9 @@ type VariantMatrix = {
   slots: Slot[];                  // ordered: base ingredients in base order, then added slots in first-seen order
 };
 type MatrixVariant = {
-  id: Uuid | 'base'; name: string; author: UserRef; cookCount: number; createdAt: DateTime;
+  id: Uuid | 'base'; name: string; author: UserRef;
+  cookCount: number;              // the variant's own count; for 'base' only the cooks without a variant (D-42)
+  createdAt: DateTime;
   isFavorite: boolean;            // caller's ♥ (for 'base': the recipe's ♥)
   productSwaps: { fromProductId: Uuid; toProductId: Uuid }[];   // for preference scoring
 };
@@ -391,6 +401,7 @@ type DeductionRequest = {
 };
 type DeductionResult = {
   id: Uuid; undone: boolean; createdAt: DateTime;
+  cookCounted: boolean;                           // false without a recipeId, inside the 12-hour rule (D-43; the deduction still happens), and on an undo
   lines: {
     productId: Uuid; requested: number; deducted: number; shortfall: number;
     items: { itemId: Uuid; previousPercent: number; newPercent: number; removed: boolean }[];
@@ -457,7 +468,7 @@ Recipe and variant descriptions: import appends `Zaimportowano — oryginalnie: 
 `auth.invalid_token` · `auth.required` · `user.onboarding_required` · `nickname.taken` · `nickname.invalid` · `admin.required` ·
 `product.not_found` · `product.duplicate` · `product.invalid_combination` · `product.merge_incompatible` · `tag.reserved` ·
 `image.invalid_type` · `image.too_large` · `image.not_found` · `image.not_owned` ·
-`recipe.not_found` · `recipe.not_author` · `recipe.public_locked` · `recipe.has_variants` · `recipe.visibility_locked` · `recipe.archived` · `quantity.unit_incompatible` · `quantity.invalid` ·
+`recipe.not_found` · `recipe.not_author` · `recipe.public_locked` · `recipe.has_variants` · `recipe.visibility_locked` · `recipe.archived` · `cook.too_soon` · `quantity.unit_incompatible` · `quantity.invalid` ·
 `unit.not_found` · `unit.invalid` · `unit.in_use` ·
 `variant.not_found` · `variant.not_author` · `variant.no_changes` · `variant.name_taken` · `selection.unknown_slot` ·
 `fridge.not_found` · `fridge.owner_required` · `fridge.owner_cannot_leave` · `invite.not_found` ·

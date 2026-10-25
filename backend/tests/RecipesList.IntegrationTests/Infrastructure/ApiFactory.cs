@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Npgsql;
 using RecipesList.Infrastructure;
 using RecipesList.Infrastructure.Persistence;
@@ -16,6 +19,14 @@ namespace RecipesList.IntegrationTests.Infrastructure;
 public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private Respawner? _respawner;
+
+    private volatile FakeTimeProvider? _clock;
+
+    /// <summary>
+    /// The app's clock while a test controls it (<see cref="UseFakeClock"/>); the real clock otherwise. It is dropped
+    /// again by <see cref="ResetDatabaseAsync"/>.
+    /// </summary>
+    public FakeTimeProvider? Clock => _clock;
 
     /// <summary>The connection string of this factory's database.</summary>
     public string ConnectionString { get; private set; } = "";
@@ -47,9 +58,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         }
     }
 
+    /// <summary>Makes the app's <see cref="TimeProvider"/> a fake that starts at the real now (whole seconds); advance it with <c>Advance</c>.</summary>
+    public FakeTimeProvider UseFakeClock() => _clock = new FakeTimeProvider(DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
+
     /// <summary>Deletes all rows (call it at the start of each test that needs a clean database).</summary>
     public async Task ResetDatabaseAsync()
     {
+        _clock = null;
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
         await _respawner!.ResetAsync(connection);
@@ -81,5 +96,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("RateLimiting:AuthPerMinute", "100000");
         builder.UseSetting("RateLimiting:ImagesPerMinute", "100000");
         builder.UseSetting("RateLimiting:ImportPerMinute", "100000");
+        builder.ConfigureTestServices(services =>
+            services.AddSingleton<TimeProvider>(new SwitchableTimeProvider(() => _clock ?? TimeProvider.System)));
     }
 }

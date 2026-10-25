@@ -59,6 +59,13 @@ X-Requested-With: fetch
 
 { "visibility": "fridges" }
 
+### "Ugotowane!": record a cook without a fridge (variantId optional; 409 cook.too_soon within 12 hours, with nextAllowedAt)
+POST {{host}}/api/v1/recipes/00000000-0000-0000-0000-000000000002/cooked
+Content-Type: application/json
+X-Requested-With: fetch
+
+{ "variantId": null }
+
 ### Delete (archives the recipe when other users have variants)
 DELETE {{host}}/api/v1/recipes/00000000-0000-0000-0000-000000000002
 X-Requested-With: fetch

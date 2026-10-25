@@ -286,7 +286,7 @@ public sealed class VariantService(
                 Recipe = r,
                 AuthorNickname = r.Author!.Nickname,
                 IsFavorite = recipeFavorites.Any(f => f.UserId == userId && f.RecipeId == r.Id),
-                CookCount = recipeCookCounts.Where(c => c.RecipeId == r.Id).Select(c => c.Count).FirstOrDefault(),
+                CookCount = recipeCookCounts.Where(c => c.RecipeId == r.Id).Select(c => c.BaseCount).FirstOrDefault(),
                 Ingredients = r.Ingredients.Select(i => new { Row = i, Product = i.Product! }).ToList(),
             })
             .AsNoTracking()
