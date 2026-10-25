@@ -36,3 +36,33 @@ PROJECT §3, §4.6, §5.3, §6 (all of it, especially the new §6.7) · API §5 
 - Playwright: open another variant from the Warianty tab → the view switches to Przepis and shows that variant; back to "Przepis bazowy" → base ingredients; the recipe ♥ is in the header and toggles the recipe favourite only; axe (light + dark) on both tabs, mobile and desktop.
 - No regressions in the existing recipe-view, favourites and import-variants specs.
 - `scripts/verify.sh --agent` is green.
+
+## Report
+
+### Summary
+Fixed the variant-opening bug and added the Warianty (N) tab and the recipe heart by the title (branch `task/R1-recipe-view-variants`).
+- Root cause: `SelectionState` only used `pinVariantId` when no selection was remembered, and the page seeded the state once. Now `SelectionState.openVariant(id)` pins every slot to that variant, replaces the remembered picks (debounced `my-selection` save) and keeps the scaling only if its anchor slot still has an amount. The constructor calls it for `?wariant=`; unknown ids change nothing. The page re-applies a changed `?wariant=` (links, back/forward) without a reload.
+- New `components/recipe-view/VariantList.svelte` (base first, then most cooked, then oldest; name, @author, visibility, cook count, variant heart, "wyświetlany" mark; empty state with "Utwórz wariant"). Page uses `Tabs` (Przepis / Warianty (N)); the tab is not in the URL. Opening an entry navigates to `?wariant=<id>` (base: no param) and switches to Przepis.
+- Recipe heart moved to the header via an additive `titleAside` snippet on `Page` / `PageHeader`. `FavoriteButton` got optional `addLabel` / `removeLabel` (defaults unchanged); names are now "Dodaj przepis do ulubionych", "Dodaj aktywny wariant do ulubionych", and per-variant names in the tab.
+- Tests: Vitest for `SelectionState` (written first, failing), Playwright specs for the remembered-selection bug, the tab, navigation, heart placement, empty state and axe (light and dark, both viewports). Mock `GET /recipes/:id/variants` added. `scripts/verify.sh --agent` green after rebasing onto main.
+
+### Deviations
+- The base entry of the tab pins every slot to the base (user picks) instead of clearing the picks. Clearing would let a favourite variant win the auto-match and show it instead of the base. The "Wyczyść wybór" button therefore shows after choosing the base.
+- Visibility is not in the matrix, so the tab fetches `GET /recipes/{id}/variants` lazily; the visibility label appears when it arrives.
+- The base entry has no heart (the recipe heart is in the header, D-39).
+- The old test "does not use ?wariant= when a selection is saved" contradicted D-38 and was replaced.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+None.
+
+### Follow-ups
+- The opening of a variant by `?wariant=` triggers a `my-selection` PUT even when the picks are identical to the remembered ones (harmless).
