@@ -30,3 +30,32 @@ A new route `src/routes/przepisy/import/format/+page.svelte` (+ `+page.ts` if ne
 - Vitest: the example validates against the `RecipeExport` schema.
 - Playwright: the link in the import dialog opens the page; the page shows the sections and the example; "Kopiuj" copies the example (clipboard permission granted in the test); axe light + dark, mobile and desktop.
 - `scripts/verify.sh --agent` is green.
+
+## Report
+
+### Summary
+- "Format pliku" help page at `/przepisy/import/format` (`<Page title="Format pliku importu">`, back to `/przepisy`), all text in Polish in `frontend/src/lib/i18n/pl/import-format.ts`.
+- Sections: what the file is; top-level structure; field tables for recipe, ingredient, quantity, steps and blocks, variant and its ops, products, custom units, images; units table; name matching and "Dodaj jako wariant"; a complete example with a "Kopiuj" button (clipboard, toast).
+- The example is a `RecipeExport` file (2 ingredients, 1 step, 1 variant, no photos). A Vitest test validates it against the schema in `docs/api/openapi.yaml`, and checks that a broken copy fails.
+- The import dialog has a "Format pliku" link that opens the page in a new tab.
+- Playwright spec `tests/integration/import-format.spec.ts`: link, sections, copy, keyboard and no sideways scroll, axe light and dark (mobile and desktop).
+
+### Deviations
+- Scrollable regions (example, tables) are focusable (`tabindex="0"`) with `svelte-ignore a11y_no_noninteractive_tabindex`, per WCAG 2.1.1 / axe scrollable-region rule. Table wrappers use `role="group"`, since `region` duplicated landmark labels.
+- Field limits are taken from the openapi schema and `RecipeWrite` where the export schema gives none (e.g. recipe title 1–150).
+- The link label `formatHelp` lives in `pl/recipes.ts`, as the task allows.
+
+### Model changes
+None.
+
+### Contract changes
+None.
+
+### Dependencies added
+None.
+
+### Requests for other tasks
+None.
+
+### Follow-ups
+- The first `scripts/verify.sh --agent` run had 4 mobile Playwright failures in `recipe-view.spec.ts` (not in I2's files). They passed when run alone, and a second full gate run is recorded in the final message. Likely load-related flakiness under two workers.
