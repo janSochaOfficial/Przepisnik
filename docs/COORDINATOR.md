@@ -34,7 +34,7 @@ Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
 | R1 | 1 | merged | task/R1-recipe-view-variants | sonnet/medium. merged 2026-10-25, no model or contract changes. Full verify green with 2 workers (350 unit, 383 integration, 579 vitest, 235 playwright). Accepted: `SelectionState.openVariant` (re-applied on client navigation); the base entry pins the base (PROJECT §6.7 updated); visibility fetched lazily from `GET /recipes/{id}/variants`; additive `titleAside` on `Page`; `FavoriteButton` `addLabel`/`removeLabel`. Follow-up: `?wariant=` saves even when the picks equal the remembered ones |
-| I2 | 2 | running | task/I2-import-format-help | haiku/low: static help page, low risk; example validated against the schema |
+| I2 | 2 | merged | task/I2-import-format-help | haiku/low. merged 2026-10-25, no model or contract changes. Full verify green with 2 workers (350 unit, 383 integration, 583 vitest, 247 playwright). Accepted: focusable scroll regions (`svelte-ignore`), table wrappers `role="group"`, limits taken from openapi / `RecipeWrite`. Watch: the agent saw 4 mobile `recipe-view.spec.ts` timeouts under two-agent load (green alone and on main) |
 | R2 | 3 | running | task/R2-servings | opus/medium: model + contract + variant engine + export + scaling change together (high compound risk). Expect model changes → coordinator migration `R2_Servings` |
 
 States: `todo` → `running` → `review` (Report written) → `merged` (or `blocked` with a reason).
