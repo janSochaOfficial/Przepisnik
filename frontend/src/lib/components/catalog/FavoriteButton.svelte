@@ -14,10 +14,21 @@
 		id: string;
 		favorite?: boolean;
 		class?: string;
+		/** Accessible names that tell two hearts on one screen apart (default: the generic ones). */
+		addLabel?: string;
+		removeLabel?: string;
 		onchange?: (favorite: boolean) => void;
 	};
 
-	let { kind, id, favorite = $bindable(false), class: className = '', onchange }: Props = $props();
+	let {
+		kind,
+		id,
+		favorite = $bindable(false),
+		class: className = '',
+		addLabel = t.recipes.favorite.add,
+		removeLabel = t.recipes.favorite.remove,
+		onchange
+	}: Props = $props();
 
 	let busy = $state(false);
 
@@ -41,8 +52,8 @@
 <button
 	type="button"
 	aria-pressed={favorite}
-	aria-label={favorite ? t.recipes.favorite.remove : t.recipes.favorite.add}
-	title={favorite ? t.recipes.favorite.remove : t.recipes.favorite.add}
+	aria-label={favorite ? removeLabel : addLabel}
+	title={favorite ? removeLabel : addLabel}
 	class={[iconButtonClass('ghost', 'md'), favorite && 'text-cobalt', className]}
 	onclick={toggle}
 >

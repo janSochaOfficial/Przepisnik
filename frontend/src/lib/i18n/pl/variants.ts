@@ -77,6 +77,32 @@ export const variants = {
 		addMissing: 'Dodaj brakujące do listy'
 	},
 
+	tabs: {
+		label: 'Widok przepisu',
+		recipe: 'Przepis',
+		variants: (n: number) => `Warianty (${n})`
+	},
+
+	list: {
+		label: 'Warianty przepisu',
+		base: 'Przepis bazowy',
+		by: (nick: string) => `@${nick}`,
+		cooked: (n: number) => `ugotowano: ${n}`,
+		shown: 'wyświetlany',
+		emptyTitle: 'Brak wariantów',
+		emptyText: 'Nikt jeszcze nie dodał wariantu tego przepisu.',
+		create: 'Utwórz wariant',
+		favoriteAdd: (name: string) => `Dodaj wariant „${name}” do ulubionych`,
+		favoriteRemove: (name: string) => `Usuń wariant „${name}” z ulubionych`
+	},
+
+	favorite: {
+		recipeAdd: 'Dodaj przepis do ulubionych',
+		recipeRemove: 'Usuń przepis z ulubionych',
+		variantAdd: 'Dodaj aktywny wariant do ulubionych',
+		variantRemove: 'Usuń aktywny wariant z ulubionych'
+	},
+
 	editor: {
 		section: 'O wariancie',
 		name: 'Nazwa wariantu',

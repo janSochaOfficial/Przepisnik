@@ -161,12 +161,14 @@ test.describe('auto-match', () => {
 		await expect(ingredients(page).getByRole('button', { name: /mleko/ })).toBeHidden();
 		await expect(page.getByText('Krok wariantu B: dodaj śmietankę.')).toBeVisible();
 
-		await ingredients(page).getByRole('button', { name: /kurczak/ }).click();
+		await ingredients(page)
+			.getByRole('button', { name: /kurczak/ })
+			.click();
 		await page.getByRole('dialog').getByLabel('Mam').fill('600');
 		await page.getByRole('dialog').getByRole('button', { name: 'Przelicz' }).click();
 		await expect(page.getByRole('status').filter({ hasText: 'Przeliczono' })).toBeVisible();
 		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toContainText(
-			/375/
+			'1 ½ szklanki'
 		);
 	});
 
@@ -183,8 +185,10 @@ test.describe('auto-match', () => {
 			}
 		});
 		await page.goto(`${url}?wariant=${variantA}`);
-		await page.getByRole('button', { name: 'Dodaj do ulubionych' }).last().click();
-		await expect(page.getByRole('button', { name: 'Usuń z ulubionych' })).toHaveCount(1);
+		await page.getByRole('button', { name: 'Dodaj aktywny wariant do ulubionych' }).click();
+		await expect(
+			page.getByRole('button', { name: 'Usuń aktywny wariant z ulubionych' })
+		).toHaveCount(1);
 		expect(api.calls.some((c) => c.key === `PUT /variants/${variantA}/favorite`)).toBe(true);
 
 		await page.getByRole('button', { name: 'Wyczyść wybór' }).click();
@@ -370,6 +374,116 @@ test.describe('variant editor', () => {
 			page.getByText('Wariant zobaczą tylko osoby, które widzą przepis bazowy.')
 		).toBeVisible();
 	});
+});
+
+const variantsTab = (page: Page) => page.getByRole('tab', { name: /^Warianty/ });
+
+test.describe('Warianty tab', () => {
+	test('lists the base first, then the variants, with the shown one marked', async ({ page }) => {
+		await mockApi(page, base);
+		await page.goto(url);
+		await expect(variantsTab(page)).toHaveText(/Warianty \(3\)/);
+		await variantsTab(page).click();
+		const entries = page.getByRole('list', { name: 'Warianty przepisu' }).getByRole('listitem');
+		await expect(entries).toHaveCount(4);
+		await expect(entries.nth(0)).toContainText('Przepis bazowy');
+		await expect(entries.nth(0)).toContainText('wyświetlany');
+		// Most cooked first: wege (2), kremowa (1), z papryką (0).
+		await expect(entries.nth(1)).toContainText('Wersja wege');
+		await expect(entries.nth(1)).toContainText('@ania');
+		await expect(entries.nth(1)).toContainText('Prywatny');
+		await expect(entries.nth(1)).toContainText('ugotowano: 2');
+		await expect(entries.nth(2)).toContainText('Moje lodówki');
+		await expect(entries.nth(3)).toContainText('Publiczny');
+		await expect(entries.nth(1)).not.toContainText('wyświetlany');
+	});
+
+	test('opening a variant shows it on Przepis, and the base entry goes back', async ({ page }) => {
+		const api = await mockApi(page, base);
+		await page.goto(url);
+		await variantsTab(page).click();
+		await page.getByRole('button', { name: /^Kremowa/ }).click();
+		await expect(page).toHaveURL(new RegExp(`\\?wariant=${variantB}$`));
+		await expect(page.getByRole('tab', { name: 'Przepis' })).toHaveAttribute(
+			'data-state',
+			'active'
+		);
+		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toBeVisible();
+		await expect(page.getByText('Krok wariantu B: dodaj śmietankę.')).toBeVisible();
+
+		await variantsTab(page).click();
+		await expect(page.getByRole('button', { name: /^Kremowa/ })).toHaveAttribute(
+			'aria-current',
+			'true'
+		);
+		await page.getByRole('button', { name: /Przepis bazowy/ }).click();
+		await expect(page).toHaveURL(new RegExp(`${recipeId}$`));
+		await expect(ingredients(page).getByRole('button', { name: /mleko/ })).toBeVisible();
+		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toBeHidden();
+		await expect(page.getByText('Krok bazowy: podsmaż kurczaka.')).toBeVisible();
+		await expect
+			.poll(
+				() =>
+					api.calls.filter((c) => c.key.startsWith('PUT') && c.key.endsWith('my-selection')).length
+			)
+			.toBeGreaterThan(0);
+	});
+
+	test('a changed ?wariant= on the same page re-applies without a reload', async ({ page }) => {
+		await mockApi(page, base);
+		await page.goto(`${url}?wariant=${variantA}`);
+		await expect(ingredients(page).getByRole('button', { name: /tofu/ })).toBeVisible();
+		await variantsTab(page).click();
+		await page.getByRole('button', { name: /^Kremowa/ }).click();
+		await expect(ingredients(page).getByRole('button', { name: /śmietanka/ })).toBeVisible();
+		// Back changes ?wariant= on the same page.
+		await page.goBack();
+		await expect(page).toHaveURL(new RegExp(`\\?wariant=${variantA}$`));
+		await expect(ingredients(page).getByRole('button', { name: /tofu/ })).toBeVisible();
+	});
+
+	test('the recipe heart sits in the header and toggles only the recipe', async ({ page }) => {
+		const api = await mockApi(page, {
+			...base,
+			'PUT /recipes/:id/favorite': { status: 204 }
+		});
+		await page.goto(`${url}?wariant=${variantA}`);
+		const header = page.locator('header').first();
+		await header.getByRole('button', { name: 'Dodaj przepis do ulubionych' }).click();
+		await expect(header.getByRole('button', { name: 'Usuń przepis z ulubionych' })).toBeVisible();
+		expect(api.calls.some((c) => c.key === `PUT /recipes/${recipeId}/favorite`)).toBe(true);
+		expect(api.calls.some((c) => c.key.startsWith('PUT /variants/'))).toBe(false);
+		await expect(
+			page.getByRole('button', { name: 'Dodaj aktywny wariant do ulubionych' })
+		).toBeVisible();
+	});
+
+	test('shows an empty state when the recipe has no variants', async ({ page }) => {
+		await mockApi(page, {
+			...base,
+			'GET /recipes/:id/variant-matrix': {
+				body: { ...matrix(), variants: matrix().variants.slice(0, 1) }
+			},
+			'GET /recipes/:id/variants': { body: [] }
+		});
+		await page.goto(url);
+		await variantsTab(page).click();
+		await expect(page.getByText('Brak wariantów')).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Utwórz wariant' })).toBeVisible();
+	});
+
+	for (const colorScheme of ['light', 'dark'] as const) {
+		test(`both tabs pass axe (${colorScheme})`, async ({ page }) => {
+			await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+			await mockApi(page, base);
+			await page.goto(url);
+			await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+			expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+			await variantsTab(page).click();
+			await expect(page.getByRole('list', { name: 'Warianty przepisu' })).toBeVisible();
+			expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+		});
+	}
 });
 
 test.describe('accessibility', () => {

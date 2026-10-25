@@ -16,7 +16,16 @@
 	import StepList from '$lib/components/recipe-view/StepList.svelte';
 	import { draftFromSelection } from '$lib/components/recipe-view/variant-draft';
 	import { Page } from '$lib/components/shell';
-	import { BottomSheet, Button, Chip, ErrorMessage, Skeleton, toast } from '$lib/components/ui';
+	import VariantList from '$lib/components/recipe-view/VariantList.svelte';
+	import {
+		BottomSheet,
+		Button,
+		Chip,
+		ErrorMessage,
+		Skeleton,
+		Tabs,
+		toast
+	} from '$lib/components/ui';
 	import { buttonClass, iconButtonClass } from '$lib/components/ui/variants';
 	import { formatBaseAmount, formatNumberPl } from '$lib/domain/format';
 	import { t } from '$lib/i18n';
@@ -53,6 +62,33 @@
 	});
 	onDestroy(() => selection.flush());
 
+	// The selected tab is not in the URL (PROJECT §6.7).
+	let tab = $state('recipe');
+
+	// `?wariant=` is already applied by the constructor; a later change (a link, back / forward)
+	// re-applies it without a reload. Unknown ids leave the remembered state alone.
+	// svelte-ignore state_referenced_locally
+	let appliedPin = data.pinVariantId;
+	$effect(() => {
+		const id = data.pinVariantId;
+		if (id === appliedPin) return;
+		appliedPin = id;
+		if (id && selection.openVariant(id)) tab = 'recipe';
+	});
+
+	/** An entry of the Warianty tab: shows exactly that variant, or the base (no `?wariant=`). */
+	function openVariant(id: string) {
+		if (!selection.openVariant(id)) return;
+		tab = 'recipe';
+		const target = resolve('/przepisy/[id]', { id: selection.recipe.id });
+		appliedPin = id === 'base' ? null : id;
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved above
+		void goto(id === 'base' ? target : `${target}?wariant=${id}`, {
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
 	const labels = t.variants;
 	let recipe = $derived(selection.recipe);
 	let isAuthor = $derived(recipe.author.id === data.me?.id);
@@ -82,6 +118,14 @@
 		return `${ingredient.product.name} ${amount.text}`;
 	});
 
+	let tabItems = $derived([
+		{ value: 'recipe', label: labels.tabs.recipe },
+		{
+			value: 'variants',
+			label: labels.tabs.variants(selection.matrix.variants.filter((v) => v.id !== 'base').length)
+		}
+	]);
+
 	let menuOpen = $state(false);
 	let visibilityOpen = $state(false);
 	let deleting = $state(false);
@@ -104,6 +148,16 @@
 </script>
 
 <Page title={recipe.title} back={resolve('/przepisy')} width="wide">
+	{#snippet titleAside()}
+		<FavoriteButton
+			kind="recipe"
+			id={recipe.id}
+			favorite={recipe.isFavorite}
+			addLabel={labels.favorite.recipeAdd}
+			removeLabel={labels.favorite.recipeRemove}
+			onchange={(on) => selection.setFavorite('base', on)}
+		/>
+	{/snippet}
 	{#snippet actions()}
 		<BottomSheet bind:open={menuOpen} title={labels.menu.title}>
 			{#snippet trigger({ props })}
@@ -191,34 +245,6 @@
 			{#if active.cookMinutes !== null}<span>{labels.view.cookTime(active.cookMinutes)}</span>{/if}
 		</div>
 
-		<div class="flex flex-wrap items-center gap-2">
-			<FavoriteButton
-				kind="recipe"
-				id={recipe.id}
-				favorite={recipe.isFavorite}
-				onchange={(on) => selection.setFavorite('base', on)}
-			/>
-			<p
-				class="flex items-center gap-1 text-lg font-semibold"
-				aria-label={labels.view.activeVariant}
-			>
-				{activeName}
-			</p>
-			{#if !match.isCustomMix && match.bestVariantId !== 'base'}
-				{#key match.bestVariantId}
-					<FavoriteButton
-						kind="variant"
-						id={match.bestVariantId}
-						favorite={variantFavorite}
-						onchange={(on) => selection.setFavorite(match.bestVariantId, on)}
-					/>
-				{/key}
-			{/if}
-		</div>
-		{#if match.isCustomMix}
-			<p class="text-sm text-muted">{labels.view.customMixHint}</p>
-		{/if}
-
 		{#if recipe.tags.length > 0 || active.utensils.length > 0}
 			<div class="flex flex-wrap gap-2">
 				{#each recipe.tags as tag (tag.id)}<Chip>{tag.name}</Chip>{/each}
@@ -228,65 +254,102 @@
 		{#if recipe.description}<p>{recipe.description}</p>{/if}
 	</header>
 
-	<div
-		class="mt-6 flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-10"
-	>
-		<section aria-labelledby="ingredients-h">
-			<h2 id="ingredients-h" class="text-2xl">{labels.view.ingredients}</h2>
-
-			{#if selection.scaling && selection.factor !== 1 && anchor}
-				<div
-					role="status"
-					class="mt-3 flex flex-wrap items-center gap-2 rounded-card border border-line-strong bg-cobalt-wash p-3 text-base"
-				>
-					<span class="flex-1"
-						>{labels.scaling.banner(formatNumberPl(selection.factor, 2), anchor)}</span
+	<Tabs class="mt-6" items={tabItems} bind:value={tab} label={labels.tabs.label}>
+		{#snippet panel(value)}
+			{#if value === 'variants'}
+				<VariantList
+					state={selection}
+					shownId={match.isCustomMix ? null : match.bestVariantId}
+					onopen={openVariant}
+					oncreate={canCreateVariant ? () => newVariant(false) : undefined}
+				/>
+			{:else}
+				<div class="flex flex-wrap items-center gap-2">
+					<p
+						class="flex items-center gap-1 text-lg font-semibold"
+						aria-label={labels.view.activeVariant}
 					>
-					<Button variant="secondary" onclick={() => selection.resetScaling()}>
-						{labels.scaling.reset}
-					</Button>
+						{activeName}
+					</p>
+					{#if !match.isCustomMix && match.bestVariantId !== 'base'}
+						{#key match.bestVariantId}
+							<FavoriteButton
+								kind="variant"
+								id={match.bestVariantId}
+								favorite={variantFavorite}
+								addLabel={labels.favorite.variantAdd}
+								removeLabel={labels.favorite.variantRemove}
+								onchange={(on) => selection.setFavorite(match.bestVariantId, on)}
+							/>
+						{/key}
+					{/if}
 				</div>
-			{/if}
+				{#if match.isCustomMix}
+					<p class="text-sm text-muted">{labels.view.customMixHint}</p>
+				{/if}
 
-			<ul class="mt-3" aria-label={labels.view.ingredientList}>
-				{#each selection.rows.filter((r) => r.ingredient || r.isBase) as row (row.slotKey)}
-					<IngredientRow
-						{row}
-						state={selection}
-						{canCreateVariant}
-						oncreate={() => newVariant(true)}
-					/>
-				{/each}
-			</ul>
+				<div
+					class="mt-6 flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-10"
+				>
+					<section aria-labelledby="ingredients-h">
+						<h2 id="ingredients-h" class="text-2xl">{labels.view.ingredients}</h2>
 
-			{#if selection.hasUserPins}
-				<div class="mt-3">
-					<Button variant="ghost" onclick={() => selection.clearPins()}>
-						{labels.clearSelection}
-					</Button>
+						{#if selection.scaling && selection.factor !== 1 && anchor}
+							<div
+								role="status"
+								class="mt-3 flex flex-wrap items-center gap-2 rounded-card border border-line-strong bg-cobalt-wash p-3 text-base"
+							>
+								<span class="flex-1"
+									>{labels.scaling.banner(formatNumberPl(selection.factor, 2), anchor)}</span
+								>
+								<Button variant="secondary" onclick={() => selection.resetScaling()}>
+									{labels.scaling.reset}
+								</Button>
+							</div>
+						{/if}
+
+						<ul class="mt-3" aria-label={labels.view.ingredientList}>
+							{#each selection.rows.filter((r) => r.ingredient || r.isBase) as row (row.slotKey)}
+								<IngredientRow
+									{row}
+									state={selection}
+									{canCreateVariant}
+									oncreate={() => newVariant(true)}
+								/>
+							{/each}
+						</ul>
+
+						{#if selection.hasUserPins}
+							<div class="mt-3">
+								<Button variant="ghost" onclick={() => selection.clearPins()}>
+									{labels.clearSelection}
+								</Button>
+							</div>
+						{/if}
+					</section>
+
+					<div class="flex flex-col gap-8" aria-busy={selection.stepsLoading}>
+						<ErrorMessage error={selection.stepsError} variant="inline" />
+						{#if selection.stepsLoading}
+							<Skeleton shape="block" class="h-24 w-full" />
+						{/if}
+						{#if active.prepSteps.length > 0}
+							<section aria-labelledby="prep-h">
+								<h2 id="prep-h" class="mb-3 text-2xl">{labels.view.prep}</h2>
+								<StepList steps={active.prepSteps} label={labels.view.prep} />
+							</section>
+						{/if}
+						<section aria-labelledby="instr-h">
+							<h2 id="instr-h" class="mb-3 text-2xl">{labels.view.instructions}</h2>
+							<StepList steps={active.instructionSteps} label={labels.view.instructions} />
+						</section>
+					</div>
 				</div>
-			{/if}
-		</section>
 
-		<div class="flex flex-col gap-8" aria-busy={selection.stepsLoading}>
-			<ErrorMessage error={selection.stepsError} variant="inline" />
-			{#if selection.stepsLoading}
-				<Skeleton shape="block" class="h-24 w-full" />
+				<CookActions />
 			{/if}
-			{#if active.prepSteps.length > 0}
-				<section aria-labelledby="prep-h">
-					<h2 id="prep-h" class="mb-3 text-2xl">{labels.view.prep}</h2>
-					<StepList steps={active.prepSteps} label={labels.view.prep} />
-				</section>
-			{/if}
-			<section aria-labelledby="instr-h">
-				<h2 id="instr-h" class="mb-3 text-2xl">{labels.view.instructions}</h2>
-				<StepList steps={active.instructionSteps} label={labels.view.instructions} />
-			</section>
-		</div>
-	</div>
-
-	<CookActions />
+		{/snippet}
+	</Tabs>
 </Page>
 
 {#if isAuthor && !recipe.isArchived}
