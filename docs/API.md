@@ -196,6 +196,7 @@ type RecipeDetail = {
   foreignVariantCount: number;    // variants by other users (author only; others get 0)
   title: string; description?: string; coverImage?: ImageInfo;
   author: UserRef; prepMinutes?: number; cookMinutes?: number;
+  servings?: number;              // 1–100, null when not stated (PROJECT §5.7)
   tags: TagRef[];                 // includes system tag 'szybkie' when applicable
   utensils: UtensilRef[];
   ingredients: Ingredient[]; prepSteps: Step[]; instructionSteps: Step[];
@@ -211,6 +212,7 @@ type StepWrite = { id?: Uuid; blocks: ContentBlock[] };   // ≥ 1 block
 type RecipeWrite = {
   title: string; description?: string; coverImageId?: Uuid;
   prepMinutes?: number; cookMinutes?: number;             // 0–2880
+  servings?: number | null;                                // 1–100 ("Liczba porcji"); outside → 400 validation.failed
   tagIds: Uuid[];                                          // system tags ignored
   utensilIds: Uuid[];
   ingredients: IngredientWrite[];                          // 1–100
@@ -245,6 +247,7 @@ type VariantWrite = {
   visibility: Visibility;       // effective audience = recipe audience ∩ variant audience (PROJECT §6.1)
   recipe: Omit<RecipeWrite, 'title' | 'description' | 'coverImageId' | 'tagIds'>;  // edited copy; ids of base rows must be kept
 };
+// recipe.servings: the diff stores a servings override only when it differs from the base's; null (cleared) inherits.
 
 type IngredientOp =
   | { op: 'modify'; targetId: Uuid; productId: Uuid; quantity?: Quantity; note?: string; optional: boolean }
@@ -267,12 +270,13 @@ type VariantDetail = VariantSummary & {
   ingredientOps: IngredientOp[]; stepOps: StepOp[];
   utensilIdsAdded: Uuid[]; utensilIdsRemoved: Uuid[];
   prepMinutes?: number; cookMinutes?: number;   // overrides; null = inherit
+  servingsOverride?: number | null;             // override of the recipe's servings (1–100); null = inherit
 };
 
 type ResolvedRecipe = Omit<RecipeDetail, 'version' | 'variantCount' | 'totalVariantCount' | 'foreignVariantCount' | 'canEdit'> & {
   variantId?: Uuid;              // null ⇒ base
   variantName?: string;
-};
+};                               // servings = variant.servingsOverride ?? recipe.servings
 ```
 In a resolved recipe, ingredient ids are kept from the base, and added ingredients use their op `id`.
 
@@ -310,10 +314,13 @@ Equality rule: the same product and base amounts within 1 % produce the same opt
 
 ```ts
 type Pick = { optionKey: string; source: 'user' | 'auto' };
-type ScalingState = { anchorSlotKey: string; anchorBaseAmount: number };   // user's "Mam: …" in base units
+type ScalingState =                                          // the single scaling choice (PROJECT §5.7)
+  | { kind?: 'ingredient'; anchorSlotKey: string; anchorBaseAmount: number }   // user's "Mam: …" in base units
+  | { kind: 'servings'; servings: number };                                    // 1–100; factor = servings / resolved servings
 type SelectionWrite = { picks: Record<string /*slotKey*/, Pick>; scaling?: ScalingState };
 type Selection = SelectionWrite & { recipeId: Uuid; updatedAt: DateTime };
 ```
+A missing `kind` means `ingredient`, so stored selections stay valid; responses always carry `kind`. A form with fields of the other form, a servings count outside 1–100 or a non-positive anchor amount → 400 `validation.failed`. A servings choice is kept whatever the slots are (it is about people, not a slot); an ingredient anchor whose slot no longer exists is dropped, as before.
 On `PUT`, the server recomputes the user's product preferences from the `source: 'user'` picks whose product differs from the base slot product (weight = the number of recipes in which the swap is pinned).
 
 ### 5.3 Favourites list
@@ -418,14 +425,14 @@ type RecipeExport = {
   images: Record<string /*localImageKey*/, { contentType: 'image/webp'; dataBase64: string }>;
   recipe: {
     key: string; title: string; description?: string; coverImageKey?: string; authorNickname: string;
-    prepMinutes?: number; cookMinutes?: number; tags: string[]; utensils: string[];
+    prepMinutes?: number; cookMinutes?: number; servings?: number; tags: string[]; utensils: string[];
     ingredients: { key: string; productKey: string; quantity?: ExportQuantity; note?: string; optional: boolean }[];
     prepSteps: { key: string; blocks: ExportBlock[] }[];
     instructionSteps: { key: string; blocks: ExportBlock[] }[];
   };
   variants: {
     name: string; description?: string; authorNickname: string;
-    prepMinutes?: number; cookMinutes?: number; utensilsAdded: string[]; utensilsRemoved: string[];
+    prepMinutes?: number; cookMinutes?: number; servingsOverride?: number; utensilsAdded: string[]; utensilsRemoved: string[];
     ingredientOps: unknown[]; stepOps: unknown[];  // same shapes as §5 but ids → keys, productId → productKey, imageId → imageKey
   }[];
 };
@@ -440,6 +447,7 @@ type ExportBlock = { type: 'text'; text: string } | { type: 'image'; imageKey: s
 ```
 Keys are opaque strings that are unique within the file (the exporter uses `i1, i2…`, `s1…`, `p1…`, `img1…`).
 In `ingredientOps` and `stepOps` every `…Id` field becomes `…Key` (`id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey`, `productId` → `productKey`, `imageId` → `imageKey`, and `customUnitId` → `customUnitKey` inside a quantity, which is an `ExportQuantity`); `baseAmount` is not exported.
+**Servings** (PROJECT §5.7): `formatVersion` stays 1; `recipe.servings` and `variants[].servingsOverride` (1–100) are optional, and files without them import as before. Importing as variants aligns them like the times: an override when the file's servings differ from the target's, and a file without servings keeps the target's.
 **Custom units** (PROJECT §5.6): `formatVersion` stays 1 (files without custom units have no `customUnits`). Import reuses an existing unit with the same normalized name, the same scope (the imported product, or every product), the same measure kind and an amount within 1 %; otherwise it creates the unit, adding " (2)", " (3)" to the name on a clash in that scope.
 Recipe and variant descriptions: import appends `Zaimportowano — oryginalnie: @<authorNickname>` to them, and export strips that footer again and reports the nickname from it as `authorNickname`. System tags (`szybkie`) are not exported. Import matches products by normalized name and creates any that are missing, using the exported properties.
 

@@ -2064,6 +2064,9 @@ components:
         author: { $ref: '#/components/schemas/UserRef' }
         prepMinutes: { type: [integer, 'null'] }
         cookMinutes: { type: [integer, 'null'] }
+        servings:
+          description: How many servings the recipe makes (PROJECT §5.7); null when not stated.
+          type: [integer, 'null']
         tags:
           description: Includes the system tag `szybkie` when applicable.
           type: array
@@ -2130,6 +2133,11 @@ components:
             - type: 'null'
         prepMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
         cookMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
+        servings:
+          description: Liczba porcji (PROJECT §5.7); outside 1–100 → 400 `validation.failed`.
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 100
         tagIds:
           description: System tags are ignored.
           type: array
@@ -2181,6 +2189,11 @@ components:
       properties:
         prepMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
         cookMinutes: { type: [integer, 'null'], minimum: 0, maximum: 2880 }
+        servings:
+          description: The servings of the edited copy; the diff stores an override only when they differ from the base's, and null inherits.
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 100
         utensilIds:
           type: array
           items: { $ref: '#/components/schemas/Uuid' }
@@ -2372,6 +2385,9 @@ components:
             cookMinutes:
               description: Override; null = inherit.
               type: [integer, 'null']
+            servingsOverride:
+              description: Override of the recipe's servings (1–100); null = inherit.
+              type: [integer, 'null']
       unevaluatedProperties: false
     ResolvedRecipe:
       description: '`Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id.'
@@ -2391,6 +2407,9 @@ components:
         author: { $ref: '#/components/schemas/UserRef' }
         prepMinutes: { type: [integer, 'null'] }
         cookMinutes: { type: [integer, 'null'] }
+        servings:
+          description: The variant's servings override, or the recipe's servings.
+          type: [integer, 'null']
         tags:
           type: array
           items: { $ref: '#/components/schemas/TagRef' }
@@ -2508,12 +2527,26 @@ components:
           enum: [user, auto]
       additionalProperties: false
     ScalingState:
+      description: 'The single scaling choice (PROJECT §5.7): "Mam: …" on an ingredient, or a number of servings. A missing `kind` means `ingredient`, so stored selections stay valid; responses always carry `kind`. Either form with fields of the other → 400 `validation.failed`.'
+      oneOf:
+        - $ref: '#/components/schemas/IngredientScalingState'
+        - $ref: '#/components/schemas/ServingsScalingState'
+    IngredientScalingState:
       description: The user's "Mam …" in base units.
       type: object
       required: [anchorSlotKey, anchorBaseAmount]
       properties:
+        kind: { type: string, const: ingredient }
         anchorSlotKey: { type: string }
         anchorBaseAmount: { type: number, exclusiveMinimum: 0 }
+      additionalProperties: false
+    ServingsScalingState:
+      description: A number of servings; the factor is `servings / resolved recipe servings`.
+      type: object
+      required: [kind, servings]
+      properties:
+        kind: { type: string, const: servings }
+        servings: { type: integer, minimum: 1, maximum: 100 }
       additionalProperties: false
     SelectionWrite:
       type: object
@@ -2953,6 +2986,11 @@ components:
         authorNickname: { type: string }
         prepMinutes: { type: [integer, 'null'] }
         cookMinutes: { type: [integer, 'null'] }
+        servings:
+          description: Optional; files without it import as before.
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 100
         tags:
           description: Tag names.
           type: array
@@ -2980,6 +3018,11 @@ components:
         authorNickname: { type: string }
         prepMinutes: { type: [integer, 'null'] }
         cookMinutes: { type: [integer, 'null'] }
+        servingsOverride:
+          description: Override of the recipe's servings; null = inherit.
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 100
         utensilsAdded:
           type: array
           items: { type: string }
