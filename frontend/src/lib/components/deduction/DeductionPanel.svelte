@@ -21,6 +21,7 @@
 		toDeductionRequest,
 		type DeductionRow
 	} from '$lib/domain/deduction';
+	import { isCookBlocked } from '$lib/domain/cook';
 	import { pluralCategory } from '$lib/domain/plural';
 	import type { FridgeItem, Ingredient, LiquidUnits } from '$lib/domain/types';
 	import { errorMessage, t } from '$lib/i18n';
@@ -46,6 +47,8 @@
 		factor?: number;
 		recipeId?: string | null;
 		variantId?: string | null;
+		/** The caller's last counted cook of the recipe (`RecipeDetail.myLastCountedCookAt`, PROJECT §9.1). */
+		lastCountedCookAt?: string | null;
 		defaultFridgeId?: string | null;
 		liquidUnits: LiquidUnits;
 		onDeducted?: (result: DeductionResult) => void;
@@ -57,6 +60,7 @@
 		factor = 1,
 		recipeId = null,
 		variantId = null,
+		lastCountedCookAt = null,
 		defaultFridgeId = null,
 		liquidUnits,
 		onDeducted
@@ -74,6 +78,8 @@
 	const selection = new SvelteSet<string>();
 
 	let rows = $derived(planDeduction(neededFromIngredients(ingredients, factor), items));
+	// The deduction always happens; within 12 hours of a counted cook it only does not raise the count.
+	let notCounted = $derived(recipeId !== null && isCookBlocked(lastCountedCookAt, new Date()));
 	let fridgeItems = $derived(fridges.map((f) => ({ value: f.id, label: f.name })));
 
 	let requestId = 0;
@@ -196,6 +202,11 @@
 <Dialog bind:open title={labels.title} description={labels.description} size="lg">
 	<div class="flex flex-col gap-5">
 		<ErrorMessage error={actionError} />
+		{#if notCounted}
+			<p role="status" class="rounded-card border border-line-strong bg-cobalt-wash p-3 text-base">
+				{labels.cookNotCounted}
+			</p>
+		{/if}
 		{#if loadError}
 			<ErrorMessage error={loadError} variant="block" retry={init} />
 		{:else}

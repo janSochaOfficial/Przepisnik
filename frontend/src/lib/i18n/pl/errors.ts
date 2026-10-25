@@ -27,6 +27,7 @@ export const errors = {
 	'recipe.visibility_locked':
 		'Nie można zawęzić widoczności — inni użytkownicy mają warianty tego przepisu.',
 	'recipe.archived': 'Ten przepis jest zarchiwizowany i nie można go zmieniać.',
+	'cook.too_soon': 'Ten przepis był już liczony jako ugotowany w ciągu ostatnich 12 godzin.',
 	'quantity.unit_incompatible': 'Tej jednostki nie można użyć dla tego produktu.',
 	'quantity.invalid': 'Nieprawidłowa ilość.',
 	'unit.not_found': 'Tej jednostki nie ma już w bazie.',

@@ -23,6 +23,8 @@
 		factor?: number;
 		recipeId?: string | null;
 		variantId?: string | null;
+		/** The caller's last counted cook of the recipe; within 12 hours the dialog warns that the count stays (PROJECT §9.1). */
+		lastCountedCookAt?: string | null;
 		defaultFridgeId?: string | null;
 		liquidUnits: LiquidUnits;
 		onDeducted?: (result: DeductionResult) => void;

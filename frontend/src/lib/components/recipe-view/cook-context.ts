@@ -12,6 +12,13 @@ export type CookContext = {
 	/** A variant uuid or 'base'. */
 	readonly variantId: string;
 	readonly ingredients: (Ingredient & { scaledBaseAmount: number | null })[];
+	/** The caller's last counted cook of the recipe (any variant); the 12-hour rule derives from it (D-43). */
+	readonly lastCountedCookAt: string | null;
+	/**
+	 * The server counted a cook of `variantId` ('base' or a variant uuid) at `countedAt`: bumps the total, that
+	 * entry's own count (the Warianty tab) and the 12-hour timestamp.
+	 */
+	countCook(variantId: string, countedAt: string): void;
 };
 
 export const [getCookContext, setCookContext] = createContext<CookContext>();

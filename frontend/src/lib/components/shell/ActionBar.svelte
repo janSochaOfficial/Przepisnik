@@ -27,7 +27,7 @@
 	{@attach publishHeight}
 	role="group"
 	aria-label={label}
-	class="sticky bottom-[calc(var(--rl-tabbar-h)+var(--rl-safe-bottom))] z-20 -mx-4 mt-6 flex items-center gap-2 border-t border-line bg-surface px-4 py-3 md:-mx-6 md:px-6 lg:bottom-0 lg:mx-0 lg:rounded-t-card lg:border-x lg:px-4 [&>*:last-child]:ml-auto"
+	class="sticky bottom-[calc(var(--rl-tabbar-h)+var(--rl-safe-bottom))] z-20 -mx-4 mt-6 flex flex-wrap items-center gap-2 border-t border-line bg-surface px-4 py-3 md:-mx-6 md:px-6 lg:bottom-0 lg:mx-0 lg:rounded-t-card lg:border-x lg:px-4 [&>*:last-child]:ml-auto"
 >
 	{@render children()}
 </div>
