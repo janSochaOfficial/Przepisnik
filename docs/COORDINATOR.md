@@ -33,7 +33,7 @@ Lane A: R1 → R2 (both change the recipe view and `SelectionState`). Lane B: I2
 
 | Task | Slot | State | Branch | Notes |
 |---|---|---|---|---|
-| R1 | 1 | merged | task/R1-recipe-view-variants | sonnet/medium. merged 2026-10-25, no model or contract changes; agent gate green (235 playwright). Accepted: `SelectionState.openVariant` (re-applied on client navigation); the base entry pins the base (PROJECT §6.7 updated); visibility fetched lazily from `GET /recipes/{id}/variants`; additive `titleAside` on `Page`; `FavoriteButton` `addLabel`/`removeLabel`. Follow-up: `?wariant=` saves even when the picks equal the remembered ones |
+| R1 | 1 | merged | task/R1-recipe-view-variants | sonnet/medium. merged 2026-10-25, no model or contract changes. Full verify green with 2 workers (350 unit, 383 integration, 579 vitest, 235 playwright). Accepted: `SelectionState.openVariant` (re-applied on client navigation); the base entry pins the base (PROJECT §6.7 updated); visibility fetched lazily from `GET /recipes/{id}/variants`; additive `titleAside` on `Page`; `FavoriteButton` `addLabel`/`removeLabel`. Follow-up: `?wariant=` saves even when the picks equal the remembered ones |
 | I2 | 2 | running | task/I2-import-format-help | haiku/low: static help page, low risk; example validated against the schema |
 | R2 | 3 | running | task/R2-servings | opus/medium: model + contract + variant engine + export + scaling change together (high compound risk). Expect model changes → coordinator migration `R2_Servings` |
 
