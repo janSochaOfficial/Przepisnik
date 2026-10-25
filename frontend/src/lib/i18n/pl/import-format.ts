@@ -46,6 +46,7 @@ export const importFormatExample = {
 		authorNickname: 'kuchnia',
 		prepMinutes: 2,
 		cookMinutes: 5,
+		servings: 2,
 		tags: [],
 		utensils: ['Patelnia'],
 		ingredients: [
@@ -178,6 +179,7 @@ export const importFormat = {
 				field('authorNickname', 'Pseudonim autora oryginału, bez znaku @.', 'tak', 'tekst'),
 				field('prepMinutes', 'Czas przygotowania w minutach.', 'nie', 'liczba całkowita 0–2880'),
 				field('cookMinutes', 'Czas gotowania w minutach.', 'nie', 'liczba całkowita 0–2880'),
+				field('servings', 'Liczba porcji.', 'nie', 'liczba całkowita 1–100'),
 				field(
 					'tags',
 					'Nazwy tagów. Tagi systemowe (np. „szybkie”) nie są eksportowane.',
@@ -264,6 +266,12 @@ export const importFormat = {
 					'Czas gotowania nadpisany w wariancie.',
 					'nie',
 					'liczba całkowita 0–2880 albo null (bez zmiany)'
+				),
+				field(
+					'servingsOverride',
+					'Liczba porcji nadpisana w wariancie.',
+					'nie',
+					'liczba całkowita 1–100 albo null (bez zmiany)'
 				),
 				field('utensilsAdded', 'Naczynia dodane w wariancie.', 'tak', 'lista nazw, może być pusta'),
 				field(

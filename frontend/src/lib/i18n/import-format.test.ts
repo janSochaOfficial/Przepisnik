@@ -5,7 +5,7 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
-import { importFormatExample } from './pl/import-format';
+import { importFormat, importFormatExample } from './pl/import-format';
 
 // The help page's example must stay a valid import file: it is checked against the RecipeExport
 // schema of the contract (docs/api/openapi.yaml), so the page cannot drift from the format.
@@ -41,6 +41,16 @@ describe('import format help example', () => {
 		const keys = new Set(importFormatExample.products.map((p) => p.key));
 		for (const i of importFormatExample.recipe.ingredients)
 			expect(keys.has(i.productKey)).toBe(true);
+	});
+
+	it.each([
+		['object-recipe', 'ExportRecipe'],
+		['object-variant', 'ExportVariant']
+	])('the %s table lists every field of %s', (tableId, schema) => {
+		const table = importFormat.objects.find((o) => o.id === tableId);
+		const documented = new Set(table?.rows.map((r) => r.field));
+		const fields = Object.keys(contract.components.schemas[schema].properties);
+		expect(fields.filter((f) => !documented.has(f))).toEqual([]);
 	});
 
 	it('fails when a required field is missing, so the check is not vacuous', () => {
