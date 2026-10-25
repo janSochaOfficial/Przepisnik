@@ -261,7 +261,19 @@ export const recipes = {
 		importFile: 'Plik z przepisem',
 		importSubmit: 'Importuj',
 		imported: 'Zaimportowano przepis.',
-		notJson: 'Ten plik nie jest poprawnym plikiem JSON.'
+		notJson: 'Ten plik nie jest poprawnym plikiem JSON.',
+		// Import of a recipe that already exists (PROJECT §4.7, D-35).
+		existsTitle: 'Ten przepis już istnieje',
+		existsText:
+			'Masz dostęp do przepisu o tym samym tytule. Możesz dodać plik jako jego warianty — prywatne, widoczne tylko dla ciebie.',
+		matchesLabel: 'Przepisy o tym tytule',
+		addAsVariant: 'Dodaj jako wariant',
+		matchAuthor: (nickname: string) => `@${nickname}`,
+		importAsNew: 'Importuj jako nowy przepis',
+		importedAsVariants: 'Dodano warianty z pliku.',
+		importedAsVariantsSkipped: (skipped: number) =>
+			`Dodano warianty z pliku (pominięto istniejące: ${skipped}).`,
+		allSkipped: (skipped: number) => `Te warianty już istnieją (pominięto ${skipped})`
 	},
 
 	upload: {
