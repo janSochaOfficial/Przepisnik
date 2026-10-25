@@ -62,6 +62,12 @@ internal sealed class RecipeBuilder
         return this;
     }
 
+    public RecipeBuilder Servings(int? servings)
+    {
+        _recipe.Servings = servings;
+        return this;
+    }
+
     /// <summary>The unchanged edited copy of the recipe, as the variant editor would first send it.</summary>
     public static RecipeDraft DraftOf(Recipe recipe) => new(
         [.. recipe.Ingredients.OrderBy(i => i.Position)
@@ -70,7 +76,8 @@ internal sealed class RecipeBuilder
         [.. StepsOf(recipe, StepSection.Instructions)],
         [.. recipe.Utensils.Select(u => u.UtensilId)],
         recipe.PrepMinutes,
-        recipe.CookMinutes);
+        recipe.CookMinutes,
+        recipe.Servings);
 
     public static IngredientDraft NewIngredient(Guid productId, decimal? grams, Guid? id = null) =>
         new(id, productId, grams is { } g ? new Quantity(g, Unit.G) : null, grams, null, false);
@@ -85,6 +92,7 @@ internal sealed class RecipeBuilder
         UtensilIdsRemoved = [.. diff.UtensilIdsRemoved],
         PrepMinutes = diff.PrepMinutes,
         CookMinutes = diff.CookMinutes,
+        ServingsOverride = diff.ServingsOverride,
     };
 
     private static IEnumerable<StepDraft> StepsOf(Recipe recipe, StepSection section) =>

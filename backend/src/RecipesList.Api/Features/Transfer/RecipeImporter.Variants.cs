@@ -85,6 +85,7 @@ internal sealed partial class RecipeImporter
                     UtensilIdsRemoved = [.. diff.UtensilIdsRemoved],
                     PrepMinutes = diff.PrepMinutes,
                     CookMinutes = diff.CookMinutes,
+                    ServingsOverride = diff.ServingsOverride,
                 };
                 var result = engine.Resolve(target, variant);
                 if (diff.IsEmpty || known.Exists(k => ImportAlignment.HasSameContent(k, result)))
@@ -201,6 +202,7 @@ internal sealed partial class RecipeImporter
             null,
             source.PrepMinutes,
             source.CookMinutes,
+            source.Servings,
             [],
             utensils,
             [.. source.Ingredients.Select(i => new IngredientWriteInput(null, refs.Products[i.ProductKey].Id, ToQuantity(i.Quantity, refs.Units), i.Note, i.Optional))],
@@ -214,6 +216,7 @@ internal sealed partial class RecipeImporter
             NormalizedTitle = NameNormalizer.Normalize(source.Title),
             PrepMinutes = source.PrepMinutes,
             CookMinutes = source.CookMinutes,
+            Servings = source.Servings,
         };
         var baseIngredients = new Dictionary<string, Guid>(StringComparer.Ordinal);
         for (var i = 0; i < source.Ingredients.Count; i++)
@@ -252,6 +255,7 @@ internal sealed partial class RecipeImporter
                 Description = ImportFooter.Append(file.Description, file.AuthorNickname, ExportValidator.MaxDescription),
                 PrepMinutes = file.PrepMinutes,
                 CookMinutes = file.CookMinutes,
+                ServingsOverride = file.ServingsOverride,
                 UtensilIdsAdded = await ResolveUtensilsAsync(file.UtensilsAdded, ct),
                 UtensilIdsRemoved = await ResolveUtensilsAsync(file.UtensilsRemoved, ct),
                 IngredientOps = [.. file.IngredientOps.Select((op, i) => IngredientOp(op, i, baseIngredients, addedIngredients, refs))],

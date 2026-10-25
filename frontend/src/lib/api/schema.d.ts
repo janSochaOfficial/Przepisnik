@@ -1299,6 +1299,8 @@ export interface components {
 			author: components['schemas']['UserRef'];
 			prepMinutes: number | null;
 			cookMinutes: number | null;
+			/** @description How many servings the recipe makes (PROJECT §5.7); null when not stated. */
+			servings?: number | null;
 			/** @description Includes the system tag `szybkie` when applicable. */
 			tags: components['schemas']['TagRef'][];
 			utensils: components['schemas']['UtensilRef'][];
@@ -1330,6 +1332,8 @@ export interface components {
 			coverImageId?: components['schemas']['Uuid'] | null;
 			prepMinutes?: number | null;
 			cookMinutes?: number | null;
+			/** @description Liczba porcji (PROJECT §5.7); outside 1–100 → 400 `validation.failed`. */
+			servings?: number | null;
 			/** @description System tags are ignored. */
 			tagIds: components['schemas']['Uuid'][];
 			utensilIds: components['schemas']['Uuid'][];
@@ -1351,6 +1355,8 @@ export interface components {
 		VariantRecipeWrite: {
 			prepMinutes?: number | null;
 			cookMinutes?: number | null;
+			/** @description The servings of the edited copy; the diff stores an override only when they differ from the base's, and null inherits. */
+			servings?: number | null;
 			utensilIds: components['schemas']['Uuid'][];
 			ingredients: components['schemas']['IngredientWrite'][];
 			prepSteps: components['schemas']['StepWrite'][];
@@ -1470,6 +1476,8 @@ export interface components {
 			prepMinutes: number | null;
 			/** @description Override; null = inherit. */
 			cookMinutes: number | null;
+			/** @description Override of the recipe's servings (1–100); null = inherit. */
+			servingsOverride?: number | null;
 		};
 		/** @description `Omit<RecipeDetail, version | variantCount | totalVariantCount | foreignVariantCount | canEdit>` plus the variant. Ingredient ids are kept from the base; added ingredients use their op id. */
 		ResolvedRecipe: {
@@ -1483,6 +1491,8 @@ export interface components {
 			author: components['schemas']['UserRef'];
 			prepMinutes: number | null;
 			cookMinutes: number | null;
+			/** @description The variant's servings override, or the recipe's servings. */
+			servings?: number | null;
 			tags: components['schemas']['TagRef'][];
 			utensils: components['schemas']['UtensilRef'][];
 			ingredients: components['schemas']['Ingredient'][];
@@ -1540,10 +1550,22 @@ export interface components {
 			/** @enum {string} */
 			source: 'user' | 'auto';
 		};
+		/** @description The single scaling choice (PROJECT §5.7): "Mam: …" on an ingredient, or a number of servings. A missing `kind` means `ingredient`, so stored selections stay valid; responses always carry `kind`. Either form with fields of the other → 400 `validation.failed`. */
+		ScalingState:
+			| components['schemas']['IngredientScalingState']
+			| components['schemas']['ServingsScalingState'];
 		/** @description The user's "Mam …" in base units. */
-		ScalingState: {
+		IngredientScalingState: {
+			/** @constant */
+			kind?: 'ingredient';
 			anchorSlotKey: string;
 			anchorBaseAmount: number;
+		};
+		/** @description A number of servings; the factor is `servings / resolved recipe servings`. */
+		ServingsScalingState: {
+			/** @constant */
+			kind: 'servings';
+			servings: number;
 		};
 		SelectionWrite: {
 			/** @description Slot key → pick. */
@@ -1806,6 +1828,8 @@ export interface components {
 			authorNickname: string;
 			prepMinutes?: number | null;
 			cookMinutes?: number | null;
+			/** @description Optional; files without it import as before. */
+			servings?: number | null;
 			/** @description Tag names. */
 			tags: string[];
 			/** @description Utensil names. */
@@ -1820,6 +1844,8 @@ export interface components {
 			authorNickname: string;
 			prepMinutes?: number | null;
 			cookMinutes?: number | null;
+			/** @description Override of the recipe's servings; null = inherit. */
+			servingsOverride?: number | null;
 			utensilsAdded: string[];
 			utensilsRemoved: string[];
 			/** @description Same shapes as `IngredientOp`, with `id` → `key`, `targetId` → `targetKey`, `afterId` → `afterKey` and `productId` → `productKey`, and quantities are `ExportQuantity` (`customUnitId` → `customUnitKey`); the server-computed `baseAmount` is not exported. */

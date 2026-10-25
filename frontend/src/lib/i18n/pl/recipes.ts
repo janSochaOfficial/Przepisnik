@@ -95,6 +95,8 @@ export const recipes = {
 		prepMinutes: 'Czas przygotowania',
 		cookMinutes: 'Czas gotowania',
 		minutes: 'min',
+		servings: 'Liczba porcji',
+		servingsHint: 'Pozwala przeliczyć przepis na inną liczbę osób.',
 		tags: 'Tagi',
 		tagsHint: 'Zatwierdź Enterem lub przecinkiem. Tag „szybkie” dodajemy sami.',
 		utensils: 'Przybory',
@@ -289,6 +291,7 @@ export const recipes = {
 		too_long: 'Tekst jest za długi.',
 		out_of_range: 'Wartość spoza dozwolonego zakresu.',
 		minutesRange: 'Podaj liczbę minut od 0 do 2880.',
+		servingsRange: 'Podaj liczbę porcji od 1 do 100.',
 		productRequired: 'Wybierz produkt.',
 		quantityRequired: 'Podaj ilość większą od zera.',
 		unitIncompatible: 'Tej jednostki nie można użyć dla tego produktu.',
@@ -301,4 +304,12 @@ export const recipes = {
 		'image.not_owned': 'Możesz użyć tylko własnych zdjęć.',
 		generic: 'Popraw to pole.'
 	}
+} as const;
+
+/** "porcja" in the four plural forms (PROJECT §5.5, §5.7): 1 porcja, 3 porcje, 6 porcji, 2 ½ porcji. */
+export const servingsForms = {
+	one: 'porcja',
+	few: 'porcje',
+	many: 'porcji',
+	fraction: 'porcji'
 } as const;

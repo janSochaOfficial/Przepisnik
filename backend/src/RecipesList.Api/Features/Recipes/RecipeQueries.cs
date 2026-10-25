@@ -166,6 +166,7 @@ internal sealed class RecipeQueries(IAppDbContext db, VisibilityRules visibility
             new UserRefDto(recipe.AuthorId, recipe.Author?.Nickname ?? ""),
             recipe.PrepMinutes,
             recipe.CookMinutes,
+            recipe.Servings,
             [.. recipe.Tags.Select(t => new TagRefDto(t.Tag!.Id, t.Tag.Name, t.Tag.IsSystem)).OrderBy(t => t.Name, StringComparer.Ordinal)],
             [.. recipe.Utensils.Select(u => new UtensilRefDto(u.Utensil!.Id, u.Utensil.Name)).OrderBy(u => u.Name, StringComparer.Ordinal)],
             [.. recipe.Ingredients.OrderBy(i => i.Position).Select(i => new IngredientDto(

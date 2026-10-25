@@ -13,6 +13,7 @@
 	import { setCookContext } from '$lib/components/recipe-view/cook-context';
 	import CookActions from '$lib/components/recipe-view/CookActions.svelte';
 	import IngredientRow from '$lib/components/recipe-view/IngredientRow.svelte';
+	import ServingsControl from '$lib/components/recipe-view/ServingsControl.svelte';
 	import StepList from '$lib/components/recipe-view/StepList.svelte';
 	import { draftFromSelection } from '$lib/components/recipe-view/variant-draft';
 	import { Page } from '$lib/components/shell';
@@ -28,6 +29,7 @@
 	} from '$lib/components/ui';
 	import { buttonClass, iconButtonClass } from '$lib/components/ui/variants';
 	import { formatBaseAmount, formatNumberPl } from '$lib/domain/format';
+	import { formatServings } from '$lib/domain/scaling';
 	import { t } from '$lib/i18n';
 	import { SelectionState } from '$lib/state/selection.svelte';
 	import type { PageProps } from './$types';
@@ -108,8 +110,10 @@
 	const visibilityIcon = { private: Lock, fridges: Refrigerator, public: Globe } as const;
 	let VisibilityIcon = $derived(visibilityIcon[recipe.visibility]);
 
+	/** What the scaling banner names: the servings choice or the "Mam: …" ingredient. */
 	let anchor = $derived.by(() => {
 		const a = selection.scaling;
+		if (a?.kind === 'servings') return formatServings(a.servings);
 		const ingredient = a && selection.rows.find((r) => r.slotKey === a.anchorSlotKey)?.ingredient;
 		if (!a || !ingredient) return null;
 		const amount = formatBaseAmount(a.anchorBaseAmount, ingredient.product, {
@@ -293,6 +297,8 @@
 				>
 					<section aria-labelledby="ingredients-h">
 						<h2 id="ingredients-h" class="text-2xl">{labels.view.ingredients}</h2>
+
+						<ServingsControl state={selection} />
 
 						{#if selection.scaling && selection.factor !== 1 && anchor}
 							<div

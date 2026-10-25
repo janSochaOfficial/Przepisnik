@@ -38,8 +38,9 @@ public sealed class SelectionMemory(
         ArgumentNullException.ThrowIfNull(input);
         var userId = currentUser.Id;
 
+        ValidateScaling(input.Scaling);
         var malformed = input.Picks.Keys.Where(k => !MatrixKeys.IsWellFormedSlot(k)).Select(k => $"picks.{k}").ToList();
-        if (input.Scaling is { } scaling && !MatrixKeys.IsWellFormedSlot(scaling.AnchorSlotKey))
+        if (input.Scaling is { Kind: ScalingKind.Ingredient } scaling && !MatrixKeys.IsWellFormedSlot(scaling.AnchorSlotKey!))
         {
             malformed.Add("scaling.anchorSlotKey");
         }
@@ -72,7 +73,7 @@ public sealed class SelectionMemory(
         }
 
         selection.Picks = Keep(input.Picks, options);
-        selection.Scaling = input.Scaling is { } s && options.ContainsKey(s.AnchorSlotKey) ? s : null;
+        selection.Scaling = input.Scaling is { } s && !IsStale(s, options) ? s : null;
         selection.UpdatedAt = clock.GetUtcNow();
 
         await RecomputePreferencesAsync([userId], [selection], ct);
@@ -109,7 +110,7 @@ public sealed class SelectionMemory(
         foreach (var selection in await db.RecipeSelections.Where(s => s.RecipeId == recipe.Id).ToListAsync(ct))
         {
             var kept = Keep(selection.Picks, options);
-            var scalingGone = selection.Scaling is { } s && !options.ContainsKey(s.AnchorSlotKey);
+            var scalingGone = selection.Scaling is { } s && IsStale(s, options);
             if (kept.Count != selection.Picks.Count || scalingGone)
             {
                 selection.Picks = kept;
@@ -178,6 +179,58 @@ public sealed class SelectionMemory(
             db.ProductPreferences.Add(new ProductPreference { UserId = userId, FromProductId = from, ToProductId = to, Weight = weight });
         }
     }
+
+    /// <summary>
+    /// The shape of a scaling choice (API.md §5.2): the ingredient form needs an anchor slot key and a positive base
+    /// amount and no servings; the servings form needs 1–100 servings and no anchor. Otherwise 400 <c>validation.failed</c>.
+    /// </summary>
+    private static void ValidateScaling(ScalingState? scaling)
+    {
+        if (scaling is null)
+        {
+            return;
+        }
+
+        var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
+        if (scaling.Kind == ScalingKind.Servings)
+        {
+            if (scaling.Servings is not (>= RecipeInputValidator.MinServings and <= RecipeInputValidator.MaxServings))
+            {
+                errors["scaling.servings"] = ["out_of_range"];
+            }
+
+            if (scaling.AnchorSlotKey is not null || scaling.AnchorBaseAmount is not null)
+            {
+                errors["scaling"] = ["invalid"];
+            }
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(scaling.AnchorSlotKey))
+            {
+                errors["scaling.anchorSlotKey"] = ["required"];
+            }
+
+            if (scaling.AnchorBaseAmount is not > 0)
+            {
+                errors["scaling.anchorBaseAmount"] = ["out_of_range"];
+            }
+
+            if (scaling.Servings is not null)
+            {
+                errors["scaling"] = ["invalid"];
+            }
+        }
+
+        if (errors.Count > 0)
+        {
+            throw new DomainValidationException(ErrorCodes.ValidationFailed, errors);
+        }
+    }
+
+    // A servings choice is about people, not a slot (R2), so only an ingredient anchor can go stale.
+    private static bool IsStale(ScalingState scaling, Dictionary<string, HashSet<string>> options) =>
+        scaling.Kind == ScalingKind.Ingredient && !options.ContainsKey(scaling.AnchorSlotKey ?? "");
 
     private static Dictionary<string, HashSet<string>> OptionKeys(VariantMatrixModel matrix) =>
         matrix.Slots.ToDictionary(s => s.Key, s => s.Options.Select(o => o.Key).ToHashSet(StringComparer.Ordinal), StringComparer.Ordinal);

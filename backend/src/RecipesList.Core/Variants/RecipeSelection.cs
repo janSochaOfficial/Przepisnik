@@ -10,8 +10,28 @@ public enum PickSource
 /// <summary>A remembered pick for one slot (API.md §5.2).</summary>
 public sealed record SelectionPick(string OptionKey, PickSource Source);
 
-/// <summary>The user's last "Mam: …" scaling choice, in base units.</summary>
-public sealed record ScalingState(string AnchorSlotKey, decimal AnchorBaseAmount);
+/// <summary>What a scaling choice is anchored to (API.md §5.2).</summary>
+public enum ScalingKind
+{
+    /// <summary>"Mam: …" on an ingredient; the default, so selections stored before servings existed stay valid.</summary>
+    Ingredient,
+
+    /// <summary>A number of servings (PROJECT §5.7).</summary>
+    Servings,
+}
+
+/// <summary>
+/// The user's last scaling choice (the single one, PROJECT §5.7): either "Mam: …" on an ingredient, in base units
+/// (<see cref="AnchorSlotKey"/> and <see cref="AnchorBaseAmount"/> set), or a number of servings (<see cref="Servings"/> set).
+/// </summary>
+public sealed record ScalingState(string? AnchorSlotKey, decimal? AnchorBaseAmount, ScalingKind Kind = ScalingKind.Ingredient, int? Servings = null)
+{
+    /// <summary>A "Mam: …" choice.</summary>
+    public static ScalingState ForIngredient(string anchorSlotKey, decimal anchorBaseAmount) => new(anchorSlotKey, anchorBaseAmount);
+
+    /// <summary>A servings choice.</summary>
+    public static ScalingState ForServings(int servings) => new(null, null, ScalingKind.Servings, servings);
+}
 
 /// <summary>Selection memory of one user for one recipe (PROJECT §6.6); picks and scaling are jsonb.</summary>
 public sealed class RecipeSelection

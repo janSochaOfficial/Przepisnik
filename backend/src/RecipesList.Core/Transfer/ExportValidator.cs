@@ -202,6 +202,12 @@ public static class ExportValidator
             fail($"{path}.name", "out_of_range");
         }
 
+        // The recipe's own servings are checked by the recipe rules; a variant's override is stored as is.
+        if (variant.ServingsOverride is < RecipeInputValidator.MinServings or > RecipeInputValidator.MaxServings)
+        {
+            fail($"{path}.servingsOverride", "out_of_range");
+        }
+
         var ingredientsAdded = new HashSet<string>(StringComparer.Ordinal);
         var stepsAdded = new Dictionary<string, StepSection>(StringComparer.Ordinal);
 

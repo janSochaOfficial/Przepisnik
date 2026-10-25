@@ -15,7 +15,7 @@ namespace RecipesList.Core.Variants;
 /// joined, trimmed, whitespace collapsed). Between two anchors (the start and the end of the section count as anchors)
 /// the unmatched steps are paired by position as replacements; the rest are removed (target) or added (source).</para>
 /// <para><b>Utensils:</b> the source's set. <b>Times:</b> the source's, except that a time the source leaves empty
-/// keeps the target's (a variant cannot clear a base time). Tags and the cover are not part of variants.</para>
+/// keeps the target's (a variant cannot clear a base time). <b>Servings</b> likewise: the source's, or the target's when the source has none. Tags and the cover are not part of variants.</para>
 /// <para>Ties of the subsequence keep the earliest target row. The order of target rows is never changed (D-20):
 /// the copy lists rows in source order, and matched target rows appear in it in their own order.</para>
 /// </remarks>
@@ -33,12 +33,13 @@ public static class ImportAlignment
             AlignSteps(target.InstructionSteps, source.InstructionSteps),
             [.. source.UtensilIds.Distinct()],
             source.PrepMinutes ?? target.PrepMinutes,
-            source.CookMinutes ?? target.CookMinutes);
+            source.CookMinutes ?? target.CookMinutes,
+            source.Servings ?? target.Servings);
     }
 
     /// <summary>
     /// Whether two resolved recipes have the same content, ignoring row ids: the same ingredients (product, quantity,
-    /// note, optional) and steps in the same order, the same set of utensils and the same times.
+    /// note, optional) and steps in the same order, the same set of utensils, the same times and the same servings.
     /// </summary>
     public static bool HasSameContent(ResolvedRecipeModel a, ResolvedRecipeModel b)
     {
@@ -47,6 +48,7 @@ public static class ImportAlignment
 
         return a.PrepMinutes == b.PrepMinutes
             && a.CookMinutes == b.CookMinutes
+            && a.Servings == b.Servings
             && a.UtensilIds.ToHashSet().SetEquals(b.UtensilIds)
             && a.Ingredients.Count == b.Ingredients.Count
             && a.Ingredients.Zip(b.Ingredients).All(p => SameIngredient(p.First, p.Second))

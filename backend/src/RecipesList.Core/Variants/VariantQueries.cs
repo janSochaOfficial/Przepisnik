@@ -23,12 +23,12 @@ public sealed record VariantSummaryRow(Variant Variant, string RecipeTitle, stri
         Variant.CreatedAt,
         Variant.UpdatedAt);
 
-    /// <summary>Operations + utensil changes + time overrides.</summary>
+    /// <summary>Operations + utensil changes + time and servings overrides.</summary>
     public static int ChangeCount(Variant variant)
     {
         ArgumentNullException.ThrowIfNull(variant);
         return variant.IngredientOps.Count + variant.StepOps.Count + variant.UtensilIdsAdded.Count + variant.UtensilIdsRemoved.Count
-            + (variant.PrepMinutes is null ? 0 : 1) + (variant.CookMinutes is null ? 0 : 1);
+            + (variant.PrepMinutes is null ? 0 : 1) + (variant.CookMinutes is null ? 0 : 1) + (variant.ServingsOverride is null ? 0 : 1);
     }
 }
 

@@ -16,6 +16,7 @@ internal sealed class RecipeConfiguration : IEntityTypeConfiguration<Recipe>
             .HasOperators("gin_trgm_ops");
         b.Property(x => x.Description).HasMaxLength(2000);
         b.Property(x => x.Version).IsRowVersion();
+        b.ToTable(t => t.HasCheckConstraint("ck_recipes_servings_range", "servings BETWEEN 1 AND 100"));
         b.HasIndex(x => new { x.AuthorId, x.CreatedAt });
         b.HasIndex(x => new { x.Visibility, x.CreatedAt });
 

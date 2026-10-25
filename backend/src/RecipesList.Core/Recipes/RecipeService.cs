@@ -216,6 +216,7 @@ public sealed class RecipeService(
         recipe.CoverImageId = input.CoverImageId;
         recipe.PrepMinutes = input.PrepMinutes;
         recipe.CookMinutes = input.CookMinutes;
+        recipe.Servings = input.Servings;
 
         ApplyIngredients(recipe, input, refs.Products, refs.Units);
         ApplySteps(recipe, input);
