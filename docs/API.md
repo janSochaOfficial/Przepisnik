@@ -159,8 +159,16 @@ An image can only be referenced in recipes and variants by the user who uploaded
 | DELETE | `/recipes/{id}` | — | `204` (deleted or archived, see PROJECT §4.4) | 403 |
 | GET | `/recipes/{id}/export` | — | `200 RecipeExport` (variants limited to those visible to the caller) with `Content-Disposition: attachment; filename="<slug>.json"` | 404 |
 | POST | `/recipes/import` | `RecipeExport` (≤ 25 MB) | `201 RecipeDetail` (recipe and variants are `private`) | 400 `import.invalid_format`, 400 `import.unsupported_version` |
+| GET | `/recipes/import-matches` | `title` (1–150) | `200 RecipeSummary[]`: visible, non-archived recipes whose normalized title equals the normalized `title`; the caller's own first, then newest; at most 10 | 400 `validation.failed` |
+| POST | `/recipes/{id}/variants/import` | `RecipeExport` (same limits and rate limit as `/recipes/import`) | `201 VariantImportResult` when at least one variant was created, otherwise `200` | 404 `recipe.not_found`, 409 `recipe.archived`, 400 / 413 as for import |
 
 Archived recipes are excluded from `GET /recipes`. `GET /recipes/{id}` still returns them, with `isArchived: true` and `canEdit: false`, to the author and to authors of their variants. They are read-only: `PUT /recipes/{id}` and `PUT /recipes/{id}/visibility` return 409 `recipe.archived` (D-27).
+**Import as variants (PROJECT §4.7, D-35):** the file's recipe becomes the variant "Wersja @<authorNickname>" of `{id}` and each file variant (resolved against the file's recipe) another one with its own name. Each is aligned with the target in order (ingredients: longest common subsequence on product; steps, per section: on normalized text, with unmatched steps between anchors paired by position as replacements; utensils as a set; a time the file leaves empty keeps the target's) and diffed like the variant editor (D-12, D-20). A candidate with no changes, or whose resolved form equals an existing variant of the target visible to the caller or one created earlier in the same import, is skipped. Created variants are private, owned by the caller, carry the import footer (§8) and get " (2)", " (3)" on a name clash among the caller's variants of the target. Photos byte-identical to the export of a photo the target (or a visible variant of it) already shows are reused; the cover is ignored.
+
+```ts
+type VariantImportResult = { recipeId: Uuid; variants: VariantSummary[]; skipped: number };   // variants: the created ones, in file order
+```
+
 **Direct edit rules (PROJECT §4.5):** `PUT /recipes/{id}` on a `public` recipe → 409 `recipe.public_locked`. If variants exist, the client first gets 409 `recipe.has_variants`, shows the confirmation, then retries with `deleteVariants: true`. The server then deletes all variants (and their favourites and remembered picks) in the same transaction as the update.
 
 ```ts
