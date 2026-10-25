@@ -16,7 +16,10 @@ const handlers = (title: string): MockHandlers => ({
 	'GET /recipes/:id': { body: baseRecipe({ title }) }
 });
 
-/** The content-box height of `el` and the font's ascent + descent for its computed font. */
+/**
+ * The padding box height of `el` (what `overflow: hidden` clips to) and the font's ascent + descent
+ * for its computed font.
+ */
 async function inkVsBox(el: Locator) {
 	return el.evaluate((node) => {
 		const cs = getComputedStyle(node);
@@ -25,9 +28,7 @@ async function inkVsBox(el: Locator) {
 		ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
 		const m = ctx.measureText(node.textContent ?? 'Ay');
 		const ink = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent;
-		const rect = node.getBoundingClientRect();
-		const padding = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-		return { box: rect.height - padding, ink };
+		return { box: node.clientHeight, ink };
 	});
 }
 

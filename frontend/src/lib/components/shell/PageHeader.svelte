@@ -44,14 +44,20 @@
 	<div class={['min-w-0 flex-1 py-2', !back && 'pl-2 lg:pl-0']}>
 		{#if titleAside}
 			<div class="flex items-center gap-1">
-				<h1 class="min-w-0 truncate text-xl lg:text-3xl lg:whitespace-normal">{title}</h1>
+				<h1
+					class="min-w-0 truncate py-[0.2em] text-xl lg:text-3xl lg:whitespace-normal -my-[0.2em]"
+				>
+					{title}
+				</h1>
 				<div class="shrink-0">{@render titleAside()}</div>
 			</div>
 		{:else}
-			<h1 class="truncate text-xl lg:text-3xl lg:whitespace-normal">{title}</h1>
+			<h1 class="truncate py-[0.2em] text-xl lg:text-3xl lg:whitespace-normal -my-[0.2em]">
+				{title}
+			</h1>
 		{/if}
 		{#if subtitle}
-			<p class="truncate text-sm text-muted">{subtitle}</p>
+			<p class="truncate py-[0.2em] text-sm text-muted -my-[0.2em]">{subtitle}</p>
 		{/if}
 	</div>
 	{#if actions}
