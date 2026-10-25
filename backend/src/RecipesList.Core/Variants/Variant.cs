@@ -39,6 +39,9 @@ public sealed class Variant
     /// <summary>Override of the base cook time; null inherits.</summary>
     public int? CookMinutes { get; set; }
 
+    /// <summary>Override of the base servings (PROJECT §5.7); null inherits.</summary>
+    public int? ServingsOverride { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

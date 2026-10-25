@@ -9,7 +9,7 @@ public sealed class RecipeInputValidatorTests
     private static readonly Guid Product = Guid.NewGuid();
 
     private static RecipeWriteInput Valid() => new(
-        "Naleśniki", null, null, null, null, [], [],
+        "Naleśniki", null, null, null, null, null, [], [],
         [new IngredientWriteInput(null, Product, new Quantity(200, Unit.G), null, false)],
         [],
         [new StepWriteInput(null, [new TextBlock("Smaż.")])]);

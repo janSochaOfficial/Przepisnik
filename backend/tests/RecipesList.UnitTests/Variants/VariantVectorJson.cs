@@ -89,7 +89,8 @@ internal static class VariantVectorJson
             ReadStepDrafts(e.GetProperty("instructionSteps")),
             [.. e.GetProperty("utensilIds").EnumerateArray().Select(u => u.GetGuid())],
             e.TryGetProperty("prepMinutes", out var prep) ? OptionalInt(prep) : null,
-            e.TryGetProperty("cookMinutes", out var cook) ? OptionalInt(cook) : null);
+            e.TryGetProperty("cookMinutes", out var cook) ? OptionalInt(cook) : null,
+            Servings: null); // the vector schema has no servings (R2 covers them in VariantEngineServingsTests)
     }
 
     /// <summary>Every product object that appears anywhere in the case, by id (the vectors' product catalog).</summary>

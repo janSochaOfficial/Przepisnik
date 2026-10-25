@@ -58,6 +58,10 @@ public sealed record VariantRecipeWrite
     [Range(0, 2880)]
     public int? CookMinutes { get; init; }
 
+    /// <summary>The servings of the edited copy (PROJECT §5.7); null or the base's value inherits.</summary>
+    [Range(1, 100)]
+    public int? Servings { get; init; }
+
     [Required]
     public required IReadOnlyList<Guid> UtensilIds { get; init; }
 
@@ -76,7 +80,8 @@ public sealed record VariantRecipeWrite
         [.. InstructionSteps.Select(s => new StepDraft(s.Id, s.Blocks))],
         UtensilIds,
         PrepMinutes,
-        CookMinutes);
+        CookMinutes,
+        Servings);
 }
 
 /// <summary>Creates a variant (API.md §5 <c>VariantWrite</c>).</summary>
@@ -221,7 +226,8 @@ public sealed record VariantDetailResponse(
     IReadOnlyList<Guid> UtensilIdsAdded,
     IReadOnlyList<Guid> UtensilIdsRemoved,
     int? PrepMinutes,
-    int? CookMinutes)
+    int? CookMinutes,
+    int? ServingsOverride)
 {
     public static VariantDetailResponse From(VariantDetailModel model)
     {
@@ -236,7 +242,8 @@ public sealed record VariantDetailResponse(
             v.UtensilIdsAdded,
             v.UtensilIdsRemoved,
             v.PrepMinutes,
-            v.CookMinutes);
+            v.CookMinutes,
+            v.ServingsOverride);
     }
 }
 
@@ -302,6 +309,7 @@ public sealed record ResolvedRecipeResponse(
     VariantUserRef Author,
     int? PrepMinutes,
     int? CookMinutes,
+    int? Servings,
     IReadOnlyList<VariantTagRef> Tags,
     IReadOnlyList<VariantUtensilRef> Utensils,
     IReadOnlyList<VariantIngredientResponse> Ingredients,
@@ -328,6 +336,7 @@ public sealed record ResolvedRecipeResponse(
             new VariantUserRef(recipe.AuthorId, m.AuthorNickname),
             resolved.PrepMinutes,
             resolved.CookMinutes,
+            resolved.Servings,
             [.. m.Tags.Select(t => new VariantTagRef(t.Id, t.Name, t.IsSystem))],
             [.. m.Utensils.Select(u => new VariantUtensilRef(u.Id, u.Name))],
             [.. resolved.Ingredients.Select(i => VariantIngredientResponse.From(i, m.Products, m.Units))],
@@ -388,14 +397,33 @@ public sealed record VariantMatrixResponse(Guid RecipeId, IReadOnlyList<MatrixVa
 /// <summary>A remembered pick (API.md §5.2 <c>Pick</c>).</summary>
 public sealed record PickDto([property: Required] string OptionKey, PickSource Source);
 
-/// <summary>The user's "Mam: …" in base units (API.md §5.2 <c>ScalingState</c>).</summary>
+/// <summary>
+/// The scaling choice (API.md §5.2 <c>ScalingState</c>): <c>"ingredient"</c> (the default when <c>kind</c> is absent) with
+/// the user's "Mam: …" in base units, or <c>"servings"</c> with a number of servings. Responses always carry <c>kind</c>
+/// and leave out the other form's fields. The shape is checked by <see cref="SelectionMemory"/>.
+/// </summary>
 public sealed record ScalingStateDto
 {
-    [Required]
-    public required string AnchorSlotKey { get; init; }
+    public ScalingKind? Kind { get; init; }
 
-    [Range(typeof(decimal), "0.0000001", "79228162514264337593543950335")]
-    public required decimal AnchorBaseAmount { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? AnchorSlotKey { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public decimal? AnchorBaseAmount { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Servings { get; init; }
+
+    public ScalingState ToState() => new(AnchorSlotKey, AnchorBaseAmount, Kind ?? ScalingKind.Ingredient, Servings);
+
+    public static ScalingStateDto From(ScalingState s)
+    {
+        ArgumentNullException.ThrowIfNull(s);
+        return s.Kind == ScalingKind.Servings
+            ? new ScalingStateDto { Kind = ScalingKind.Servings, Servings = s.Servings }
+            : new ScalingStateDto { Kind = ScalingKind.Ingredient, AnchorSlotKey = s.AnchorSlotKey, AnchorBaseAmount = s.AnchorBaseAmount };
+    }
 }
 
 /// <summary>Picks and scaling to remember (API.md §5.2 <c>SelectionWrite</c>).</summary>
@@ -409,7 +437,7 @@ public sealed record SelectionWriteRequest
 
     public SelectionInput ToInput() => new(
         Picks.ToDictionary(p => p.Key, p => new SelectionPick(p.Value.OptionKey, p.Value.Source), StringComparer.Ordinal),
-        Scaling is null ? null : new ScalingState(Scaling.AnchorSlotKey, Scaling.AnchorBaseAmount));
+        Scaling?.ToState());
 }
 
 /// <summary>The remembered selection (API.md §5.2 <c>Selection</c>).</summary>
@@ -420,7 +448,7 @@ public sealed record SelectionResponse(IReadOnlyDictionary<string, PickDto> Pick
         ArgumentNullException.ThrowIfNull(s);
         return new(
             s.Picks.ToDictionary(p => p.Key, p => new PickDto(p.Value.OptionKey, p.Value.Source), StringComparer.Ordinal),
-            s.Scaling is null ? null : new ScalingStateDto { AnchorSlotKey = s.Scaling.AnchorSlotKey, AnchorBaseAmount = s.Scaling.AnchorBaseAmount },
+            s.Scaling is null ? null : ScalingStateDto.From(s.Scaling),
             s.RecipeId,
             s.UpdatedAt);
     }

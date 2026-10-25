@@ -123,6 +123,9 @@ public sealed record ExportRecipe
 
     public int? CookMinutes { get; init; }
 
+    /// <summary>1–100, optional (PROJECT §5.7); files without it import as before.</summary>
+    public int? Servings { get; init; }
+
     public required IReadOnlyList<string> Tags { get; init; }
 
     public required IReadOnlyList<string> Utensils { get; init; }
@@ -180,6 +183,9 @@ public sealed record ExportVariant
     public int? PrepMinutes { get; init; }
 
     public int? CookMinutes { get; init; }
+
+    /// <summary>Override of the recipe's servings, 1–100; null inherits.</summary>
+    public int? ServingsOverride { get; init; }
 
     public required IReadOnlyList<string> UtensilsAdded { get; init; }
 

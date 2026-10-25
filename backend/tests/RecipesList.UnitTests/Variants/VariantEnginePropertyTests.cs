@@ -132,7 +132,8 @@ public sealed class VariantEnginePropertyTests
             EditSteps(random, draft.InstructionSteps),
             [.. Utensils.Where(_ => random.Next(3) == 0)],
             prep,
-            cook);
+            cook,
+            draft.Servings);
     }
 
     private static List<StepDraft> EditSteps(Random random, IReadOnlyList<StepDraft> steps)

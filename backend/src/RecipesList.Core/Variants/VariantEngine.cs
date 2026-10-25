@@ -15,6 +15,8 @@ namespace RecipesList.Core.Variants;
 /// <para><b>Not representable in v1</b> (rejected with 400 <c>validation.failed</c> and a field path): reordering base
 /// rows (D-20, the variant editor locks their order), a base row sent twice or in the other step section, and clearing
 /// a time the base sets (a null override means "inherit").</para>
+/// <para><b>Servings</b> (PROJECT §5.7): an override only when the edited value differs from the base; an edited copy
+/// without servings inherits the base's (unlike a time, clearing is not an error: R2 "cleared → inherit").</para>
 /// </remarks>
 public sealed class VariantEngine(Func<Guid>? newId = null) : IVariantEngine
 {
@@ -44,13 +46,14 @@ public sealed class VariantEngine(Func<Guid>? newId = null) : IVariantEngine
 
         var prepOverride = TimeOverride(baseRecipe.PrepMinutes, edited.PrepMinutes, "recipe.prepMinutes", errors);
         var cookOverride = TimeOverride(baseRecipe.CookMinutes, edited.CookMinutes, "recipe.cookMinutes", errors);
+        var servingsOverride = edited.Servings == baseRecipe.Servings ? null : edited.Servings;
 
         if (errors.Count > 0)
         {
             throw new DomainValidationException(ErrorCodes.ValidationFailed, errors, "The edited copy cannot be expressed as variant operations.");
         }
 
-        return new VariantDiff(ingredientOps, stepOps, added, removed, prepOverride, cookOverride);
+        return new VariantDiff(ingredientOps, stepOps, added, removed, prepOverride, cookOverride, servingsOverride);
     }
 
     /// <inheritdoc />
@@ -73,7 +76,8 @@ public sealed class VariantEngine(Func<Guid>? newId = null) : IVariantEngine
             ResolveSteps(baseRecipe, variant, StepSection.Instructions),
             utensils,
             variant?.PrepMinutes ?? baseRecipe.PrepMinutes,
-            variant?.CookMinutes ?? baseRecipe.CookMinutes);
+            variant?.CookMinutes ?? baseRecipe.CookMinutes,
+            variant?.ServingsOverride ?? baseRecipe.Servings);
     }
 
     /// <inheritdoc />

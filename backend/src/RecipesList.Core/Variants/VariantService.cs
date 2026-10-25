@@ -380,6 +380,7 @@ public sealed class VariantService(
         variant.UtensilIdsRemoved = [.. diff.UtensilIdsRemoved];
         variant.PrepMinutes = diff.PrepMinutes;
         variant.CookMinutes = diff.CookMinutes;
+        variant.ServingsOverride = diff.ServingsOverride;
     }
 
     private async Task<VariantDiff> DiffAsync(Recipe recipe, VariantRecipeInput input, Guid userId, CancellationToken ct)
@@ -462,7 +463,7 @@ public sealed class VariantService(
             throw new DomainValidationException(code, errors);
         }
 
-        var draft = new RecipeDraft(ingredients, input.PrepSteps, input.InstructionSteps, input.UtensilIds, input.PrepMinutes, input.CookMinutes);
+        var draft = new RecipeDraft(ingredients, input.PrepSteps, input.InstructionSteps, input.UtensilIds, input.PrepMinutes, input.CookMinutes, input.Servings);
         return engine.Diff(recipe, draft);
     }
 

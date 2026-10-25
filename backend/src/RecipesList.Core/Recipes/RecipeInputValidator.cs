@@ -12,6 +12,8 @@ public static class RecipeInputValidator
     public const int MaxTitle = 150;
     public const int MaxDescription = 2000;
     public const int MaxMinutes = 2880;
+    public const int MinServings = 1;
+    public const int MaxServings = 100;
     public const int MaxIngredients = 100;
     public const int MaxSteps = 50;
     public const int MaxNote = 300;
@@ -40,6 +42,10 @@ public static class RecipeInputValidator
 
         CheckMinutes(errors, "prepMinutes", input.PrepMinutes);
         CheckMinutes(errors, "cookMinutes", input.CookMinutes);
+        if (input.Servings is < MinServings or > MaxServings)
+        {
+            errors.Add("servings", "out_of_range");
+        }
 
         if (input.Ingredients.Count is < 1 or > MaxIngredients)
         {

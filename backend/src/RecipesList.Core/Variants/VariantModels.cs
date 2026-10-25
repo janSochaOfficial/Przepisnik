@@ -16,7 +16,8 @@ public sealed record VariantRecipeInput(
     IReadOnlyList<StepDraft> InstructionSteps,
     IReadOnlyList<Guid> UtensilIds,
     int? PrepMinutes,
-    int? CookMinutes);
+    int? CookMinutes,
+    int? Servings);
 
 /// <summary>A create or update of a variant (API.md §5 <c>VariantWrite</c>).</summary>
 public sealed record VariantInput(string Name, string? Description, VisibilityLevel Visibility, VariantRecipeInput Recipe);

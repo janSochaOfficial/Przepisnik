@@ -15,6 +15,7 @@ public sealed record RecipeWriteInput(
     Guid? CoverImageId,
     int? PrepMinutes,
     int? CookMinutes,
+    int? Servings,
     IReadOnlyList<Guid> TagIds,
     IReadOnlyList<Guid> UtensilIds,
     IReadOnlyList<IngredientWriteInput> Ingredients,

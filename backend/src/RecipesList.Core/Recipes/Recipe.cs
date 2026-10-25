@@ -30,6 +30,9 @@ public sealed class Recipe
 
     public int? CookMinutes { get; set; }
 
+    /// <summary>How many servings the recipe makes, 1–100 (PROJECT §5.7, D-37); null when not stated.</summary>
+    public int? Servings { get; set; }
+
     public VisibilityLevel Visibility { get; set; } = VisibilityLevel.Private;
 
     /// <summary>Set instead of deleting when other users have variants (PROJECT §4.4, D-17).</summary>

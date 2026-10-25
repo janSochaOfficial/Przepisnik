@@ -29,7 +29,8 @@ public sealed record RecipeDraft(
     IReadOnlyList<StepDraft> InstructionSteps,
     IReadOnlyList<Guid> UtensilIds,
     int? PrepMinutes,
-    int? CookMinutes);
+    int? CookMinutes,
+    int? Servings);
 
 /// <summary>The operations of a variant, as computed by <see cref="IVariantEngine.Diff"/>.</summary>
 public sealed record VariantDiff(
@@ -38,12 +39,13 @@ public sealed record VariantDiff(
     IReadOnlyList<Guid> UtensilIdsAdded,
     IReadOnlyList<Guid> UtensilIdsRemoved,
     int? PrepMinutes,
-    int? CookMinutes)
+    int? CookMinutes,
+    int? ServingsOverride)
 {
     /// <summary>True when the edit changes nothing (→ 400 <c>variant.no_changes</c>).</summary>
     public bool IsEmpty =>
         IngredientOps.Count == 0 && StepOps.Count == 0 && UtensilIdsAdded.Count == 0 && UtensilIdsRemoved.Count == 0
-        && PrepMinutes is null && CookMinutes is null;
+        && PrepMinutes is null && CookMinutes is null && ServingsOverride is null;
 }
 
 /// <summary>An ingredient of a resolved recipe. Base rows keep their id; added rows use the op id.</summary>
@@ -61,7 +63,8 @@ public sealed record ResolvedRecipeModel(
     IReadOnlyList<ResolvedStep> InstructionSteps,
     IReadOnlyList<Guid> UtensilIds,
     int? PrepMinutes,
-    int? CookMinutes)
+    int? CookMinutes,
+    int? Servings)
 {
     /// <summary>Whether the effective times earn the system tag <c>szybkie</c> (D-09).</summary>
     public bool IsQuick => QuickTagRule.Applies(PrepMinutes, CookMinutes);
